@@ -5,6 +5,8 @@ import Editor from './editor';
 
 const translations = `# Try editing the translations here!
 
+hello-world = Hello, world!
+
 shared-photos = { $user_name } { $photo_count ->
     [0] hasn't added any photos yet
     [one] added a new photo
