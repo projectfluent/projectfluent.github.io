@@ -1,0 +1,83 @@
+.editor {
+    height: 18rem;
+    margin-top: 2rem;
+}
+
+.demo__title {
+    margin-top: 0;
+    font-size: 1rem;
+}
+
+.externals {
+    display: flex;
+    flow-direction: columns;
+    margin-top: 2rem;
+}
+
+.externals__control {
+    flex: 1;
+}
+
+.externals__name {
+    margin-bottom: .5rem;
+}
+
+.externals__label {
+    display: block;
+}
+
+.externals__input {
+    margin: 0;
+}
+
+.externals__input[type="text"] {
+    width: 8rem;
+}
+
+.externals__input[type="range"] {
+    width: 8rem;
+}
+
+.externals__input[type="number"] {
+    width: 2rem;
+}
+
+.output {
+    padding: 1rem;
+    border: 1px solid #ddd;
+}
+
+.message,
+.junk {
+    display: flex;
+    margin: .3rem 0;
+}
+
+.message code {
+    font-size: .9rem;
+    padding: 2px;
+    background-color: #fff;
+    color: #666;
+}
+
+.junk code {
+    font-size: .9rem;
+
+    padding: 2px;
+    color: #999;
+}
+
+.message__id,
+.junk__id {
+    flex: 1;
+}
+
+.junk__id,
+.junk__value {
+    font-style: italic;
+}
+
+.message__value,
+.junk__value {
+    flex: 2;
+}
