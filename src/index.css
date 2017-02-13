@@ -53,7 +53,8 @@
     margin: .3rem 0;
 }
 
-.message code {
+.message code,
+.junk code {
     font-size: .9rem;
     padding: 2px;
     background-color: #fff;
@@ -61,9 +62,6 @@
 }
 
 .junk code {
-    font-size: .9rem;
-
-    padding: 2px;
     color: #999;
 }
 
