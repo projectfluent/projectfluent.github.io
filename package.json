@@ -1,8 +1,10 @@
 {
   "name": "fluent-website",
   "version": "0.1.0",
+  "homepage": "http://projectfluent.io",
   "private": true,
   "devDependencies": {
+    "gh-pages": "^0.12.0",
     "react-scripts": "0.9.0"
   },
   "dependencies": {
@@ -13,6 +15,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "deploy": "npm run build && gh-pages -d build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
