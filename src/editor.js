@@ -3,7 +3,9 @@ import React, { Component } from 'react';
 import brace from 'brace';
 import 'brace/theme/github';
 import 'brace/mode/json';
-import './editor-mode-fluent.js';
+
+import './editor-mode-fluent';
+import './editor-theme-fluent.css'
 
 class Editor extends Component {
     componentWillReceiveProps(nextProps) {
