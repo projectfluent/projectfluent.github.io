@@ -25,7 +25,7 @@ class Editor extends Component {
 
         this.editor.setOptions({
             selectionStyle: 'text',
-            highlightActiveLine: false,
+            highlightActiveLine: true,
             highlightSelectedWord: false,
             readOnly: false,
             cursorStyle: 'ace',
@@ -46,9 +46,9 @@ class Editor extends Component {
             fadeFoldWidgets: false,
             showFoldWidgets: false,
             showLineNumbers: false,
-            showGutter: gutter,
+            showGutter: false,
             displayIndentGuides: false,
-            fontSize: 16,
+            fontSize: 12,
             //fontFamily: 'monospace', 
             scrollPastEnd: false,
             fixedWidthGutter: false,

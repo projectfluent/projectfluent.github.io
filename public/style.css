@@ -2,8 +2,8 @@ body {
     margin: 0;
     padding: 0;
     font-family: Helvetica, "Fira Sans", Arial, sans-serif;
-    background-color: #f7f7f7;
-    color: #222;
+    background-color: #fff;
+    color: #333;
 }
 
 code {
@@ -12,13 +12,13 @@ code {
 
 .link,
 .link:visited {
-    color: #00f;
+    color: #428BCA;
+    text-decoration: none;
 }
 
 .link:hover {
-    color: #fff;
-    background-color: #00f;
-    text-decoration: none;
+    color: #2a6496;
+    text-decoration: underline;
 }
 
 .highlight {
@@ -52,6 +52,7 @@ code {
     flex: 2;
     display: flex;
     justify-content: space-between;
+    font-weight: bold;
 }
 
 .pitch {
@@ -60,18 +61,17 @@ code {
 }
 
 .link--cta {
-    font-size: 1.6rem;
-    margin-left: 3rem;
+    font-size: 1.3rem;
     white-space: nowrap;
     color: #fff;
-    background-color: #00f;
+    background-color: #428BCA;
     text-decoration: none;
-    padding: 1rem;
-    border: 2px outset #fff;
+    padding: 1.3rem 2rem;
+    border-radius: 0.3rem;
 }
 
 .link--cta:hover {
-    background-color: #36f;
+  text-decoration: underline;
 }
 
 .features {
@@ -90,4 +90,12 @@ code {
 
 .example {
     flex: 2;
+}
+
+.editor {
+    border: 1px solid #ccc;
+    font-size: 0.8rem;
+    margin-top: 0 !important;
+    background-color: #FAFAFA !important;
+    border-radius: 0.3rem;
 }
