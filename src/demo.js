@@ -108,6 +108,13 @@ export default class Demo extends Component {
 
         return (
             <div className="demo">
+                <Editor
+                    className="editor"
+                    mode="fluent"
+                    value={translations}
+                    annotations={annotations}
+                    onChange={val => this.handleTranslationsChange(val)}
+                />
                 <div className="output">
                     {ast.body.map(entry => {
                         switch (entry.type) {
@@ -208,13 +215,6 @@ export default class Demo extends Component {
                     </div>
                 </div>
 
-                <Editor
-                    className="editor"
-                    mode="fluent"
-                    value={translations}
-                    annotations={annotations}
-                    onChange={val => this.handleTranslationsChange(val)}
-                />
             </div>
         );
     }
