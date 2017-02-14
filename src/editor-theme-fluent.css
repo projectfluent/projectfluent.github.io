@@ -2,6 +2,10 @@
     background-color: #f7f7f7 !important;
 }
 
+.ace-github .ace_name {
+    font-weight: bold;
+}
+
 .ace-github .ace_string {
     color: #1A1AA6 !important;
 }

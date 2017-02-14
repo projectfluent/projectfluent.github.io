@@ -15,7 +15,7 @@ class Editor extends Component {
 
     componentDidMount(){
         const {
-            mode, gutter = "true", value, annotations, onChange
+            mode, gutter = "true", fontSize = 14, value, annotations, onChange
         } = this.props;
 
         this.editor = brace.edit(this.root);
@@ -50,8 +50,7 @@ class Editor extends Component {
             showLineNumbers: false,
             showGutter: gutter,
             displayIndentGuides: false,
-            fontSize: 16,
-            //fontFamily: 'monospace', 
+            fontSize,
             scrollPastEnd: false,
             fixedWidthGutter: false,
             theme: `ace/theme/github`

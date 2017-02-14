@@ -80,7 +80,8 @@ code {
     margin-right: 1rem;
 }
 
-.features__title {
+.features__title,
+.example__title {
     font-size: 1rem;
     margin-top: 0;
 }
