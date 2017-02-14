@@ -1,6 +1,8 @@
 .editor {
     height: 20rem;
     margin-top: 2rem;
+    background-color: #f7f7f7 !important;
+    border: 1px solid #ddd;
 }
 
 .demo__title {
@@ -56,8 +58,6 @@
 .message code,
 .junk code {
     font-size: .9rem;
-    padding: 2px;
-    background-color: #fff;
     color: #666;
 }
 
