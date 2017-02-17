@@ -23,6 +23,7 @@ class Editor extends Component {
         this.editor.setValue(value);
         this.editor.getSession().setAnnotations(annotations);
         this.editor.clearSelection();
+        this.editor.gotoLine(0);
         this.editor.on('change', () => onChange(this.editor.getValue()));
 
         this.editor.setOptions({

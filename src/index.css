@@ -48,33 +48,37 @@
     border: 1px solid #ddd;
 }
 
-.message,
-.junk {
+.output__item {
     display: flex;
     margin: .3rem 0;
 }
 
-.message code,
-.junk code {
-    font-size: .9rem;
-    color: #666;
-}
-
-.junk code {
-    color: #999;
-}
-
-.message__id,
-.junk__id {
+.output__key {
     flex: 1;
 }
 
-.junk__id,
-.junk__value {
-    font-style: italic;
+.output__value {
+    flex: 2;
 }
 
-.message__value,
-.junk__value {
-    flex: 2;
+.message__id {
+    font-size: .9rem;
+    color: #666;
+    margin: 0;
+}
+
+.annotation {
+    font-size: .9rem;
+}
+
+.annotation__slice,
+.annotation__label {
+    white-space: pre-wrap;
+    color: #999;
+    margin: 0;
+}
+
+.annotation__name,
+.annotation__label {
+    color: #d14;
 }

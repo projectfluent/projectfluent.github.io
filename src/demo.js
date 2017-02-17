@@ -1,7 +1,9 @@
-/* global Fluent */
-
 import React, { Component } from 'react';
 import Editor from './editor';
+
+import {
+    annotation_display, parse_translations, create_context, format_messages
+} from './fluent';
 
 const translations = `# Try editing the translations here!
 
@@ -23,43 +25,47 @@ liked-comment = { $user_name } liked your comment on { $user_gender ->
 function Message(props) {
     const { id, value } = props;
     return (
-        <div className="message">
-            <div className="message__id">
-                <code>{id}</code>
+        <div className="output__item message">
+            <div className="output__key">
+                <code className="message__id">{id}</code>
             </div>
-            <div className="message__value">{value}</div>
+            <div className="output__value">{value}</div>
         </div>
     );
 }
 
-function Junk(props) {
-    const { value } = props;
+function indent(spaces) {
+    return new Array(spaces + 1).join(' ');
+}
+
+function Annotation(props) {
+    const {
+        annotation: { name, message, line_offset, column_offset, head, tail }
+    } = props;
+
     return (
-        <div className="junk">
-            <div className="junk__id">
-                <code>SyntaxError</code>
+        <div className="output__item annotation">
+            <div className="output__key">
+                <code className="annotation__name">{name} on line {line_offset + 1}</code>
             </div>
-            <div className="junk__value">
-                <code>{value}</code>
+            <div className="output__value">
+                <pre className="annotation__slice">{head}</pre>
+                <pre className="annotation__label">
+                    {indent(column_offset)}⮤ {message}
+                </pre>
+                <pre className="annotation__slice">{tail}</pre>
             </div>
         </div>
     );
 }
 
 function update(translations, externals) {
-    const [ast, ast_errors] = Fluent.syntax.parser.parse(translations);
-
-    const ctx = new Fluent.MessageContext('en-US');
-    ctx.addMessages(translations);
-
-    const out = new Map(); 
-    const out_errors = [];
-    for (const [id, message] of ctx.messages) {
-        out.set(id, ctx.format(message, externals, out_errors)); 
-    }
+    const [res, annotations] = parse_translations(translations);
+    const ctx = create_context(translations);
+    const [out, out_errors] = format_messages(ctx, externals);
 
     return {
-        ast, ast_errors, out, out_errors
+        res, annotations, out, out_errors
     };
 }
 
@@ -80,9 +86,10 @@ export default class Demo extends Component {
     }
 
     handleTranslationsChange(translations) {
-        this.setState(
-            update(translations, this.state.externals)
-        );
+        this.setState({
+            translations,
+            ...update(translations, this.state.externals)
+        });
     }
 
     handleExternalsChange(name, value) {
@@ -98,27 +105,29 @@ export default class Demo extends Component {
     }
 
     render() {
-        const { translations, externals, ast, ast_errors, out } = this.state;
-        const annotations = ast_errors.map(err => ({
+        const { translations, externals, res, annotations, out } = this.state;
+        const editor_annotations = annotations.map(annot => ({
             type: 'error',
-            text: err.message,
-            row: err.lineNumber - 1,
-            column: err.columnNumber
+            text: annot.message,
+            row: annot.line_offset,
+            column: annot.column_offset,
         }));
 
         return (
             <div className="demo">
                 <div className="output">
-                    {ast.body.map(entry => {
+                    {res.body.map(entry => {
                         switch (entry.type) {
                             case 'Message': {
                                 const { id: { name: id } } = entry;
                                 const value = out.get(id);
                                 return <Message key={id} id={id} value={value} />;
                             }
-                            case 'JunkEntry': {
-                                const { content } = entry;
-                                return <Junk key={Date.now() + Math.random()} value={content} />;
+                            case 'Junk': {
+                                const error = entry.annotations[0];
+                                const annot = annotation_display(translations, entry, error);
+                                const key = Date.now() + Math.random();
+                                return <Annotation key={key} annotation={annot} />;
                             }
                             case 'Comment':
                             case 'Section':
@@ -212,7 +221,7 @@ export default class Demo extends Component {
                     className="editor"
                     mode="fluent"
                     value={translations}
-                    annotations={annotations}
+                    annotations={editor_annotations}
                     onChange={val => this.handleTranslationsChange(val)}
                 />
             </div>

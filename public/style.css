@@ -6,7 +6,7 @@ body {
     color: #333;
 }
 
-code {
+pre, code {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
 }
 
