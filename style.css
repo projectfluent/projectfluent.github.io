@@ -6,7 +6,7 @@ body {
     color: #333;
 }
 
-code {
+pre, code {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
 }
 
@@ -93,4 +93,9 @@ code {
 .example {
     flex: 2;
     margin-left: 1rem;
+}
+
+.example__more {
+    margin-top: 1rem;
+    text-align: right;
 }
