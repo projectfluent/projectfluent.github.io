@@ -94,3 +94,8 @@ pre, code {
     flex: 2;
     margin-left: 1rem;
 }
+
+.example__more {
+    margin-top: 1rem;
+    text-align: right;
+}
