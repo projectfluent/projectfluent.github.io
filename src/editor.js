@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 
 import brace from 'brace';
-import 'brace/theme/github';
 import 'brace/mode/json';
 
 import './editor-mode-fluent';
-import './editor-theme-fluent.css'
+import './editor-theme-fluent';
 
 class Editor extends Component {
     componentWillReceiveProps(nextProps) {
@@ -54,7 +53,7 @@ class Editor extends Component {
             fontSize,
             scrollPastEnd: false,
             fixedWidthGutter: false,
-            theme: `ace/theme/github`
+            theme: `ace/theme/fluent`
         });
 
         this.editor.getSession().setOptions({
