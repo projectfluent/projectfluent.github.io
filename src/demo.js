@@ -21,8 +21,7 @@ liked-comment =
         [male] his
         [female] her
        *[other] their
-    } post.
-`;
+    } post.`;
 
 function Message(props) {
     const { id, value } = props;
@@ -117,34 +116,20 @@ export default class Demo extends Component {
 
         return (
             <div className="demo">
-                <div className="output">
-                    {res.body.map(entry => {
-                        switch (entry.type) {
-                            case 'Message': {
-                                const { id: { name: id } } = entry;
-                                const value = out.get(id);
-                                return <Message key={id} id={id} value={value} />;
-                            }
-                            case 'Junk': {
-                                const error = entry.annotations[0];
-                                const annot = annotation_display(translations, entry, error);
-                                const key = Date.now() + Math.random();
-                                return <Annotation key={key} annotation={annot} />;
-                            }
-                            case 'Comment':
-                            case 'Section':
-                            default:
-                                return null;
-                        }
-                    })}
-                </div>
+                <Editor
+                    className="editor"
+                    mode="fluent"
+                    value={translations}
+                    annotations={editor_annotations}
+                    onChange={val => this.handleTranslationsChange(val)}
+                />
 
                 <div className="externals">
                     <div className="externals__control">
                         <div className="externals__name">
-                            User name
+                            <code className="message__id">$user_name</code>
                         </div>
-                        <div className="externals__data">
+                        <div className="externals__data text__input__wrapper">
                             <input
                                 className="externals__input"
                                 type="text"
@@ -157,7 +142,7 @@ export default class Demo extends Component {
 
                     <div className="externals__control">
                         <div className="externals__name">
-                            User gender
+                            <code className="message__id">$user_gender</code>
                         </div>
                         <div className="externals__data">
                             <label className="externals__label">
@@ -195,7 +180,7 @@ export default class Demo extends Component {
 
                     <div className="externals__control">
                         <div className="externals__name">
-                            Photo count
+                            <code className="message__id">$photo_count</code>
                         </div>
                         <div className="externals__data">
                             <input
@@ -208,24 +193,31 @@ export default class Demo extends Component {
                                 step="1"
                                 onChange={evt => this.handleExternalsChange(evt.target.name, parseInt(evt.target.value, 10))}
                             />
-                            <input
-                                className="externals__input"
-                                type="number"
-                                name="photo_count"
-                                value={externals.photo_count}
-                                onChange={evt => this.handleExternalsChange(evt.target.name, parseInt(evt.target.value, 10))}
-                            />
                         </div>
                     </div>
                 </div>
 
-                <Editor
-                    className="editor"
-                    mode="fluent"
-                    value={translations}
-                    annotations={editor_annotations}
-                    onChange={val => this.handleTranslationsChange(val)}
-                />
+                <div className="output">
+                    {res.body.map(entry => {
+                        switch (entry.type) {
+                            case 'Message': {
+                                const { id: { name: id } } = entry;
+                                const value = out.get(id);
+                                return <Message key={id} id={id} value={value} />;
+                            }
+                            case 'Junk': {
+                                const error = entry.annotations[0];
+                                const annot = annotation_display(translations, entry, error);
+                                const key = Date.now() + Math.random();
+                                return <Annotation key={key} annotation={annot} />;
+                            }
+                            case 'Comment':
+                            case 'Section':
+                            default:
+                                return null;
+                        }
+                    })}
+                </div>
             </div>
         );
     }

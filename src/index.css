@@ -1,7 +1,10 @@
+.demo {
+    background: #e8e8e8;
+    border: 1px solid #aaa;
+}
+
 .editor {
     height: 20rem;
-    margin-top: 2rem;
-    border: 1px solid #ddd;
 }
 
 .demo__title {
@@ -9,22 +12,17 @@
     font-size: 1rem;
 }
 
-.externals {
-    display: flex;
-    flow-direction: columns;
-    margin-top: 2rem;
-}
-
-.externals__control {
-    flex: 1;
-}
-
-.externals__name {
-    margin-bottom: .5rem;
+.externals, .output {
+    border-left: 26px solid #ddd;
+    border-top: 1px solid #ddd;
+    font-size: 13px;
+    margin: 0;
+    padding: 0.5rem 5px;
 }
 
 .externals__label {
-    display: block;
+    display: inline-block;
+    padding-right: 1rem;
 }
 
 .externals__input {
@@ -32,39 +30,46 @@
 }
 
 .externals__input[type="text"] {
-    width: 8rem;
+    width: 295px;
 }
 
 .externals__input[type="range"] {
-    width: 6rem;
-}
-
-.externals__input[type="number"] {
-    width: 4rem;
+    width: 300px;
 }
 
 .output {
-    padding: 1rem;
-    border: 1px solid #ddd;
+    background: #FFF;
 }
 
-.output__item {
+.output__item,
+.externals__control {
     display: flex;
-    margin: .3rem 0;
+    margin: .5rem 0;
 }
 
-.output__key {
+.output__key,
+.externals__name {
     flex: 1;
+    padding-top: 2px;
 }
 
-.output__value {
+.output__value,
+.externals__data {
     flex: 2;
+    font-size: 15px;
+}
+
+.externals__data.text__input__wrapper {
+    margin-top: -2px;
 }
 
 .message__id {
-    font-size: .9rem;
-    color: #666;
+    color: #000;
     margin: 0;
+}
+
+.externals__name .message__id {
+    color: #930f80;
 }
 
 .annotation {

@@ -14,7 +14,7 @@ class Editor extends Component {
 
     componentDidMount(){
         const {
-            mode, gutter = "true", fontSize = 14, value, annotations, onChange
+            mode, gutter = "true", fontSize = 13, value, annotations, onChange
         } = this.props;
 
         this.editor = brace.edit(this.root);
