@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
 
-    <link href="https://fonts.googleapis.com/css?family=Sarina" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
     <title>Project Fluent</title>
@@ -17,59 +18,62 @@
           fluent
         </h1>
         <nav class="header__nav">
-          <a class="link" href="http://projectfluent.io/fluent/guide">Syntax Guide</a>
-          <a class="link" href="http://projectfluent.io/play">Online Editor</a>
-          <a class="link" href="https://github.com/projectfluent">GitHub</a>
-          <a class="link" href="https://groups.google.com/forum/#!forum/mozilla.tools.l10n">Mailing list</a>
-          <a class="link" href="https://github.com/projectfluent/fluent/wiki">Wiki</a>
+          <a class="link" href="http://projectfluent.io/fluent/guide">Learn</a>
+          <a class="link" href="http://projectfluent.io/play">Play</a>
+          <a class="link" href="#implementation-docs">Use</a>
+          <a class="link" href="https://github.com/projectfluent">Contribute</a>
+          <!-- <a class="link" href="https://groups.google.com/forum/#!forum/mozilla.tools.l10n">Community</a> -->
         </nav>
       </header>
 
       <section class="section section--centered">
-        <p class="pitch">
+        <div class="pitch-wrapper">
+          <p class="pitch">
+            <strong>Fluent</strong> is a set of localization libraries<br>
+            designed to create better translations.
+          </p>
+          <a class="link use" href="#implementation-docs">See how to use it.</a>
+        </div>
 
-          <strong class="highlight">Fluent</strong> is a localization paradigm
-          designed to unleash the expressive power of the natural language.
-
-        </p>
-
-        <a class="link--cta" href="https://github.com/projectfluent">Visit GitHub →</a>
+        <div class="cta-wrapper">
+          <a class="link--cta" href="https://www.npmjs.com/package/fluent">Install fluent.js 0.3.1</a>
+          <a class="link other" href="https://github.com/projectfluent/">Other implementations</a>
+        </div>
       </section>
 
       <section class="section">
         <div class="features">
-          <h2 class="features__title">For localizers</h2>
+          <h2 class="features__title">Featuring</h2>
           <ul class="features__list">
-            <li><strong class="highlight">Natural-sounding translations</strong>
+            <li>Natural-sounding translations
             <li>Number and date formatting
             <li>Plural rules
             <li>Genders
             <li>Grammatical cases
+            <li>Bi-directional text
+            <li>Error handling
+            <li>Client & server side support
+            <li>
+              <a class="link" href="https://github.com/projectfluent/fluent.js">JS</a>,
+              <a class="link" href="https://github.com/projectfluent/python-fluent">Python</a>,
+              <a class="link" href="https://github.com/projectfluent/fluent.rs">Rust</a>
+              implementation
+            <li>Open-source
+            <!--
             <li>
               <a class="link" href="http://projectfluent.io/fluent/guide">Readable file format</a>
             </li>
-          </ul>
-          <h2 class="features__title">For developers</h2>
-          <ul class="features__list">
-            <li>Client- and server-side
             <li>Simple API
-            <li>Good error handling
             <li>Integration with
               <acronym title="International Components for Unicode">ICU</acronym>,
               <acronym title="ECMAScript Internationalization API Specification">ECMA 402</acronym>
-            <li>Bi-directional text
-            <li>Open-source (Apache 2.0)
-            <li>Implemented in
-              <a class="link" href="https://github.com/projectfluent/fluent.js">JavaScript</a>,
-              <a class="link" href="https://github.com/projectfluent/python-fluent">Python</a> and
-              <a class="link" href="https://github.com/projectfluent/fluent.rs">Rust</a>
             <li>Well-defined
               <a class="link" href="https://github.com/projectfluent/fluent/tree/master/spec">EBNF grammar</a>
+            -->
           </ul>
         </div>
 
         <div class="example">
-          <h2 class="example__title">Interactive Example</h2>
           <div id="demo"></div>
           <div class="example__more">
             <a class="link" href="http://projectfluent.io/play">

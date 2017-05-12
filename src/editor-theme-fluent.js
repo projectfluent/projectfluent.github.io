@@ -13,7 +13,7 @@ function theme(acequire, exports, module) {
 
     exports.cssText = `
         .ace-fluent {
-            background-color: #f7f7f7;
+            background-color: #e8e8e8;
             color: #222;
         }
 
@@ -22,7 +22,7 @@ function theme(acequire, exports, module) {
         }
 
         .ace-fluent .ace_gutter {
-            background: #e8e8e8;
+            background: #ddd;
             color: #aaa;
         }
 
@@ -41,15 +41,10 @@ function theme(acequire, exports, module) {
 
         .ace-fluent .ace_comment {
             color: #999;
-            font-style: italic;
         }
 
         .ace-fluent .ace_section {
             color: #666;
-        }
-
-        .ace-fluent .ace_message {
-            font-weight: bold;
         }
 
         /*
