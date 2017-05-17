@@ -42,13 +42,13 @@ function indent(spaces) {
 
 function Annotation(props) {
     const {
-        annotation: { name, message, line_offset, column_offset, head, tail }
+        annotation: { message, line_offset, column_offset, head, tail }
     } = props;
 
     return (
         <div className="output__item annotation">
             <div className="output__key">
-                <code className="annotation__name">{name} on line {line_offset + 1}</code>
+                <code className="annotation__name">Error on line {line_offset + 1}</code>
             </div>
             <div className="output__value">
                 <pre className="annotation__slice">{head}</pre>
@@ -110,7 +110,7 @@ export default class Demo extends Component {
         const { translations, externals, res, annotations, out } = this.state;
         const editor_annotations = annotations.map(annot => ({
             type: 'error',
-            text: annot.message,
+            text: `${annot.code}: ${annot.message}`,
             row: annot.line_offset,
             column: annot.column_offset,
         }));
