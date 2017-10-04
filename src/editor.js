@@ -67,12 +67,10 @@ class Editor extends Component {
     }
 
     render() {
-        const { className } = this.props;
         return (
-            <div
-                className={className}
+            <code
                 ref={elem => this.root = elem}
-            ></div>
+            ></code>
         );
     }
 }

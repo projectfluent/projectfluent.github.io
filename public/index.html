@@ -5,79 +5,163 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
 
+    <link rel="stylesheet" href="./css/fluent.css">
+    <link rel="stylesheet" href="./css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Sarina" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
 
     <title>Project Fluent</title>
   </head>
   <body>
-    <div class="main">
-      <header class="header">
-        <h1 class="header__wordmark">
-          fluent
+    <div>
+      <nav id="topbar">
+        <div class="logo">
+          <a href="">fluent</a>
+        </div>
+        <ul>
+          <li>
+            <a href="#">Home</a>
+          </li>
+          <li>
+            <a href="#">Documentation</a>
+          </li>
+          <li>
+            <a href="#">Online Editor</a>
+          </li>
+          <li>
+            <a href="#">Wiki</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div>
+      <header id="intro">
+        <h1>
+          Fluent
         </h1>
-        <nav class="header__nav">
-          <a class="link" href="http://projectfluent.io/fluent/guide">Syntax Guide</a>
-          <a class="link" href="http://projectfluent.io/play">Online Editor</a>
-          <a class="link" href="https://github.com/projectfluent">GitHub</a>
-          <a class="link" href="https://groups.google.com/forum/#!forum/mozilla.tools.l10n">Mailing list</a>
-          <a class="link" href="https://github.com/projectfluent/fluent/wiki">Wiki</a>
-        </nav>
+        <h2>A localization paradigm designed to unleash the expressive power of the natural language.</h2>
+        <a href="#" class="cta">Get Started</a>
       </header>
-
-      <section class="section section--centered">
-        <p class="pitch">
-
-          <strong class="highlight">Fluent</strong> is a localization paradigm
-          designed to unleash the expressive power of the natural language.
-
+    </div>
+    <div>
+      <main>
+        <ul>
+          <li>
+            <h1>
+              Innovative
+            </h1>
+            <p>Natural-sounding translations that use the grammatical features of each language..</p>
+          </li>
+          <li>
+            <h1>
+              Powerfull & Extensible
+            </h1>
+            <p>
+              Date, time, number, plural rules support. Full bidirectionality.
+              Any internationalization formatters can be added.
+            </p>
+          </li>
+          <li>
+            <h1>
+              Flexible
+            </h1>
+            <p>
+              Can translate on client-side and server-side. Live language switching,
+              robust error handling.
+              JS, Python, Rust and React implementation.
+            </p>
+          </li>
+          <li>
+            <h1>
+              Complete
+            </h1>
+            <p>
+              Visual localization editor, linters, checkers and
+              workflow tooling.
+            </p>
+          </li>
+        </ul>
+        <aside id="demo"></aside>
+      </main>
+    </div>
+    <div>
+      <section id="explainer">
+        <h1>Why are we doing it?</h1>
+        <p>
+        Software localization has been dominated by an outdated paradigm: the translation is just a dictionary of strings which map one-to-one to the English (en-US) copy. This paradigm is unfair and limiting to languages with grammars more complex than English.
+        <br/>
+        For any grammatical feature not supported by English, a special case must be added to the source code, leaking logic into all translations. Furthermore, creating good UIs which depend on multiple external arguments is hard and requires the developer to understand the grammar of the languages the product targets.
         </p>
-
-        <a class="link--cta" href="https://github.com/projectfluent">Visit GitHub →</a>
+        <p>
+        The design of Fluent is targeting those limitations and is centered around the following <a href="https://github.com/projectfluent/fluent/wiki/Design-Principles">five concepts</a>: Control and Isolation, Simplicity, Tolerance, Modularity and composability, and The Principle of Least Power.
+        </p>
       </section>
-
-      <section class="section">
-        <div class="features">
-          <h2 class="features__title">For localizers</h2>
-          <ul class="features__list">
-            <li><strong class="highlight">Natural-sounding translations</strong>
-            <li>Number and date formatting
-            <li>Plural rules
-            <li>Genders
-            <li>Grammatical cases
+    </div>
+    <div>
+      <section id="examples">
+        <h1>Examples</h1>
+        <div class="grid">
+          <code><span class="id">shared-photos</span> =
+    { <span class="variable">$name</span> } { <span class="variable">$photo_count</span> ->
+        [<span class="keyword">0</span>] <span class="string">hasn't added any photos yet</span>
+        [<span class="keyword">one</span>] <span class="string">added a new photo</span>
+       *[<span class="keyword">other</span>] <span class="string">added</span> { <span class="variable">$photo_count</span> } <span class="string">new photos</span>
+    }.</code>
+          <dl class="variables">
+            <dt>$name</dt>
+            <dd>
+              <input type="text" value="Anne" />
+            </dd>
+            <dt>$photo_count</dt>
+            <dd>
+              <input type="range" id="photo_count"/>
+              <label for="photo_count">3</label>
+            </dd>
+          </dl>
+          <div class="spacer">
+            <span class="fa fa-angle-right"></span>
+          </div>
+          <dl class="result">
+            <dt>shared-photod</dt>
+            <dd>John added 3 new photos.</p>
+          </dl>
+          <code><span class="id">liked-comment</span> =
+  { <span class="variable">$name</span> } <span class="string">liked your comment on</span> { <span class="variable">$gender</span> ->
+      [<span class="keyword">male</span>] <span class="string">his</span>
+      [<span class="keyword">female</span>] <span class="string">her</span>
+     *[<span class="keyword">other</span>] <span class="string">their</span>
+  } <span class="string">post</span>.</code>
+          <dl class="variables">
+            <dt>$gender</dt>
+            <dd class="radio">
+              <input type="radio" checked="checked" name="gender" id="male" value="male" />
+              <label for="male">male</label>
+              <input type="radio" name="gender" id="female" value="female" />
+              <label for="female">female</label>
+              <input type="radio" name="gender" id="other" value"other" />
+              <label for="other">other</label>
+            </dd>
+          </dl>
+          <div class="spacer">
+            <span class="fa fa-angle-right"></span>
+          </div>
+          <dl class="result">
+            <dt>liked-commen</dt>
+            <dd>John liked your comment on his post!</p>
+          </dl>
+        </div>
+      </section>
+    </div>
+    <div>
+      <footer>
+        <p class="cr">Copyright 2017 Project Fluent</p>
+        <nav>
+          <ul>
             <li>
-              <a class="link" href="http://projectfluent.io/fluent/guide">Readable file format</a>
+              <a href="#" class="fa fa-github"></a> 
             </li>
           </ul>
-          <h2 class="features__title">For developers</h2>
-          <ul class="features__list">
-            <li>Client- and server-side
-            <li>Simple API
-            <li>Good error handling
-            <li>Integration with
-              <acronym title="International Components for Unicode">ICU</acronym>,
-              <acronym title="ECMAScript Internationalization API Specification">ECMA 402</acronym>
-            <li>Bi-directional text
-            <li>Open-source (Apache 2.0)
-            <li>Implemented in
-              <a class="link" href="https://github.com/projectfluent/fluent.js">JavaScript</a>,
-              <a class="link" href="https://github.com/projectfluent/python-fluent">Python</a> and
-              <a class="link" href="https://github.com/projectfluent/fluent-rs">Rust</a>
-            <li>Well-defined
-              <a class="link" href="https://github.com/projectfluent/fluent/tree/master/spec">EBNF grammar</a>
-          </ul>
-        </div>
-
-        <div class="example">
-          <h2 class="example__title">Interactive Example</h2>
-          <div id="demo"></div>
-          <div class="example__more">
-            <a class="link" href="http://projectfluent.io/play">
-              Try the Fluent Playground editor →
-            </a>
-          </div>
-        </div>
-      </section>
+        </nav>
+      </footer>
     </div>
   </body>
 </html>
