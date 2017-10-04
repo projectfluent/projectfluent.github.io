@@ -8,12 +8,11 @@ import {
 const translations = `
 hello-user = Hello, { $user }!
 
-unread-emails = You have { $emails-count ->
+unread-emails = You have { $emails_count ->
     [0] no unread emails.
     [one] one unread email
-   *[other] { $emails-count } unread emails.
-  }
-`;
+   *[other] { $emails_count } unread emails.
+  }`;
 
 function Message(props) {
     const { id, value } = props;
@@ -59,7 +58,7 @@ export default class Demo extends Component {
         super();
         const externals = {
             user: "Anne",
-            "emails-count": 3,
+            "emails_count": 3,
         };
 
         this.state = {
@@ -115,19 +114,19 @@ export default class Demo extends Component {
                 onChange={evt => this.handleExternalsChange(evt.target.name, evt.target.value)}
 />
           </dd>
-          <dt>$emails-count</dt>
+          <dt>$emails_count</dt>
           <dd>
             <input
-                id="emails-count"
+                id="emails_count"
                 type="range"
-                name="emails-count"
-                value={externals["emails-count"]}
+                name="emails_count"
+                value={externals["emails_count"]}
                 min="0"
                 max="9"
                 step="1"
                 onChange={evt => this.handleExternalsChange(evt.target.name, parseInt(evt.target.value, 10))}
 />
-           <label for="emails-count">{externals["emails-count"]}</label>
+           <label for="emails_count">{externals.emails_count}</label>
           </dd>
         </dl>,
         <div className="spacer">

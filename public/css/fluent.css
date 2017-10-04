@@ -86,9 +86,6 @@ body > div:nth-of-type(4) {
 }
 
 body > div:nth-of-type(5) {
-}
-
-body > div:nth-of-type(6) {
   height: 5rem;
   background-color: var(--indent-bg-color);
   color: var(--indent-bg-text-color);
@@ -203,6 +200,14 @@ main > ul > li > h1 {
   font-size: 1.5rem;
 }
 
+main > ul > li > p > a {
+  color: var(--main-accent-color);
+}
+
+main > ul > li > p > a:hover {
+  color: var(--main-accent-darker-color);
+}
+
 main > aside > code {
   height: 9rem;
 }
@@ -241,7 +246,7 @@ main > aside > .spacer {
 }
 
 #explainer > p {
-  padding: 1rem 0;
+  padding: 0.5rem 0;
 }
 
 #explainer > p > a {
@@ -342,24 +347,94 @@ code {
   padding: 1rem;
 }
 
-code > span.comment {
-  color: var(--code-comment-color);
+code.ace-fluent .ace_cursor {
+    color: var(--main-accent-lighter-color);
 }
 
-code > span.string {
-  color: var(--code-string-color);
+code.ace-fluent .ace_hidden-cursors .ace_cursor {
+    color: transparent;
 }
 
-code > span.variable {
-  color: var(--code-variable-color);
+code.ace-fluent .ace_gutter {
+    width: 1rem;
+    background-color: transparent;
 }
 
-code > span.keyword {
-  color: var(--code-keyword-color);
+code.ace-fluent .ace_gutter-active-line {
+    background-color: transparent;
 }
 
-code > span.id {
-  color: var(--code-id-color);
+code.ace-fluent .ace_comment {
+    color: var(--code-comment-color);
+    font-style: italic;
+}
+
+code.ace-fluent .ace_section {
+    color: #666;
+}
+
+code.ace-fluent .ace_message {
+    color: var(--code-id-color);
+    font-weight: normal;
+}
+
+code.ace-fluent .ace_string {
+    color: var(--code-string-color); 
+}
+
+code.ace-fluent .ace_number {
+    color: var(--code-keyword-color);
+}
+
+code.ace-fluent .ace_symbol {
+    color: var(--code-keyword-color);
+}
+
+code.ace-fluent .ace_variable {
+    color: var(--code-variable-color);
+}
+
+code.ace-fluent .ace_function {
+    color: var(--code-function-color);
+}
+
+code.ace-fluent .ace_invalid {
+    background-color: #ffe5e5;
+    color: red;
+}
+
+code.ace-fluent .ace_marker-layer .ace_selection {
+    background: rgb(181, 213, 255);
+}
+
+code.ace-fluent.ace_multiselect .ace_selection.ace_start {
+    box-shadow: 0 0 3px 0px white;
+}
+
+code.ace-fluent.ace_nobold .ace_line > span {
+    font-weight: normal !important;
+}
+
+code.ace-fluent .ace_marker-layer .ace_step {
+    background: rgb(252, 255, 0);
+}
+
+code.ace-fluent .ace_marker-layer .ace_stack {
+    background: rgb(164, 229, 101);
+}
+
+code.ace-fluent .ace_marker-layer .ace_bracket {
+    margin: -1px 0 0 -1px;
+    border: 1px solid rgb(192, 192, 192);
+}
+
+code.ace-fluent .ace_marker-layer .ace_selected-word {
+    background: rgb(250, 250, 255);
+    border: 1px solid rgb(200, 200, 250);
+}
+
+code.ace-fluent .ace_error {
+    background: #ffa5a5 !important;
 }
 
 dl.variables {

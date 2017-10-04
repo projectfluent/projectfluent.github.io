@@ -19,13 +19,13 @@
         </div>
         <ul>
           <li>
-            <a href="#">Home</a>
-          </li>
-          <li>
             <a href="/fluent/guide">Documentation</a>
           </li>
           <li>
             <a href="/play">Online Editor</a>
+          <li>
+            <a href="https://github.com/projectfluent">Github</a>
+          </li>
           </li>
           <li>
             <a href="https://github.com/projectfluent/fluent/wiki">Wiki</a>
@@ -38,7 +38,7 @@
         <h1>
           Fluent
         </h1>
-        <h2>A localization paradigm designed to unleash the expressive power of the natural language.</h2>
+        <h2>Fluent is a family of localization libraries designed to improve how software is translated.</h2>
         <a href="https://github.com/projectfluent/fluent/wiki/Integrating-Fluent" class="cta">Get Started</a>
       </header>
     </div>
@@ -49,15 +49,15 @@
             <h1>
               Innovative
             </h1>
-            <p>Natural-sounding translations that use the grammatical features of each language..</p>
+            <p>Natural-sounding translations with genders and grammatical cases when necessary.</p>
           </li>
           <li>
             <h1>
-              Powerfull & Extensible
+              Powerful &amp; Extensible
             </h1>
             <p>
-              Date, time, number, plural rules support. Full bidirectionality.
-              Any internationalization formatters can be added.
+              Date, time, number, plural rules and custom features support. Full bidirectionality.
+              Compatibility with <a href="http://site.icu-project.org/" title="International Compontns for Unicode">ICU</a>, <a href="https://tc39.github.io/ecma402/" title="ECMAScript® Internationalization API Specification">ECMA 402</a>. <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.
             </p>
           </li>
           <li>
@@ -65,18 +65,9 @@
               Flexible
             </h1>
             <p>
-              Can translate on client-side and server-side. Live language switching,
+              Client- and server-side. Live language switching,
               robust error handling.
-              JS, Python, Rust and React implementation.
-            </p>
-          </li>
-          <li>
-            <h1>
-              Complete
-            </h1>
-            <p>
-              Visual localization editor, linters, checkers and
-              workflow tooling.
+              <a href="https://github.com/projectfluent/fluent.js">JS</a>, <a href="https://github.com/projectfluent/python-fluent">Python</a>, <a href="https://github.com/projectfluent/fluent-rs">Rust</a> and <a href="https://github.com/projectfluent/fluent.js/tree/master/fluent-react">React</a> implementations.
             </p>
           </li>
         </ul>
@@ -87,8 +78,9 @@
       <section id="explainer">
         <h1>Why are we doing it?</h1>
         <p>
-        Software localization has been dominated by an outdated paradigm: the translation is just a dictionary of strings which map one-to-one to the English (en-US) copy. This paradigm is unfair and limiting to languages with grammars more complex than English.
-        <br/>
+        Software localization has been dominated by an outdated paradigm: the translation is just a dictionary of strings which map one-to-one to the English (en-US) copy. This paradigm is limiting to languages with grammars more complex than English.
+        </p>
+        <p>
         For any grammatical feature not supported by English, a special case must be added to the source code, leaking logic into all translations. Furthermore, creating good UIs which depend on multiple external arguments is hard and requires the developer to understand the grammar of the languages the product targets.
         </p>
         <p>
