@@ -5,35 +5,20 @@ import {
     annotation_display, parse_translations, create_context, format_messages
 } from './fluent';
 
-const translations = `// Try editing the translations here!
+const translations = `hello-user = Hello, { $user }!
 
-hello-world = Hello, world!
-
-shared-photos =
-    { $user_name } { $photo_count ->
-        [0] hasn't added any photos yet
-        [one] added a new photo
-       *[other] added { $photo_count } new photos
-    }.
-
-liked-comment =
-    { $user_name } liked your comment on { $user_gender ->
-        [male] his
-        [female] her
-       *[other] their
-    } post.
-`;
+unread-emails = You have { $emails_count ->
+    [0] no unread emails.
+    [one] one unread email
+   *[other] { $emails_count } unread emails.
+  }`;
 
 function Message(props) {
     const { id, value } = props;
-    return (
-        <div className="output__item message">
-            <div className="output__key">
-                <code className="message__id">{id}</code>
-            </div>
-            <div className="output__value">{value}</div>
-        </div>
-    );
+    return [
+      <dt>{id}</dt>,
+      <dd>{value}</dd>,
+    ];
 }
 
 function indent(spaces) {
@@ -45,20 +30,16 @@ function Annotation(props) {
         annotation: { message, line_offset, column_offset, head, tail }
     } = props;
 
-    return (
-        <div className="output__item annotation">
-            <div className="output__key">
-                <code className="annotation__name">Error on line {line_offset + 1}</code>
-            </div>
-            <div className="output__value">
-                <pre className="annotation__slice">{head}</pre>
-                <pre className="annotation__label">
-                    {indent(column_offset)}⮤ {message}
-                </pre>
-                <pre className="annotation__slice">{tail}</pre>
-            </div>
-        </div>
-    );
+    return [
+      <dt>Error on line {line_offset + 1}</dt>,
+      <dd>
+        <pre className="annotation__slice">{head}</pre>
+        <pre className="annotation__label">
+          {indent(column_offset)}⮤ {message}
+        </pre>
+        <pre className="annotation__slice">{tail}</pre>
+      </dd>,
+    ];
 }
 
 function update(translations, externals) {
@@ -75,9 +56,8 @@ export default class Demo extends Component {
     constructor() {
         super();
         const externals = {
-            user_name: "Anne",
-            user_gender: "female",
-            photo_count: 3,
+            user: "Anne",
+            emails_count: 3,
         };
 
         this.state = {
@@ -115,118 +95,63 @@ export default class Demo extends Component {
             column: annot.column_offset,
         }));
 
-        return (
-            <div className="demo">
-                <div className="output">
-                    {res.body.map(entry => {
-                        switch (entry.type) {
-                            case 'Message': {
-                                const { id: { name: id } } = entry;
-                                const value = out.get(id);
-                                return <Message key={id} id={id} value={value} />;
-                            }
-                            case 'Junk': {
-                                const error = entry.annotations[0];
-                                const annot = annotation_display(translations, entry, error);
-                                const key = Date.now() + Math.random();
-                                return <Annotation key={key} annotation={annot} />;
-                            }
-                            case 'Comment':
-                            case 'Section':
-                            default:
-                                return null;
-                        }
-                    })}
-                </div>
-
-                <div className="externals">
-                    <div className="externals__control">
-                        <div className="externals__name">
-                            User name
-                        </div>
-                        <div className="externals__data">
-                            <input
-                                className="externals__input"
-                                type="text"
-                                name="user_name"
-                                value={externals.user_name}
-                                onChange={evt => this.handleExternalsChange(evt.target.name, evt.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="externals__control">
-                        <div className="externals__name">
-                            User gender
-                        </div>
-                        <div className="externals__data">
-                            <label className="externals__label">
-                                <input
-                                    className="externals__input"
-                                    type="radio"
-                                    name="user_gender"
-                                    value="male"
-                                    checked={externals.user_gender === 'male'}
-                                    onChange={evt => this.handleExternalsChange(evt.target.name, evt.target.value)}
-                                /> male
-                            </label>
-                            <label className="externals__label">
-                                <input
-                                    className="externals__input"
-                                    type="radio"
-                                    name="user_gender"
-                                    value="female"
-                                    checked={externals.user_gender === 'female'}
-                                    onChange={evt => this.handleExternalsChange(evt.target.name, evt.target.value)}
-                                /> female
-                            </label>
-                            <label className="externals__label">
-                                <input
-                                    className="externals__input"
-                                    type="radio"
-                                    name="user_gender"
-                                    value="na"
-                                    checked={externals.user_gender === 'na'}
-                                    onChange={evt => this.handleExternalsChange(evt.target.name, evt.target.value)}
-                                /> not specified
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="externals__control">
-                        <div className="externals__name">
-                            Photo count
-                        </div>
-                        <div className="externals__data">
-                            <input
-                                className="externals__input"
-                                type="range"
-                                name="photo_count"
-                                value={externals.photo_count}
-                                min="0"
-                                max="9"
-                                step="1"
-                                onChange={evt => this.handleExternalsChange(evt.target.name, parseInt(evt.target.value, 10))}
-                            />
-                            <input
-                                className="externals__input"
-                                type="number"
-                                name="photo_count"
-                                value={externals.photo_count}
-                                onChange={evt => this.handleExternalsChange(evt.target.name, parseInt(evt.target.value, 10))}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <Editor
-                    className="editor"
-                    mode="fluent"
-                    value={translations}
-                    annotations={editor_annotations}
-                    onChange={val => this.handleTranslationsChange(val)}
-                />
-            </div>
-        );
+      return [
+        <Editor
+          className="editor"
+          mode="fluent"
+          value={translations}
+          annotations={editor_annotations}
+          onChange={val => this.handleTranslationsChange(val)}
+        />,
+        <dl className="variables">
+          <dt>$user</dt>
+          <dd>
+            <input
+                type="text"
+                name="user"
+                value={externals.user}
+                onChange={evt => this.handleExternalsChange(evt.target.name, evt.target.value)}
+/>
+          </dd>
+          <dt>$emails_count</dt>
+          <dd>
+            <input
+                id="emails_count"
+                type="range"
+                name="emails_count"
+                value={externals.emails_count}
+                min="0"
+                max="9"
+                step="1"
+                onChange={evt => this.handleExternalsChange(evt.target.name, parseInt(evt.target.value, 10))}
+/>
+           <label for="emails_count">{externals.emails_count}</label>
+          </dd>
+        </dl>,
+        <div className="spacer">
+          <span className="fa fa-angle-down"></span>
+        </div>,
+        <dl className="result">
+          {res.body.map(entry => {
+              if (entry.type === 'Message') {
+                  const { id: { name: id } } = entry;
+                  const value = out.get(id);
+                  return <Message key={id} id={id} value={value} />;
+              }
+              return null;
+          })}
+        </dl>,
+        <dl className="annotations">
+          {res.body.map(entry => {
+              if (entry.type === 'Junk') {
+                  const error = entry.annotations[0];
+                  const annot = annotation_display(translations, entry, error);
+                  const key = Date.now() + Math.random();
+                  return <Annotation key={key} annotation={annot} />;
+              }
+              return null;
+          })}
+        </dl>,
+      ];
     }
 }
