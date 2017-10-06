@@ -68,9 +68,11 @@ class Editor extends Component {
 
     render() {
         return (
-            <code
-                ref={elem => this.root = elem}
-            ></code>
+            <div class="code">
+              <code
+                  ref={elem => this.root = elem}
+              ></code>
+            </div>
         );
     }
 }

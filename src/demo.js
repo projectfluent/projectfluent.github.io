@@ -5,8 +5,7 @@ import {
     annotation_display, parse_translations, create_context, format_messages
 } from './fluent';
 
-const translations = `
-hello-user = Hello, { $user }!
+const translations = `hello-user = Hello, { $user }!
 
 unread-emails = You have { $emails_count ->
     [0] no unread emails.
@@ -36,7 +35,7 @@ function Annotation(props) {
       <dd>
         <pre className="annotation__slice">{head}</pre>
         <pre className="annotation__label">
-        {indent(column_offset)} {message}
+          {indent(column_offset)}⮤ {message}
         </pre>
         <pre className="annotation__slice">{tail}</pre>
       </dd>,
@@ -58,7 +57,7 @@ export default class Demo extends Component {
         super();
         const externals = {
             user: "Anne",
-            "emails_count": 3,
+            emails_count: 3,
         };
 
         this.state = {
@@ -120,7 +119,7 @@ export default class Demo extends Component {
                 id="emails_count"
                 type="range"
                 name="emails_count"
-                value={externals["emails_count"]}
+                value={externals.emails_count}
                 min="0"
                 max="9"
                 step="1"
@@ -134,35 +133,23 @@ export default class Demo extends Component {
         </div>,
         <dl className="result">
           {res.body.map(entry => {
-              switch (entry.type) {
-                  case 'Message': {
-                      const { id: { name: id } } = entry;
-                      const value = out.get(id);
-                      return <Message key={id} id={id} value={value} />;
-                  }
-                  case 'Junk':
-                  case 'Comment':
-                  case 'Section':
-                  default:
-                      return null;
+              if (entry.type === 'Message') {
+                  const { id: { name: id } } = entry;
+                  const value = out.get(id);
+                  return <Message key={id} id={id} value={value} />;
               }
+              return null;
           })}
         </dl>,
         <dl className="annotations">
           {res.body.map(entry => {
-              switch (entry.type) {
-                  case 'Junk': {
-                      const error = entry.annotations[0];
-                      const annot = annotation_display(translations, entry, error);
-                      const key = Date.now() + Math.random();
-                      return <Annotation key={key} annotation={annot} />;
-                  }
-                  case 'Message':
-                  case 'Comment':
-                  case 'Section':
-                  default:
-                      return null;
+              if (entry.type === 'Junk') {
+                  const error = entry.annotations[0];
+                  const annot = annotation_display(translations, entry, error);
+                  const key = Date.now() + Math.random();
+                  return <Annotation key={key} annotation={annot} />;
               }
+              return null;
           })}
         </dl>,
       ];

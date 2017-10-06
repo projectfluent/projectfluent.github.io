@@ -208,8 +208,14 @@ main > ul > li > p > a:hover {
   color: var(--main-accent-darker-color);
 }
 
-main > aside > code {
-  height: 9rem;
+main > aside > .code {
+  background-color: var(--indent-bg-color);
+  padding-top: 1.5rem;
+}
+
+main > aside > .code > code {
+  height: 8rem;
+  line-height: 1.2rem !important;
 }
 
 main > aside > .variables {
