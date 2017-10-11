@@ -9,11 +9,12 @@ import {
 
 const translations = `hello-user = Hello, { $user }!
 
-unread-emails = You have { $emails_count ->
-    [0] no unread emails.
-    [one] one unread email
-   *[other] { $emails_count } unread emails.
-  }`;
+unread-emails =
+    You have { $emails_count ->
+        [0] no unread emails
+        [one] one unread email
+       *[other] { $emails_count } unread emails
+    }.`;
 
 function Message(props) {
     const { id, value } = props;
