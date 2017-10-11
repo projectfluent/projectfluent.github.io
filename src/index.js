@@ -4,10 +4,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import Demo from './demo';
-
-import './index.css';
+import Examples from './examples';
 
 ReactDOM.render(
    <Demo />,
-   document.getElementById('demo')
+   document.getElementById('demo-app')
+);
+
+ReactDOM.render(
+   <Examples />,
+   document.getElementById('examples-app')
 );
