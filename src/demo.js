@@ -1,3 +1,5 @@
+// vim: ts=4 et sts=4 sw=4
+
 import React, { Component } from 'react';
 import Editor from './editor';
 
@@ -16,8 +18,8 @@ unread-emails = You have { $emails_count ->
 function Message(props) {
     const { id, value } = props;
     return [
-      <dt>{id}</dt>,
-      <dd>{value}</dd>,
+        <dt>{id}</dt>,
+        <dd>{value}</dd>,
     ];
 }
 
@@ -31,14 +33,14 @@ function Annotation(props) {
     } = props;
 
     return [
-      <dt>Error on line {line_offset + 1}</dt>,
-      <dd>
-        <pre className="annotation__slice">{head}</pre>
-        <pre className="annotation__label">
-          {indent(column_offset)}⮤ {message}
-        </pre>
-        <pre className="annotation__slice">{tail}</pre>
-      </dd>,
+        <dt>Error on line {line_offset + 1}</dt>,
+        <dd>
+            <pre className="annotation__slice">{head}</pre>
+            <pre className="annotation__label">
+                {indent(column_offset)}⮤ {message}
+            </pre>
+            <pre className="annotation__slice">{tail}</pre>
+        </dd>,
     ];
 }
 
@@ -95,63 +97,72 @@ export default class Demo extends Component {
             column: annot.column_offset,
         }));
 
-      return [
-        <Editor
-          className="editor"
-          mode="fluent"
-          value={translations}
-          annotations={editor_annotations}
-          onChange={val => this.handleTranslationsChange(val)}
-        />,
-        <dl className="variables">
-          <dt>$user</dt>
-          <dd>
-            <input
-                type="text"
-                name="user"
-                value={externals.user}
-                onChange={evt => this.handleExternalsChange(evt.target.name, evt.target.value)}
-/>
-          </dd>
-          <dt>$emails_count</dt>
-          <dd>
-            <input
-                id="emails_count"
-                type="range"
-                name="emails_count"
-                value={externals.emails_count}
-                min="0"
-                max="9"
-                step="1"
-                onChange={evt => this.handleExternalsChange(evt.target.name, parseInt(evt.target.value, 10))}
-/>
-           <label for="emails_count">{externals.emails_count}</label>
-          </dd>
-        </dl>,
-        <div className="spacer">
-          <span className="fa fa-angle-down"></span>
-        </div>,
-        <dl className="result">
-          {res.body.map(entry => {
-              if (entry.type === 'Message') {
-                  const { id: { name: id } } = entry;
-                  const value = out.get(id);
-                  return <Message key={id} id={id} value={value} />;
-              }
-              return null;
-          })}
-        </dl>,
-        <dl className="annotations">
-          {res.body.map(entry => {
-              if (entry.type === 'Junk') {
-                  const error = entry.annotations[0];
-                  const annot = annotation_display(translations, entry, error);
-                  const key = Date.now() + Math.random();
-                  return <Annotation key={key} annotation={annot} />;
-              }
-              return null;
-          })}
-        </dl>,
-      ];
+        return [
+            <Editor
+                className="editor"
+                mode="fluent"
+                value={translations}
+                annotations={editor_annotations}
+                onChange={val => this.handleTranslationsChange(val)}
+            />,
+
+            <dl className="variables">
+                <dt>$user</dt>
+                <dd>
+                    <input
+                        type="text"
+                        name="user"
+                        value={externals.user}
+                        onChange={evt => this.handleExternalsChange(
+                            evt.target.name, evt.target.value
+                        )}
+                    />
+               </dd>
+
+               <dt>$emails_count</dt>
+               <dd>
+                   <input
+                        id="emails_count"
+                        type="range"
+                        name="emails_count"
+                        value={externals.emails_count}
+                        min="0"
+                        max="9"
+                        step="1"
+                        onChange={evt => this.handleExternalsChange(
+                            evt.target.name, parseInt(evt.target.value, 10)
+                        )}
+                   />
+                   <label for="emails_count">{externals.emails_count}</label>
+               </dd>
+            </dl>,
+
+            <div className="spacer">
+                <span className="fa fa-angle-down"></span>
+            </div>,
+
+            <dl className="result">
+                {res.body.map(entry => {
+                    if (entry.type === 'Message') {
+                        const { id: { name: id } } = entry;
+                        const value = out.get(id);
+                        return <Message key={id} id={id} value={value} />;
+                    }
+                    return null;
+                })}
+            </dl>,
+
+            <dl className="annotations">
+                {res.body.map(entry => {
+                    if (entry.type === 'Junk') {
+                        const error = entry.annotations[0];
+                        const annot = annotation_display(translations, entry, error);
+                        const key = Date.now() + Math.random();
+                        return <Annotation key={key} annotation={annot} />;
+                    }
+                    return null;
+                })}
+            </dl>,
+        ];
     }
 }

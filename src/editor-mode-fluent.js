@@ -1,3 +1,4 @@
+// vim: ts=4 et sts=4 sw=4
 /* global ace */
 
 ace.define(

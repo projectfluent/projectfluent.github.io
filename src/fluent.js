@@ -1,3 +1,5 @@
+// vim: ts=4 et sts=4 sw=4
+
 import 'fluent-intl-polyfill/compat';
 import { MessageContext } from 'fluent/compat';
 import { FluentParser, lineOffset, columnOffset, Resource }
