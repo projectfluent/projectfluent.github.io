@@ -63,11 +63,11 @@ const example2 = {
 
 function Examples() {
     return [
-        <Example {...example1} chevron="right">
+        <Example {...example1}>
             <TextInput name="user_name" />
             <RangeInput name="photo_count" min="0" max="9" step="1" />
         </Example>,
-        <Example {...example2} chevron="right">
+        <Example {...example2}>
             <TextInput name="user_name" />
             <RadioInput name="user_gender" options={["male", "female", "unknown"]} />
         </Example>

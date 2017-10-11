@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
 
-    <link rel="stylesheet" href="./css/fluent.css">
-    <link rel="stylesheet" href="./css/font-awesome.min.css">
+    <link rel="stylesheet" href="./fluent.css">
+    <link rel="stylesheet" href="./editor.css">
     <link href="https://fonts.googleapis.com/css?family=Sarina" rel="stylesheet">
 
     <title>Project Fluent</title>
@@ -78,7 +78,7 @@
             </p>
           </li>
         </ul>
-        <aside id="demo-app"></aside>
+        <aside id="demo-app" class="example-vertical"></aside>
       </main>
     </div>
     <div>
@@ -97,20 +97,16 @@
     </div>
     <div>
       <section id="examples">
-        <h1>Examples</h1>
-        <div id="examples-app" class="grid"></div>
+        <header class="example-horizontal">
+          <h1 style="grid-column: 1 / span 3">Interactive Examples</h1>
+          <h2 style="grid-column: 4">Formatted Output</h2>
+        </header>
+        <div id="examples-app" class="example-horizontal"></div>
       </section>
     </div>
     <div>
       <footer>
         <p class="cr">Copyright 2017 Project Fluent</p>
-        <nav>
-          <ul>
-            <li>
-              <a href="https://github.com/projectfluent/" class="fa fa-github"></a> 
-            </li>
-          </ul>
-        </nav>
       </footer>
     </div>
   </body>
