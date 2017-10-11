@@ -69,15 +69,9 @@ body > div > * {
   padding-right: 1rem;
 }
 
-body > div:nth-of-type(1) {
-}
-
 body > div:nth-of-type(2) {
   background-color: var(--accent-bg-color);
   color: var(--accent-bg-text-color);
-}
-
-body > div:nth-of-type(3) {
 }
 
 body > div:nth-of-type(4) {
@@ -85,7 +79,7 @@ body > div:nth-of-type(4) {
   color: var(--accent-bg-text-color);
 }
 
-body > div:nth-of-type(5) {
+body > div:nth-of-type(6) {
   height: 5rem;
   background-color: var(--indent-bg-color);
   color: var(--indent-bg-text-color);
@@ -208,12 +202,12 @@ main > ul > li > p > a:hover {
   color: var(--main-accent-darker-color);
 }
 
-main > aside > .code {
+.code {
   background-color: var(--indent-bg-color);
   padding-top: 1.5rem;
 }
 
-main > aside > .code > code {
+.code > code {
   height: 8rem;
   line-height: 1.2rem !important;
 }
@@ -275,6 +269,11 @@ main > aside > .spacer {
   margin: 2rem 0;
 }
 
+#examples .results {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
 #examples > div.grid {
   display: grid;
@@ -305,11 +304,11 @@ main > aside > .spacer {
   padding-left: 1rem;
 }
 
-#examples > div.grid > .result > dt {
+#examples > div.grid > .results dt {
   display: none;
 }
 
-#examples > div.grid > .result > dd {
+#examples > div.grid > .results dd {
   grid-column: 1 / span 2;
 }
 
@@ -458,7 +457,7 @@ dl.variables > dd {
 }
 
 dl.variables > dd > input {
-  width: 100%;
+  width: 80%;
 }
 
 dl.variables > dd > input[type=range] {
@@ -479,23 +478,22 @@ dl.variables > dd.radio {
   align-items: center;
 }
 
-dl.result {
+.output {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto;
-  font-size: 0.9rem;
   align-items: center;
 }
 
-dl.result > dt {
+.output > dt {
   color: var(--code-id-color);
 }
 
-dl.result > dd {
+.output > dd {
   color: var(--code-string-color);
 }
 
-dl.annotations {
+.annotations {
   padding-top: 1rem;
   display: grid;
   grid-template-rows: auto;
@@ -504,12 +502,24 @@ dl.annotations {
   align-items: center;
 }
 
-dl.annotations > dt {
-  color: var(--code-error-color);
+.annotation__name {
+    color: var(--code-error-color);
 }
 
-dl.annotations > dd {
+.annotation__body {
   font-size: 0.7rem;
+}
+
+.annotation__slice,
+.annotation__label {
+    white-space: pre-wrap;
+    color: #999;
+    margin: 0;
+}
+
+.annotation__name,
+.annotation__label {
+    color: #d14;
 }
 
 
