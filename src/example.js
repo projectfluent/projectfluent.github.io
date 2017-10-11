@@ -79,7 +79,7 @@ export default class Example extends Component {
     }
 
     render() {
-        const { chevron = "down", children } = this.props;
+        const { children } = this.props;
         const { translations, externals, res, annotations, out } = this.state;
 
         const editor_annotations = annotations.map(annot => ({
@@ -111,10 +111,6 @@ export default class Example extends Component {
             <dl className="variables">
                 {externals_controls}
             </dl>,
-
-            <div className="spacer">
-                <span className={`fa fa-angle-${chevron}`}></span>
-            </div>,
 
             <div className="results">
                 <dl className="output">
