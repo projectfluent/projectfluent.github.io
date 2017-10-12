@@ -123,7 +123,8 @@ body > div > * {
   font-size: 2rem;
   line-height: 2.2rem;
   font-weight: 300;
-  margin: 3rem 0;
+  margin: 3rem auto;
+  max-width: 80%;
 }
 
 #intro > a.cta {
