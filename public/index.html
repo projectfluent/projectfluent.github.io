@@ -49,14 +49,23 @@
             <h1>
               Innovative
             </h1>
-            <p>Natural-sounding translations with genders and grammatical cases when necessary.</p>
+            <p>
+
+              Natural-sounding translations with genders and grammatical cases
+              when necessary.  Locale-specific logic doesn't leak to other
+              locales.
+
+            </p>
           </li>
           <li>
             <h1>
               Powerful
             </h1>
             <p>
-              Date, time, number, plural rules and custom features support. Full bidirectionality.
+
+              Date, time, and number formatting. Plural categories. Full
+              bidirectionality support. Custom formatters. Easy-to-read syntax.
+
             </p>
           </li>
           <li>
@@ -64,9 +73,16 @@
               Flexible
             </h1>
             <p>
-              Client- and server-side. Live language switching,
-              robust error handling.
-              <a href="https://github.com/projectfluent/fluent.js">JS</a>, <a href="https://github.com/projectfluent/python-fluent">Python</a>, <a href="https://github.com/projectfluent/fluent-rs">Rust</a> and <a href="https://github.com/projectfluent/fluent.js/tree/master/fluent-react">React</a> implementations.
+
+              Client- and server-side. Runtime translation and re-translation.
+              Robust error handling.  <a
+                  href="https://github.com/projectfluent/fluent.js">JS</a>, <a
+                  href="https://github.com/projectfluent/python-fluent">Python</a>,
+              <a href="https://github.com/projectfluent/fluent-rs">Rust</a>
+              implementations.  <a
+                  href="https://github.com/projectfluent/fluent.js/tree/master/fluent-react">React</a>
+              bindings.
+
             </p>
           </li>
           <li>
@@ -74,7 +90,15 @@
               Extensible
             </h1>
             <p>
-              Compatibility with <a href="http://site.icu-project.org/" title="International Compontns for Unicode">ICU</a>, <a href="https://tc39.github.io/ecma402/" title="ECMAScript® Internationalization API Specification">ECMA 402</a>. <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.
+
+              Compatible with <a href="http://site.icu-project.org/"
+                  title="International Compontns for Unicode">ICU</a> and <a
+                  href="https://tc39.github.io/ecma402/" title="ECMAScript®
+                  Internationalization API Specification">ECMA 402</a>.
+              Licensed under the <a
+                  href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0
+                  License</a>.
+
             </p>
           </li>
         </ul>
@@ -83,15 +107,31 @@
     </div>
     <div>
       <section id="explainer">
-        <h1>Why are we doing it?</h1>
+        <h1>Why did we create Fluent?</h1>
         <p>
-        Software localization has been dominated by an outdated paradigm: the translation is just a dictionary of strings which map one-to-one to the English (en-US) copy. This paradigm is limiting to languages with grammars more complex than English.
+
+          Software localization has been dominated by an outdated paradigm:
+          that the translation is just a dictionary of strings which map
+          one-to-one to the English copy. It is limiting to languages with
+          grammars more complex than English.
+
         </p>
         <p>
-        For any grammatical feature not supported by English, a special case must be added to the source code, leaking logic into all translations. Furthermore, creating good UIs which depend on multiple external arguments is hard and requires the developer to understand the grammar of the languages the product targets.
+
+          We created Fluent to change this paradigm. Translators should be able
+          to use the entire expressive power of their language without asking
+          developers for permission. Fluent allows translations to be
+          asymmetric: a simple string in English can map to a complex
+          multi-variant translation in another language.
+
         </p>
         <p>
-        The design of Fluent is targeting those limitations and is centered around the following <a href="https://github.com/projectfluent/fluent/wiki/Design-Principles">five concepts</a>: Control and Isolation, Simplicity, Tolerance, Modularity and composability, and The Principle of Least Power.
+
+          The design of Fluent is based on the following <a
+              href="https://github.com/projectfluent/fluent/wiki/Design-Principles">five
+              principles</a>: Control and Isolation, Simplicity, Tolerance,
+          Modularity and Composability, and The Principle of Least Power.
+
         </p>
       </section>
     </div>
