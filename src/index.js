@@ -1,6 +1,5 @@
 // vim: ts=4 et sts=4 sw=4
 
-import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
