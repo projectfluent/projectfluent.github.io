@@ -4,8 +4,10 @@
   "homepage": "https://projectfluent.org",
   "private": true,
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "gh-pages": "^1.2.0",
-    "react-scripts": "^2.0.0-next.3e165448"
+    "parcel-bundler": "^1.9.7"
   },
   "dependencies": {
     "brace": "^0.11.1",
@@ -16,23 +18,17 @@
     "react-dom": "^16.3.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "deploy": "npm run build && gh-pages -d build -b master -a"
+    "start": "parcel serve public/index.html",
+    "build": "parcel build public/index.html",
+    "deploy": "npm run build && gh-pages -d dist -b master -a"
   },
-  "browserslist": {
-    "development": [
-      "last 2 chrome versions",
-      "last 2 firefox versions"
-    ],
-    "production": [
-      "Firefox >= 52",
-      "FirefoxAndroid >= 52",
-      "Chrome >= 55",
-      "ChromeAndroid >= 55",
-      "Edge >= 15",
-      "Safari >= 10.1",
-      "iOS >= 10.3"
-    ]
-  }
+  "browserslist": [
+    "Firefox >= 52",
+    "FirefoxAndroid >= 52",
+    "Chrome >= 55",
+    "ChromeAndroid >= 55",
+    "Edge >= 15",
+    "Safari >= 10.1",
+    "iOS >= 10.3"
+  ]
 }
