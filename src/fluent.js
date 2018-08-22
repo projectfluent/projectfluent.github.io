@@ -1,7 +1,7 @@
 // vim: ts=4 et sts=4 sw=4
 
 import 'fluent-intl-polyfill/compat';
-import { MessageContext } from 'fluent/compat';
+import { FluentBundle } from 'fluent/compat';
 import { FluentParser, lineOffset, columnOffset, Resource }
     from 'fluent-syntax/compat';
 
@@ -53,7 +53,7 @@ export function parse_translations(translations) {
 }
 
 export function create_context(translations) {
-    const context = new MessageContext('en-US');
+    const context = new FluentBundle('en-US');
     context.addMessages(translations);
     return context;
 }
