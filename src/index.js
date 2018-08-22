@@ -1,6 +1,6 @@
 // vim: ts=4 et sts=4 sw=4
 
-import React from 'react';
+import React, {Fragment} from 'react';
 import ReactDOM from 'react-dom';
 
 import Example from './example';
@@ -62,16 +62,18 @@ const example2 = {
 };
 
 function Examples() {
-    return [
-        <Example {...example1}>
-            <TextInput name="user_name" />
-            <RangeInput name="photo_count" min="0" max="9" step="1" />
-        </Example>,
-        <Example {...example2}>
-            <TextInput name="user_name" />
-            <RadioInput name="user_gender" options={["male", "female", "unknown"]} />
-        </Example>
-    ];
+    return (
+        <Fragment>
+            <Example {...example1}>
+                <TextInput name="user_name" />
+                <RangeInput name="photo_count" min="0" max="9" step="1" />
+            </Example>
+            <Example {...example2}>
+                <TextInput name="user_name" />
+                <RadioInput name="user_gender" options={["male", "female", "unknown"]} />
+            </Example>
+        </Fragment>
+    )
 }
 
 ReactDOM.render(

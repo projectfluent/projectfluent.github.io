@@ -1,6 +1,6 @@
 // vim: ts=4 et sts=4 sw=4
 
-import React, { Children, Component, cloneElement } from 'react';
+import React, {Children, Component, cloneElement, Fragment} from 'react';
 import Editor from './editor';
 
 import {
@@ -9,10 +9,12 @@ import {
 
 function Message(props) {
     const { id, value } = props;
-    return [
-        <dt>{id}</dt>,
-        <dd>{value}</dd>,
-    ];
+    return (
+        <Fragment>
+            <dt>{id}</dt>
+            <dd>{value}</dd>
+        </Fragment>
+    );
 }
 
 function indent(spaces) {
@@ -24,16 +26,18 @@ function Annotation(props) {
         annotation: { message, line_offset, column_offset, head, tail }
     } = props;
 
-    return [
-        <dt className="annotation__name">Error on line {line_offset + 1}</dt>,
-        <dd className="annotation__body">
-            <pre className="annotation__slice">{head}</pre>
-            <pre className="annotation__label">
-                {indent(column_offset)}⮤ {message}
-            </pre>
-            <pre className="annotation__slice">{tail}</pre>
-        </dd>,
-    ];
+    return (
+        <Fragment>
+            <dt className="annotation__name">Error on line {line_offset + 1}</dt>
+            <dd className="annotation__body">
+                <pre className="annotation__slice">{head}</pre>
+                <pre className="annotation__label">
+                    {indent(column_offset)}⮤ {message}
+                </pre>
+                <pre className="annotation__slice">{tail}</pre>
+            </dd>
+        </Fragment>
+    );
 }
 
 function update(translations, externals) {
@@ -99,39 +103,41 @@ export default class Example extends Component {
         const messages = res.body.filter(entry => entry.type === "Message");
         const junk = res.body.filter(entry => entry.type === "Junk");
 
-        return [
-            <Editor
-                className="editor"
-                mode="fluent"
-                value={translations}
-                annotations={editor_annotations}
-                onChange={val => this.handleTranslationsChange(val)}
-            />,
+        return (
+            <Fragment>
+                <Editor
+                    className="editor"
+                    mode="fluent"
+                    value={translations}
+                    annotations={editor_annotations}
+                    onChange={val => this.handleTranslationsChange(val)}
+                />
 
-            <dl className="variables">
-                {externals_controls}
-            </dl>,
-
-            <div className="results">
-                <dl className="output">
-                    {messages.map(entry => {
-                        const { id: { name: id } } = entry;
-                        const value = out.get(id);
-                        return <Message key={id} id={id} value={value} />;
-                    })}
+                <dl className="variables">
+                    {externals_controls}
                 </dl>
 
-                {junk.length > 0 &&
-                    <dl className="annotations">
-                        {junk.map(entry => {
-                            const error = entry.annotations[0];
-                            const annot = annotation_display(translations, entry, error);
-                            const key = Date.now() + Math.random();
-                            return <Annotation key={key} annotation={annot} />;
+                <div className="results">
+                    <dl className="output">
+                        {messages.map(entry => {
+                            const { id: { name: id } } = entry;
+                            const value = out.get(id);
+                            return <Message key={id} id={id} value={value} />;
                         })}
                     </dl>
-                }
-            </div>
-        ];
+
+                    {junk.length > 0 &&
+                        <dl className="annotations">
+                            {junk.map(entry => {
+                                const error = entry.annotations[0];
+                                const annot = annotation_display(translations, entry, error);
+                                const key = Date.now() + Math.random();
+                                return <Annotation key={key} annotation={annot} />;
+                            })}
+                        </dl>
+                    }
+                </div>
+            </Fragment>
+        );
     }
 }

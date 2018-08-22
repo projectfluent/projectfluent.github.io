@@ -70,10 +70,8 @@ class Editor extends Component {
 
     render() {
         return (
-            <div class="code">
-              <code
-                  ref={elem => this.root = elem}
-              ></code>
+            <div className="code">
+                <code ref={elem => this.root = elem}></code>
             </div>
         );
     }
