@@ -15,5 +15,5 @@ With this setup, individual repositories in the `projectfluent` organization
 can deploy their own GitHub Pages which will be accessible at
 `projectfluent.org/<repo_name>`.
 
-[projectfluent.org]: http://projectfluent.org
+[projectfluent.org]: https://projectfluent.org/
 [Organization Page]: https://help.github.com/articles/user-organization-and-project-pages/
