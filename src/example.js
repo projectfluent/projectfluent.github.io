@@ -4,7 +4,7 @@ import React, {Children, Component, cloneElement, Fragment} from 'react';
 import Editor from './editor';
 
 import {
-    annotation_display, parse_translations, create_context, format_messages
+    annotation_display, parse_translations, create_bundle, format_messages
 } from './fluent';
 
 function Message(props) {
@@ -42,8 +42,8 @@ function Annotation(props) {
 
 function update(translations, externals) {
     const [res, annotations] = parse_translations(translations);
-    const ctx = create_context(translations);
-    const [out, out_errors] = format_messages(ctx, externals);
+    const bundle = create_bundle(translations);
+    const [out, out_errors] = format_messages(res, bundle, externals);
 
     return {
         res, annotations, out, out_errors

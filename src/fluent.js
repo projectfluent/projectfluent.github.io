@@ -52,17 +52,22 @@ export function parse_translations(translations) {
     return [res, annotations];
 }
 
-export function create_context(translations) {
-    const context = new FluentBundle('en-US');
-    context.addMessages(translations);
-    return context;
+export function create_bundle(translations) {
+    const bundle = new FluentBundle('en-US');
+    bundle.addMessages(translations);
+    return bundle;
 }
 
-export function format_messages(context, externals) {
+export function format_messages(ast, bundle, externals) {
     const outputs = new Map(); 
     const errors = [];
-    for (const [id, message] of context.messages) {
-        outputs.set(id, context.format(message, externals, errors)); 
+    for (let entry of ast.body) {
+        if (entry.type !== 'Message') {
+            continue;
+        }
+        const id = entry.id.name;
+        const message = bundle.getMessage(id);
+        outputs.set(id, bundle.format(message, externals, errors));
     }
     return [outputs, errors];
 }
