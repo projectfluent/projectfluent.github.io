@@ -4,18 +4,16 @@
   "homepage": "https://projectfluent.org",
   "private": true,
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "gh-pages": "^1.2.0",
-    "parcel-bundler": "^1.9.7"
+    "parcel-bundler": "^1.10.3"
   },
   "dependencies": {
     "brace": "^0.11.1",
     "fluent": "0.9.1",
     "fluent-syntax": "0.9.0",
     "intl-pluralrules": "^0.2.1",
-    "react": "^16.3.2",
-    "react-dom": "^16.3.2"
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3"
   },
   "scripts": {
     "start": "parcel serve public/index.html",
