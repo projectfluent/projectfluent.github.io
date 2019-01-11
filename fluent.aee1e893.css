@@ -174,16 +174,6 @@ main > ul > li > p > a:hover {
   color: var(--main-accent-darker-color);
 }
 
-.code {
-  background-color: var(--indent-bg-color);
-  padding-top: 1.5rem;
-}
-
-.code > code {
-  height: 8rem;
-  line-height: 1.2rem !important;
-}
-
 main > aside > .variables {
   border-top: 1px solid #ddd;
   border-bottom: 1px solid var(--main-accent-color);
