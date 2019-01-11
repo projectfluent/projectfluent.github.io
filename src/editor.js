@@ -1,6 +1,5 @@
-// vim: ts=4 et sts=4 sw=4
-
-import React, { Component } from 'react';
+import React from 'react';
+import AceEditor from 'react-ace';
 
 import brace from 'brace';
 import 'brace/mode/json';
@@ -8,73 +7,45 @@ import 'brace/mode/json';
 import './editor-mode-fluent';
 import './editor-theme-fluent';
 
-class Editor extends Component {
-    componentWillReceiveProps(nextProps) {
-        const { annotations } = nextProps;
-        this.editor.getSession().setAnnotations(annotations);
-    }
+// https://github.com/ajaxorg/ace/wiki/Configuring-Ace
+const ACE_OPTIONS = {
+    // Editor options.
+    selectionStyle: 'text',
+    highlightActiveLine: false,
+    highlightSelectedWord: false,
+    cursorStyle: 'ace',
+    mergeUndoDeltas: false,
+    behavioursEnabled: false,
+    wrapBehavioursEnabled: false,
+    autoScrollEditorIntoView: false,
 
-    componentDidMount(){
-        const {
-            mode, gutter = "true", fontSize = 14, value, annotations, onChange
-        } = this.props;
+    // Renderer options.
+    hScrollBarAlwaysVisible: false,
+    vScrollBarAlwaysVisible: false,
+    highlightGutterLine: true,
+    animatedScroll: false,
+    showInvisibles: false,
+    showPrintMargin: false,
+    printMarginColumn: false,
+    printMargin: false,
+    fadeFoldWidgets: false,
+    showFoldWidgets: false,
+    showLineNumbers: false,
+    displayIndentGuides: false,
+    scrollPastEnd: false,
+    fixedWidthGutter: false,
+};
 
-        this.editor = brace.edit(this.root);
-
-        this.editor.setValue(value);
-        this.editor.getSession().setAnnotations(annotations);
-        this.editor.clearSelection();
-        this.editor.gotoLine(0);
-        this.editor.on('change', () => onChange(this.editor.getValue()));
-
-        this.editor.setOptions({
-            selectionStyle: 'text',
-            highlightActiveLine: false,
-            highlightSelectedWord: false,
-            readOnly: false,
-            cursorStyle: 'ace',
-            mergeUndoDeltas: false,
-            behavioursEnabled: false,
-            wrapBehavioursEnabled: false,
-            autoScrollEditorIntoView: false,
-
-            // renderer options
-            hScrollBarAlwaysVisible: false,
-            vScrollBarAlwaysVisible: false,
-            highlightGutterLine: true,
-            animatedScroll: false,
-            showInvisibles: false,
-            showPrintMargin: false,
-            printMarginColumn: false,
-            printMargin: false,
-            fadeFoldWidgets: false,
-            showFoldWidgets: false,
-            showLineNumbers: false,
-            showGutter: gutter,
-            displayIndentGuides: false,
-            fontSize,
-            scrollPastEnd: false,
-            fixedWidthGutter: false,
-            theme: `ace/theme/fluent`
-        });
-
-        this.editor.getSession().setOptions({
-            firstLineNumber: 1,
-            useWorker: false,
-            useSoftTabs: true,
-            tabSize: 4,
-            mode: `ace/mode/${mode}`
-        });
-
-    }
-
-    render() {
-        return (
-            <div className="code">
-                <code ref={elem => this.root = elem}></code>
-            </div>
-        );
-    }
+export default
+function Editor(props) {
+    return <AceEditor
+        mode="fluent"
+        theme="fluent"
+        fontSize={14}
+        width="auto"
+        setOptions={ACE_OPTIONS}
+        debounceChangePeriod={200}
+        onLoad={editor => editor.gotoLine(0)}
+        {...props}
+    />;
 }
-
-export default Editor;

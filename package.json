@@ -13,6 +13,7 @@
     "fluent-syntax": "0.10.0",
     "intl-pluralrules": "^0.2.1",
     "react": "^16.6.3",
+    "react-ace": "^6.3.2",
     "react-dom": "^16.6.3"
   },
   "scripts": {

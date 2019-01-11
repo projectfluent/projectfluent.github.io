@@ -105,13 +105,14 @@ export default class Example extends Component {
 
         return (
             <Fragment>
-                <Editor
-                    className="editor"
-                    mode="fluent"
-                    value={translations}
-                    annotations={editor_annotations}
-                    onChange={val => this.handleTranslationsChange(val)}
-                />
+                <div className="example-editor">
+                    <Editor
+                        height="10rem"
+                        value={translations}
+                        annotations={editor_annotations}
+                        onChange={val => this.handleTranslationsChange(val)}
+                    />
+                </div>
 
                 <dl className="variables">
                     {externals_controls}
