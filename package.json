@@ -22,8 +22,8 @@
     "deploy": "npm run build && gh-pages -d dist -b master -a"
   },
   "browserslist": [
-    "Firefox >= 52",
-    "FirefoxAndroid >= 52",
+    "Firefox >= 53",
+    "FirefoxAndroid >= 53",
     "Chrome >= 55",
     "ChromeAndroid >= 55",
     "Edge >= 15",
