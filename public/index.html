@@ -2,14 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <title>Project Fluent</title>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-77033033-23"></script>
+    <script>
+        var doNotTrack =
+            navigator.doNotTrack === "1" // Modern browsers
+                || navigator.doNotTrack === "yes" // Firefox < 32
+                || window.doNotTrack === "1" // IE11
+                || navigator.msDoNotTrack === "1"; // IE9, IE10
+        if (!doNotTrack) {
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {dataLayer.push(arguments);}
+            gtag("js", new Date());
+            gtag("config", "UA-77033033-23", {
+                anonymize_ip: true,
+            });
+        }
+    </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="./favicon.ico">
-
     <link rel="stylesheet" href="./fluent.css">
     <link rel="stylesheet" href="./editor.css">
     <link href="https://fonts.googleapis.com/css?family=Sarina" rel="stylesheet">
 
-    <title>Project Fluent</title>
     <script src="../src/index.js" defer></script>
   </head>
   <body>
@@ -147,7 +165,31 @@
     </div>
     <div>
       <footer>
-        <p class="cr">Copyright 2017 Project Fluent</p>
+        <p>
+
+          Fluent is a research project by <a
+              href="https://mozilla.org">Mozilla</a>.
+          Content available under a <a rel="license"
+              href="https://mozilla.org/en-US/foundation/licensing/">
+              Creative Commons BY-SA 3.0</a> license.
+
+        </p>
+
+        <ul>
+          <li>
+            <a href="https://www.mozilla.org/en-US/privacy/">Privacy</a>
+          </li>
+          <li>
+            <a href="https://www.mozilla.org/en-US/privacy/websites/">Website Privacy Notice</a>
+          </li>
+          <li>
+            <a href="https://www.mozilla.org/en-US/privacy/websites/#cookies">Cookies</a>
+          </li>
+          <li>
+            <a href="https://www.mozilla.org/en-US/about/legal/">Legal</a>
+          </li>
+        </ul>
+
       </footer>
     </div>
   </body>
