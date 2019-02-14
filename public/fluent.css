@@ -279,8 +279,6 @@ main > aside > .variables {
 /* Footer */
 
 footer {
-  display: flex;
-  justify-content: space-between;
   margin-bottom: 2rem;
   color: #818a91;
   font-size: 0.8rem;
