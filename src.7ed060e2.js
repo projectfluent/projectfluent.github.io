@@ -57366,35 +57366,15 @@ function create_bundle(translations) {
 function format_messages(ast, bundle, externals) {
   const outputs = new Map();
   const errors = [];
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
 
-  try {
-    for (var _iterator = ast.body[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      let entry = _step.value;
-
-      if (entry.type !== 'Message') {
-        continue;
-      }
-
-      const id = entry.id.name;
-      const message = bundle.getMessage(id);
-      outputs.set(id, bundle.format(message, externals, errors));
+  for (let entry of ast.body) {
+    if (entry.type !== 'Message') {
+      continue;
     }
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return != null) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
-    }
+
+    const id = entry.id.name;
+    const message = bundle.getMessage(id);
+    outputs.set(id, bundle.format(message, externals, errors));
   }
 
   return [outputs, errors];
@@ -57750,7 +57730,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54240" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60011" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

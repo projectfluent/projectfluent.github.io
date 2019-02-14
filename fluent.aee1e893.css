@@ -279,14 +279,14 @@ main > aside > .variables {
 /* Footer */
 
 footer {
-  display: flex;
-  justify-content: space-between;
-}
-
-footer > .cr {
+  margin-bottom: 2rem;
   color: #818a91;
   font-size: 0.8rem;
-  line-height: 5rem;
+}
+
+footer li {
+  display: inline;
+  margin-right: 1rem;
 }
 
 
