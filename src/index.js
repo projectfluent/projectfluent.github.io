@@ -70,7 +70,7 @@ function Examples() {
             </Example>
             <Example {...example2}>
                 <TextInput name="user_name" />
-                <RadioInput name="user_gender" options={["male", "female", "unknown"]} />
+                <RadioInput name="user_gender" options={["male", "female", "unspecified"]} />
             </Example>
         </Fragment>
     )
