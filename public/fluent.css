@@ -130,8 +130,8 @@ body > div > * {
 #intro > a.cta {
   color: var(--main-accent-darker-color);
   text-decoration: none;
-  font-size: 2rem;
-  padding: 1.5rem 2rem;
+  font-size: 1.3rem;
+  padding: 1rem 1.3rem;
   display: inline-block;
   border: 1px solid var(--main-accent-darker-color);
 }
