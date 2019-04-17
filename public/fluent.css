@@ -181,8 +181,6 @@ main > aside > .variables {
   grid-template-columns: 2fr 5fr;
   grid-template-rows: auto;
   grid-row-gap: 0.5rem;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
 }
 
 
@@ -236,7 +234,7 @@ main > aside > .variables {
 
 .example-vertical {
   display: grid;
-  grid-template-rows: 13rem 8rem 2rem auto;
+  grid-template-rows: 18rem 10rem 2rem auto;
 }
 
 .example-vertical > .results {
@@ -250,7 +248,6 @@ main > aside > .variables {
 }
 
 .example-horizontal > .variables {
-  padding: 0 1rem;
   border-left: 1px solid #ddd;
   border-right: 1px solid var(--main-accent-color);
 }
@@ -320,13 +317,13 @@ dl.variables > dd > label {
 
 dl.variables > dd.radio {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 9fr;
   grid-template-rows: auto;
 }
 
 .output {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 2fr;
   grid-template-rows: auto;
   align-items: center;
 }

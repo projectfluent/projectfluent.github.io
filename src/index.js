@@ -7,25 +7,33 @@ import Example from './example';
 import { TextInput, RadioInput, RangeInput } from "./controls";
 
 const example0 = {
-    translations: `hello-user = Hello, { $user_name }!
+    translations: `\
+# Simple things are simple.
+hello-user = Hello, {$userName}!
 
-unread-emails =
-    You have { $emails_count ->
-        [0] no unread emails
-        [one] one unread email
-       *[other] { $emails_count } unread emails
+# Complex things are possible.
+shared-photos =
+    {$userName} {$photoCount ->
+        [one] added a new photo
+       *[other] added {$photoCount} new photos
+    } to {$userGender ->
+        [male] his stream
+        [female] her stream
+       *[other] their stream
     }.`,
     externals: {
-        user_name: "Anne",
-        emails_count: 3,
+        userName: "Anne",
+        userGender: "female",
+        photoCount: 3,
     }
 };
 
 function Example0() {
     return (
         <Example {...example0}>
-            <TextInput name="user_name" />
-            <RangeInput name="emails_count" min="0" max="9" step="1" />
+            <TextInput name="userName" />
+            <RadioInput name="userGender" options={["male", "female", "unspecified"]} />
+            <RangeInput name="photoCount" min="1" max="9" step="1" />
         </Example>
     );
 }

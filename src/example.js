@@ -83,7 +83,7 @@ export default class Example extends Component {
     }
 
     render() {
-        const { children } = this.props;
+        const { children, height = "16rem" } = this.props;
         const { translations, externals, res, annotations, out } = this.state;
 
         const editor_annotations = annotations.map(annot => ({
@@ -107,7 +107,7 @@ export default class Example extends Component {
             <Fragment>
                 <div className="example-editor">
                     <Editor
-                        height="10rem"
+                        height={height}
                         value={translations}
                         annotations={editor_annotations}
                         onChange={val => this.handleTranslationsChange(val)}
