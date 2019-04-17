@@ -60339,7 +60339,10 @@ class Example extends _react.Component {
   }
 
   render() {
-    const children = this.props.children;
+    const _this$props = this.props,
+          children = _this$props.children,
+          _this$props$height = _this$props.height,
+          height = _this$props$height === void 0 ? "16rem" : _this$props$height;
     const _this$state = this.state,
           translations = _this$state.translations,
           externals = _this$state.externals,
@@ -60363,7 +60366,7 @@ class Example extends _react.Component {
     return _react.default.createElement(_react.Fragment, null, _react.default.createElement("div", {
       className: "example-editor"
     }, _react.default.createElement(_editor.default, {
-      height: "10rem",
+      height: height,
       value: translations,
       annotations: editor_annotations,
       onChange: val => this.handleTranslationsChange(val)
@@ -60477,26 +60480,36 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 // vim: ts=4 et sts=4 sw=4
 const example0 = {
-  translations: `hello-user = Hello, { $user_name }!
+  translations: `\
+# Simple things are simple.
+hello-user = Hello, {$userName}!
 
-unread-emails =
-    You have { $emails_count ->
-        [0] no unread emails
-        [one] one unread email
-       *[other] { $emails_count } unread emails
+# Complex things are possible.
+shared-photos =
+    {$userName} {$photoCount ->
+        [one] added a new photo
+       *[other] added {$photoCount} new photos
+    } to {$userGender ->
+        [male] his stream
+        [female] her stream
+       *[other] their stream
     }.`,
   externals: {
-    user_name: "Anne",
-    emails_count: 3
+    userName: "Anne",
+    userGender: "female",
+    photoCount: 3
   }
 };
 
 function Example0() {
   return _react.default.createElement(_example.default, example0, _react.default.createElement(_controls.TextInput, {
-    name: "user_name"
+    name: "userName"
+  }), _react.default.createElement(_controls.RadioInput, {
+    name: "userGender",
+    options: ["male", "female", "unspecified"]
   }), _react.default.createElement(_controls.RangeInput, {
-    name: "emails_count",
-    min: "0",
+    name: "photoCount",
+    min: "1",
     max: "9",
     step: "1"
   }));
@@ -60574,7 +60587,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62124" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56445" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
