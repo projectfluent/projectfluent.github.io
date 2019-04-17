@@ -130,26 +130,28 @@
         <p>
 
           Software localization has been dominated by an outdated paradigm:
-          that the translation is just a dictionary of strings which map
-          one-to-one to the English copy. It is limiting to languages with
-          grammars more complex than English.
+          translations that map one-to-one to the English copy. The
+          grammar of the source language imposes limits on the expressiveness
+          of the translation.
 
         </p>
         <p>
 
-          We created Fluent to change this paradigm. Translators should be able
-          to use the entire expressive power of their language without asking
-          developers for permission. Fluent allows translations to be
-          asymmetric: a simple string in English can map to a complex
+          We created Fluent to change this paradigm. Translators should be
+          able to use the entire expressive power of their language without
+          asking developers for permission. In Fluent, translations are
+          asymmetric. A simple string in English can map to a complex
           multi-variant translation in another language.
 
         </p>
         <p>
 
-          The design of Fluent is based on the following <a
-              href="https://github.com/projectfluent/fluent/wiki/Design-Principles">five
-              principles</a>: Control and Isolation, Simplicity, Tolerance,
-          Modularity and Composability, and The Principle of Least Power.
+          Fluent makes it possible to cater to the grammar and style of many
+          languages, independently of the source language. It happens in
+          isolation; the fact that one language benefits from more advanced
+          logic doesn’t require any other localization to apply it. Each
+          localization is in control of how complex the translation
+          becomes.
 
         </p>
       </section>
