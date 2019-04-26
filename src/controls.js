@@ -28,7 +28,7 @@ export function RadioInput(props) {
             <dt>${name}</dt>
             <dd className="radio">
                 {options.map(option => {
-                    const id = `${name}_${option}`;
+                    const id = `${name}_${option.replace(/[^a-z]/gi, "_")}`;
                     return (<Fragment key={id}>
                         <input
                             id={id}
