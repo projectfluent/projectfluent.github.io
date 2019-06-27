@@ -49,8 +49,13 @@ const example1 = {
     locale: "en-US",
     translations: ftl`
         tabs-close-warning =
-            You are about to close {$count} tabs.
+            You are about to close {$tabCount} tabs.
             Are you sure you want to continue?
+
+        containers-tabs-close = {$tabCount ->
+            [one] Close {$tabCount} Container Tab
+           *[other] Close {$tabCount} Container Tabs
+        }
 
         -sync-brand-name = Firefox Account
 
@@ -62,13 +67,14 @@ const example1 = {
             Connect with your {-sync-brand-name}
         `,
     externals: {
-        count: 2,
-    }
+        tabCount: 2,
+    },
+    height: "22rem",
 };
 
 ReactDOM.render(
     <Example {...example1}>
-        <RangeInput name="count" min="2" max="9" step="1" />
+        <RangeInput name="tabCount" min="2" max="9" step="1" />
     </Example>,
     document.getElementById('example1-app')
 );
@@ -78,9 +84,15 @@ const example2 = {
     locale: "it",
     translations: ftl`
         tabs-close-warning =
-            Verranno chiuse {$count} schede. Proseguire?
+            Verranno chiuse {$tabCount} schede.
+            Proseguire?
 
-        -sync-brand-name = {$capitalization ->
+        containers-tabs-close = {$tabCount ->
+            [one] Chiudi {$tabCount} scheda contenitore
+           *[other] Chiudi {$tabCount} schede contenitore
+        }
+
+        -sync-brand-name = {$first ->
            *[uppercase] Account Firefox
             [lowercase] account Firefox
         }
@@ -90,16 +102,17 @@ const example2 = {
             {-sync-brand-name}: il modo migliore
             per avere i tuoi dati sempre con te
         sync-signedout-title =
-            Connetti il tuo {-sync-brand-name(capitalization: "lowercase")}
+            Connetti il tuo {-sync-brand-name(first: "lowercase")}
         `,
     externals: {
-        count: 2,
-    }
+        tabCount: 2,
+    },
+    height: "25rem",
 };
 
 ReactDOM.render(
     <Example {...example2}>
-        <RangeInput name="count" min="2" max="9" step="1" />
+        <RangeInput name="tabCount" min="2" max="9" step="1" />
     </Example>,
     document.getElementById('example2-app')
 );
@@ -108,11 +121,17 @@ ReactDOM.render(
 const example3 = {
     locale: "pl",
     translations: ftl`
-        tabs-close-warning = {$count ->
-            [few] Zostaną zamknięte {$count} karty.
+        tabs-close-warning = {$tabCount ->
+            [few] Zostaną zamknięte {$tabCount} karty.
                   Czy chcesz kontynuować?
-           *[other] Zostanie zamkniętych {$count} kart.
+           *[other] Zostanie zamkniętych {$tabCount} kart.
                     Czy chcesz kontynuować?
+        }
+
+        containers-tabs-close = {$tabCount ->
+            [one] Zamknij kartę z kontekstem
+            [few] Zamknij {$tabCount} karty z kontekstem
+           *[many] Zamknij { $tabCount } kart z kontekstem
         }
 
         -sync-brand-name = {$case ->
@@ -129,13 +148,14 @@ const example3 = {
             Zaloguj do {-sync-brand-name(case: "genitive")}
         `,
     externals: {
-        count: 2,
-    }
+        tabCount: 2,
+    },
+    height: "25rem",
 };
 
 ReactDOM.render(
     <Example {...example3}>
-        <RangeInput name="count" min="2" max="9" step="1" />
+        <RangeInput name="tabCount" min="2" max="9" step="1" />
     </Example>,
     document.getElementById('example3-app')
 );

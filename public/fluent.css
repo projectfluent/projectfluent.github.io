@@ -173,6 +173,12 @@ body > div > * {
   color: var(--main-accent-darker-color);
 }
 
+#above-the-fold .example-vertical {
+  flex: 1;
+  display: grid;
+  grid-template-rows: 18rem 10rem 2rem auto;
+}
+
 
 /* Explainer */
 
@@ -214,7 +220,7 @@ body > div > * {
 }
 
 #examples .example-description {
-  flex: 1;
+  flex: 3;
   margin-left: 2rem;
 }
 
@@ -224,10 +230,10 @@ body > div > * {
   margin: 4rem 0 2rem 0;
 }
 
-.example-vertical {
-  flex: 1;
+#examples .example-vertical {
+  flex: 4;
   display: grid;
-  grid-template-rows: 18rem 10rem 2rem auto;
+  grid-template-rows: 27rem 3rem 2rem auto;
 }
 
 .example-vertical .results {
