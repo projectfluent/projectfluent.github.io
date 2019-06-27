@@ -2,6 +2,7 @@
 
 import React, {Fragment} from 'react';
 import ReactDOM from 'react-dom';
+import ftl from "@fluent/dedent";
 
 import Example from './example';
 import { TextInput, RadioInput, RangeInput } from "./controls";
@@ -44,43 +45,59 @@ ReactDOM.render(
 );
 
 const example1 = {
-    translations: `shared-photos =
-    { $user_name } { $photo_count ->
-        [0] hasn't added any photos yet
-        [one] added a new photo
-       *[other] added { $photo_count } new photos
-    }.`,
+    translations: ftl`
+        tabs-close-warning =
+            You are about to close {$count} tabs.
+            Are you sure you want to continue?
+        `,
     externals: {
-        user_name: "Anne",
-        photo_count: 3,
-    }
-};
-
-const example2 = {
-    translations: `liked-comment =
-    { $user_name } liked your comment on { $user_gender ->
-        [male] his
-        [female] her
-       *[other] their
-    } post.`,
-    externals: {
-        user_name: "John",
-        user_gender: "male",
+        count: 2,
     }
 };
 
 ReactDOM.render(
     <Example {...example1}>
-        <TextInput name="user_name" />
-        <RangeInput name="photo_count" min="0" max="9" step="1" />
+        <RangeInput name="count" min="2" max="9" step="1" />
     </Example>,
     document.getElementById('example1-app')
 );
 
+
+const example2 = {
+    translations: ftl`
+        tabs-close-warning =
+            Verranno chiuse {$count} schede. Proseguire?
+        `,
+    externals: {
+        count: 2,
+    }
+};
+
 ReactDOM.render(
     <Example {...example2}>
-        <TextInput name="user_name" />
-        <RadioInput name="user_gender" options={["male", "female", "unspecified"]} />
+        <RangeInput name="count" min="2" max="9" step="1" />
     </Example>,
     document.getElementById('example2-app')
+);
+
+
+const example3 = {
+    translations: ftl`
+        tabs-close-warning-multiple = {$count ->
+            [few] Zostaną zamknięte {$count} karty.
+                  Czy chcesz kontynuować?
+           *[other] Zostanie zamkniętych {$count} kart.
+                    Czy chcesz kontynuować?
+        }
+        `,
+    externals: {
+        count: 2,
+    }
+};
+
+ReactDOM.render(
+    <Example {...example3}>
+        <RangeInput name="count" min="2" max="9" step="1" />
+    </Example>,
+    document.getElementById('example3-app')
 );
