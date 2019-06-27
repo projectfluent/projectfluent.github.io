@@ -175,8 +175,6 @@ body > div > * {
 
 #above-the-fold .example-vertical {
   flex: 1;
-  display: grid;
-  grid-template-rows: 18rem 10rem 2rem auto;
 }
 
 
@@ -232,12 +230,6 @@ body > div > * {
 
 #examples .example-vertical {
   flex: 4;
-  display: grid;
-  grid-template-rows: 27rem 3rem 2rem auto;
-}
-
-.example-vertical .results {
-  grid-row: 4;
 }
 
 .example-vertical .variables {
@@ -247,6 +239,10 @@ body > div > * {
   grid-template-columns: 2fr 5fr;
   grid-template-rows: auto;
   grid-row-gap: 0.5rem;
+}
+
+.example-vertical .results {
+  margin-top: 2rem;
 }
 
 

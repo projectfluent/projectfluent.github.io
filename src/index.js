@@ -69,7 +69,7 @@ const example1 = {
     externals: {
         tabCount: 2,
     },
-    height: "22rem",
+    height: "23rem",
 };
 
 ReactDOM.render(
@@ -107,7 +107,7 @@ const example2 = {
     externals: {
         tabCount: 2,
     },
-    height: "25rem",
+    height: "27rem",
 };
 
 ReactDOM.render(
@@ -150,7 +150,7 @@ const example3 = {
     externals: {
         tabCount: 2,
     },
-    height: "25rem",
+    height: "33rem",
 };
 
 ReactDOM.render(
