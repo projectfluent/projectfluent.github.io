@@ -69,22 +69,18 @@ const example2 = {
     }
 };
 
-function Examples() {
-    return (
-        <Fragment>
-            <Example {...example1}>
-                <TextInput name="user_name" />
-                <RangeInput name="photo_count" min="0" max="9" step="1" />
-            </Example>
-            <Example {...example2}>
-                <TextInput name="user_name" />
-                <RadioInput name="user_gender" options={["male", "female", "unspecified"]} />
-            </Example>
-        </Fragment>
-    )
-}
+ReactDOM.render(
+    <Example {...example1}>
+        <TextInput name="user_name" />
+        <RangeInput name="photo_count" min="0" max="9" step="1" />
+    </Example>,
+    document.getElementById('example1-app')
+);
 
 ReactDOM.render(
-   <Examples />,
-   document.getElementById('examples-app')
+    <Example {...example2}>
+        <TextInput name="user_name" />
+        <RadioInput name="user_gender" options={["male", "female", "unspecified"]} />
+    </Example>,
+    document.getElementById('example2-app')
 );
