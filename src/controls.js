@@ -27,9 +27,11 @@ export function RadioInput(props) {
         <Fragment>
             <dt>${name}</dt>
             <dd className="radio">
-                {options.map(option =>
-                    <Fragment key={`${name}_${option}`}>
+                {options.map(option => {
+                    const id = `${name}_${option.replace(/[^a-z]/gi, "_")}`;
+                    return (<Fragment key={id}>
                         <input
+                            id={id}
                             type="radio"
                             name={name}
                             value={option}
@@ -39,11 +41,11 @@ export function RadioInput(props) {
                                 evt.target.value
                             )}
                         />
-                        <label>
+                        <label htmlFor={id}>
                             {option}
                         </label>
-                    </Fragment>
-                )}
+                    </Fragment>)
+                })}
             </dd>
         </Fragment>
     );
