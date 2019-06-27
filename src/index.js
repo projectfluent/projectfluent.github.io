@@ -8,6 +8,7 @@ import Example from './example';
 import { TextInput, RadioInput, RangeInput } from "./controls";
 
 const example0 = {
+    locale: "en-US",
     translations: `\
 # Simple things are simple.
 hello-user = Hello, {$userName}!
@@ -45,6 +46,7 @@ ReactDOM.render(
 );
 
 const example1 = {
+    locale: "en-US",
     translations: ftl`
         tabs-close-warning =
             You are about to close {$count} tabs.
@@ -64,6 +66,7 @@ ReactDOM.render(
 
 
 const example2 = {
+    locale: "it",
     translations: ftl`
         tabs-close-warning =
             Verranno chiuse {$count} schede. Proseguire?
@@ -82,8 +85,9 @@ ReactDOM.render(
 
 
 const example3 = {
+    locale: "pl",
     translations: ftl`
-        tabs-close-warning-multiple = {$count ->
+        tabs-close-warning = {$count ->
             [few] Zostaną zamknięte {$count} karty.
                   Czy chcesz kontynuować?
            *[other] Zostanie zamkniętych {$count} kart.
