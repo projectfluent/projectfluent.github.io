@@ -51,6 +51,15 @@ const example1 = {
         tabs-close-warning =
             You are about to close {$count} tabs.
             Are you sure you want to continue?
+
+        -sync-brand-name = Firefox Account
+
+        sync-dialog-title = {-sync-brand-name}
+        sync-headline-title =
+            {-sync-brand-name}: The best way to bring
+            your data always with you
+        sync-signedout-title =
+            Connect with your {-sync-brand-name}
         `,
     externals: {
         count: 2,
@@ -70,6 +79,18 @@ const example2 = {
     translations: ftl`
         tabs-close-warning =
             Verranno chiuse {$count} schede. Proseguire?
+
+        -sync-brand-name = {$capitalization ->
+           *[uppercase] Account Firefox
+            [lowercase] account Firefox
+        }
+
+        sync-dialog-title = {-sync-brand-name}
+        sync-headline-title =
+            {-sync-brand-name}: il modo migliore
+            per avere i tuoi dati sempre con te
+        sync-signedout-title =
+            Connetti il tuo {-sync-brand-name(capitalization: "lowercase")}
         `,
     externals: {
         count: 2,
@@ -93,6 +114,19 @@ const example3 = {
            *[other] Zostanie zamkniętych {$count} kart.
                     Czy chcesz kontynuować?
         }
+
+        -sync-brand-name = {$case ->
+           *[nominative] Konto Firefox
+            [genitive] Konta Firefox
+            [accusative] Kontem Firefox
+        }
+
+        sync-dialog-title = {-sync-brand-name}
+        sync-headline-title =
+            {-sync-brand-name}: Najlepszy sposób na to,
+            aby mieć swoje dane zawsze przy sobie
+        sync-signedout-title =
+            Zaloguj do {-sync-brand-name(case: "genitive")}
         `,
     externals: {
         count: 2,
