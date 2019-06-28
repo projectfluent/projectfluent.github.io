@@ -17,11 +17,11 @@ const example0 = {
         shared-photos =
             {$userName} {$photoCount ->
                 [one] added a new photo
-            *[other] added {$photoCount} new photos
+               *[other] added {$photoCount} new photos
             } to {$userGender ->
                 [male] his stream
                 [female] her stream
-            *[other] their stream
+               *[other] their stream
             }.
         `,
     externals: {
