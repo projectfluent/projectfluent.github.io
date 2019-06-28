@@ -214,7 +214,6 @@
               beta release channels.
 
             </p>
-
           </div>
         </article>
 
@@ -231,26 +230,22 @@
               impose any additional complexity when it's not necessary.
 
             </p>
-
             <p>
 
-                Using terms verbatim in the middle of a sentence may cause
-                trouble for inflected languages or for languages with
-                different capitalization rules than English. Terms can define
-                multiple facets of their value, suitable for use in different
-                contexts. Consider the following definition of the
-                -sync-brand-name term in Italian.
+              The capitalization rules are different in Italian than in
+              English. Thanks to the asymmetric nature of Fluent, the Italian
+              translation is free to define two facets of the brand name. The
+              default one, <code>[uppercase]</code>, is suitable for
+              standalone appearances (<code>sync-dialog-titile</code>) and
+              for beginning of sentences (<code>sync-headline-title</code>).
 
             </p>
             <p>
 
-              Thanks to the asymmetric nature of Fluent, the Italian
-              translator is free to define two facets of the brand name. The
-              default one (uppercase) is suitable for standalone appearances
-              as well as for use at the beginning of sentences. The lowercase
-              version can be explicitly requested by passing the
-              capitalization parameter, when the brand name is used inside a
-              larger sentence.
+              At the same time, the <code>[lowercase]</code> variant can be
+              explicitly requested by passing the <code>first</code>
+              parameter when the brand name is used inside a larger sentence
+              in the <code>sync-signedout-title</code> message.
 
             </p>
           </div>
