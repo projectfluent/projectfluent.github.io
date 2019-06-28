@@ -215,7 +215,7 @@ body > div > * {
 
 #examples article {
   display: flex;
-  margin-bottom: 4rem;
+  margin-bottom: 6rem;
 }
 
 #examples .example-description {
@@ -237,6 +237,7 @@ body > div > * {
 
 #examples .example-vertical {
   flex: 4;
+  border-top: 1px solid var(--main-accent-color);
 }
 
 .example-vertical .variables {
