@@ -188,16 +188,26 @@
             <p>
 
               On the other hand, when no logic is required, translations in
-              Fluent can stay simple. The <code>tabs-close-warning</code>
-              message appears in Firefox when the user tries to close a
-              window with more than one tab. The message is only displayed
-              when the tab count is 2 or more, and so in English, the word
-              <em>tab</em> will always appear as the plural <em>tabs</em>.
+              Fluent stay simple. The <code>tabs-close-warning</code> message
+              appears in Firefox when the user tries to close a window with
+              more than one tab. The message is only displayed when the tab
+              count is 2 or more, and so in English, the word <em>tab</em>
+              will always appear as the plural <em>tabs</em>.
 
             </p>
             <p>
 
-              Once defined, the -sync-brand-name term can be referenced from
+              <code>-sync-brand-name</code> is a special kind of message in
+              Fluent, called a <em>term</em>. Term identifiers always start
+              with a dash. Terms can be referenced by other messages, but
+              cannot be displayed directly in the app. Referencing terms is a
+              powerful tool for ensuring consistency. Once defined, a
+              translation can be reused in other translations.
+
+            </p>
+            <p>
+
+              The <code>-sync-brand-name</code> term can be referenced from
               other messages, and it will always resolve to the same value.
               Terms help enforce style guidelines; they can also be swapped
               in and out to modify the branding in unofficial builds and on
