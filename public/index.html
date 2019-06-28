@@ -158,27 +158,106 @@
     </div>
     <div>
       <section id="examples">
-        <h1>Example in English</h1>
+        <h1>Interactive Walkthrough</h1>
         <article>
           <div id="example1-app" class="example-vertical"></div>
           <div class="example-description">
-            Example 1 Description
+            <h2>The English Translation</h2>
+
+            <p>
+
+              In Fluent, most messages are simple text strings identified by
+              an <em>identifier</em>. In the first message in the example,
+              <code>tabs-close-button</code> is an identifier and
+              <code>Close</code> is the value.
+
+            </p>
+            <p>
+
+              Sometimes, translations require a little bit of logic to sound
+              right in the target language. In the
+              <code>tabs-close-tooltip</code> message, the correct variant of
+              the translation depends on the value of the
+              <code>$tabCount</code> variable. The names of the variants,
+              <code>[one]</code> and <code>[other]</code> are standard names
+              of the plural categories defined by the Unicode in <a
+              href="http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html">CLDR</a>.
+
+
+            </p>
+            <p>
+
+              On the other hand, when no logic is required, translations in
+              Fluent can stay simple. The <code>tabs-close-warning</code>
+              message appears in Firefox when the user tries to close a
+              window with more than one tab. The message is only displayed
+              when the tab count is 2 or more, and so in English, the word
+              <em>tab</em> will always appear as the plural <em>tabs</em>.
+
+            </p>
+            <p>
+
+              Once defined, the -sync-brand-name term can be referenced from
+              other messages, and it will always resolve to the same value.
+              Terms help enforce style guidelines; they can also be swapped
+              in and out to modify the branding in unofficial builds and on
+              beta release channels.
+
+            </p>
+
           </div>
         </article>
 
-        <h1>Example in Italian</h1>
         <article>
           <div id="example2-app" class="example-vertical"></div>
           <div class="example-description">
-            Example 2 Description
+            <h2>The Italian Translation</h2>
+            <p>
+
+              In Italian, the messages from the <code>tabs-close</code>
+              family have a similar structure to their English counterparts.
+              Even if the languages are different, the grammar requirements
+              for these particular messages are similar. Fluent doesn't
+              impose any additional complexity when it's not necessary.
+
+            </p>
+
+            <p>
+
+                Using terms verbatim in the middle of a sentence may cause
+                trouble for inflected languages or for languages with
+                different capitalization rules than English. Terms can define
+                multiple facets of their value, suitable for use in different
+                contexts. Consider the following definition of the
+                -sync-brand-name term in Italian.
+
+            </p>
+            <p>
+
+              Thanks to the asymmetric nature of Fluent, the Italian
+              translator is free to define two facets of the brand name. The
+              default one (uppercase) is suitable for standalone appearances
+              as well as for use at the beginning of sentences. The lowercase
+              version can be explicitly requested by passing the
+              capitalization parameter, when the brand name is used inside a
+              larger sentence.
+
+            </p>
           </div>
         </article>
 
-        <h1>Example in Polish</h1>
         <article>
           <div id="example3-app" class="example-vertical"></div>
           <div class="example-description">
-            Example 3 Description
+            <h2>The Polish Translation</h2>
+
+            <p>
+
+               the Polish translation can use declensions to construct a
+               grammatically correct sentence in the
+               sync-signedout-account-title message.
+
+            </p>
           </div>
         </article>
       </section>

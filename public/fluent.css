@@ -215,6 +215,7 @@ body > div > * {
 
 #examples article {
   display: flex;
+  margin-bottom: 4rem;
 }
 
 #examples .example-description {
@@ -226,6 +227,12 @@ body > div > * {
   font-size: 2rem;
   font-weight: 300;
   margin: 4rem 0 2rem 0;
+}
+
+#examples h2 {
+  font-size: 1.4;
+  font-weight: 300;
+  margin-bottom: 1rem;
 }
 
 #examples .example-vertical {
@@ -243,6 +250,17 @@ body > div > * {
 
 .example-vertical .results {
   margin-top: 2rem;
+}
+
+
+/* Text content */
+
+article p {
+  margin-bottom: 1rem;
+}
+
+article code {
+  background-color: var(--accent-bg-text-color);
 }
 
 

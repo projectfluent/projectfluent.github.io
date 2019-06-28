@@ -48,14 +48,18 @@ ReactDOM.render(
 const example1 = {
     locale: "en-US",
     translations: ftl`
+        ## Closing tabs
+
+        tabs-close-button = Close
+        tabs-close-tooltip = {$tabCount ->
+            [one] Close {$tabCount} tab
+           *[other] Close {$tabCount} tabs
+        }
         tabs-close-warning =
             You are about to close {$tabCount} tabs.
             Are you sure you want to continue?
 
-        containers-tabs-close = {$tabCount ->
-            [one] Close {$tabCount} Container Tab
-           *[other] Close {$tabCount} Container Tabs
-        }
+        ## Syncing
 
         -sync-brand-name = Firefox Account
 
@@ -69,7 +73,7 @@ const example1 = {
     externals: {
         tabCount: 2,
     },
-    height: "23rem",
+    height: "30rem",
 };
 
 ReactDOM.render(
@@ -83,14 +87,17 @@ ReactDOM.render(
 const example2 = {
     locale: "it",
     translations: ftl`
-        tabs-close-warning =
-            Verranno chiuse {$tabCount} schede.
-            Proseguire?
+        ## Closing tabs
 
-        containers-tabs-close = {$tabCount ->
-            [one] Chiudi {$tabCount} scheda contenitore
-           *[other] Chiudi {$tabCount} schede contenitore
+        tabs-close-button = Chiudi
+        tabs-close-tooltip = {$tabCount ->
+            [one] Chiudi {$tabCount} scheda
+           *[other] Chiudi {$tabCount} schede
         }
+        tabs-close-warning =
+            Verranno chiuse {$tabCount} schede. Proseguire?
+
+        ## Syncing
 
         -sync-brand-name = {$first ->
            *[uppercase] Account Firefox
@@ -107,7 +114,7 @@ const example2 = {
     externals: {
         tabCount: 2,
     },
-    height: "27rem",
+    height: "30rem",
 };
 
 ReactDOM.render(
@@ -121,6 +128,14 @@ ReactDOM.render(
 const example3 = {
     locale: "pl",
     translations: ftl`
+        ## Closing tabs
+
+        tabs-close-button = Zamknij
+        tabs-close-tooltip = {$tabCount ->
+            [one] Zamknij kartę
+            [few] Zamknij {$tabCount} karty
+           *[many] Zamknij { $tabCount } kart
+        }
         tabs-close-warning = {$tabCount ->
             [few] Zostaną zamknięte {$tabCount} karty.
                   Czy chcesz kontynuować?
@@ -128,11 +143,7 @@ const example3 = {
                     Czy chcesz kontynuować?
         }
 
-        containers-tabs-close = {$tabCount ->
-            [one] Zamknij kartę z kontekstem
-            [few] Zamknij {$tabCount} karty z kontekstem
-           *[many] Zamknij { $tabCount } kart z kontekstem
-        }
+        ## Syncing
 
         -sync-brand-name = {$case ->
            *[nominative] Konto Firefox
@@ -150,7 +161,7 @@ const example3 = {
     externals: {
         tabCount: 2,
     },
-    height: "33rem",
+    height: "37rem",
 };
 
 ReactDOM.render(
