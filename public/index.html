@@ -168,7 +168,7 @@
 
               In Fluent, most messages are simple text strings identified by
               an <em>identifier</em>. In the first message in the example,
-              <code>tabs-close-button</code> is an identifier and
+              <code>tabs-close-button</code> is the identifier and
               <code>Close</code> is the value.
 
             </p>
@@ -179,7 +179,7 @@
               <code>tabs-close-tooltip</code> message, the correct variant of
               the translation depends on the value of the
               <code>$tabCount</code> variable. The names of the variants,
-              <code>[one]</code> and <code>[other]</code> are standard names
+              <code>[one]</code> and <code>[other]</code>, are standard names
               of the plural categories defined by the Unicode in <a
               href="http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html">CLDR</a>.
 
@@ -244,9 +244,10 @@
             <p>
 
               At the same time, the <code>[lowercase]</code> variant can be
-              explicitly requested by passing the <code>first</code>
-              parameter when the brand name is used inside a larger sentence
-              in the <code>sync-signedout-title</code> message.
+              explicitly requested by passing the <code>first:
+              "lowercase"</code> parameter when the brand name is used inside
+              a larger sentence in the <code>sync-signedout-title</code>
+              message.
 
             </p>
           </div>
@@ -259,24 +260,24 @@
 
             <p>
 
-              The Polish translation illustrates how yet more complex
-              grammars can be catered to in Fluent.
+              The Polish translation illustrates how Fluent caters to yet
+              more complex grammars.
 
             </p>
             <p>
 
               The imperative <em>Close</em> command in
               <code>tabs-close-button</code>, <em>Zamknij</em>, still remains
-              a simple string, but the other messages in the
-              <code>tabs-close</code> group require a bit more attention to
-              sound well in Polish. It's related to the fact that Polish, a
-              Slavic language, has more plural categories than English (a
-              Germanic language) or Italian (a Romance language). For
-              example, the Polish translation for <em>tab</em> takes
-              different forms for counts of 2, 3, and 4 than it does for 5,
-              6, or 7. Hence, the <code>tabs-close-warning</code> message
-              requires additional variants in Polish: <code>[few]</code> and
-              <code>[many]</code>.
+              a simple string, same as in English and in Italian. The other
+              messages in the <code>tabs-close</code> group, however, require
+              a bit more attention to sound well in Polish. It's related to
+              the fact that Polish, a Slavic language, has more plural
+              categories than English (a Germanic language) or Italian (a
+              Romance language). For example, the Polish translation for
+              <em>tab</em> takes a different form for counts of 2, 3, and 4
+              than it does for 5, 6, or 7. Hence, the
+              <code>tabs-close-warning</code> message requires additional
+              variants in Polish: <code>[few]</code> and <code>[many]</code>.
 
             </p>
             <p>
@@ -291,10 +292,10 @@
             </p>
             <p>
 
-              Using terms verbatim in sentences requires care in Polish,
-              which is an inflected language.
-              The Polish translation uses declensions to construct a
-              grammatically correct sentence in the
+              Using terms inside sentences requires care in Polish, which is
+              an inflected language. The Polish translation can reference the
+              specific term variant corresponding to the <em>genitive</em>
+              declension to construct a grammatically correct sentence in the
               <code>sync-signedout-title</code> message.
 
             </p>
