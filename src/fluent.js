@@ -52,8 +52,8 @@ export function parse_translations(translations) {
     return [res, annotations];
 }
 
-export function create_bundle(translations) {
-    const bundle = new FluentBundle('en-US');
+export function create_bundle(locale, translations) {
+    const bundle = new FluentBundle(locale);
     bundle.addMessages(translations);
     return bundle;
 }

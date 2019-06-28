@@ -40,9 +40,9 @@ function Annotation(props) {
     );
 }
 
-function update(translations, externals) {
+function update(locale, translations, externals) {
     const [res, annotations] = parse_translations(translations);
-    const bundle = create_bundle(translations);
+    const bundle = create_bundle(locale, translations);
     const [out, out_errors] = format_messages(res, bundle, externals);
 
     return {
@@ -54,19 +54,19 @@ export default class Example extends Component {
     constructor(props) {
         super(props);
 
-        const { translations, externals } = props;
+        const { locale, translations, externals } = props;
 
         this.state = {
             translations,
             externals,
-            ...update(translations, externals)
+            ...update(locale, translations, externals)
         }
     }
 
     handleTranslationsChange(translations) {
         this.setState({
             translations,
-            ...update(translations, this.state.externals)
+            ...update(this.props.locale, translations, this.state.externals)
         });
     }
 
@@ -78,7 +78,7 @@ export default class Example extends Component {
 
         this.setState({
             externals,
-            ...update(this.state.translations, externals)
+            ...update(this.props.locale, this.state.translations, externals)
         });
     }
 

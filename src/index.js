@@ -2,11 +2,13 @@
 
 import React, {Fragment} from 'react';
 import ReactDOM from 'react-dom';
+import ftl from "@fluent/dedent";
 
 import Example from './example';
 import { TextInput, RadioInput, RangeInput } from "./controls";
 
 const example0 = {
+    locale: "en-US",
     translations: `\
 # Simple things are simple.
 hello-user = Hello, {$userName}!
@@ -44,47 +46,127 @@ ReactDOM.render(
 );
 
 const example1 = {
-    translations: `shared-photos =
-    { $user_name } { $photo_count ->
-        [0] hasn't added any photos yet
-        [one] added a new photo
-       *[other] added { $photo_count } new photos
-    }.`,
-    externals: {
-        user_name: "Anne",
-        photo_count: 3,
-    }
-};
+    locale: "en-US",
+    translations: ftl`
+        ## Closing tabs
 
-const example2 = {
-    translations: `liked-comment =
-    { $user_name } liked your comment on { $user_gender ->
-        [male] his
-        [female] her
-       *[other] their
-    } post.`,
-    externals: {
-        user_name: "John",
-        user_gender: "male",
-    }
-};
+        tabs-close-button = Close
+        tabs-close-tooltip = {$tabCount ->
+            [one] Close {$tabCount} tab
+           *[other] Close {$tabCount} tabs
+        }
+        tabs-close-warning =
+            You are about to close {$tabCount} tabs.
+            Are you sure you want to continue?
 
-function Examples() {
-    return (
-        <Fragment>
-            <Example {...example1}>
-                <TextInput name="user_name" />
-                <RangeInput name="photo_count" min="0" max="9" step="1" />
-            </Example>
-            <Example {...example2}>
-                <TextInput name="user_name" />
-                <RadioInput name="user_gender" options={["male", "female", "unspecified"]} />
-            </Example>
-        </Fragment>
-    )
-}
+        ## Syncing
+
+        -sync-brand-name = Firefox Account
+
+        sync-dialog-title = {-sync-brand-name}
+        sync-headline-title =
+            {-sync-brand-name}: The best way to bring
+            your data always with you
+        sync-signedout-title =
+            Connect with your {-sync-brand-name}
+        `,
+    externals: {
+        tabCount: 2,
+    },
+    height: "30rem",
+};
 
 ReactDOM.render(
-   <Examples />,
-   document.getElementById('examples-app')
+    <Example {...example1}>
+        <RangeInput name="tabCount" min="2" max="9" step="1" />
+    </Example>,
+    document.getElementById('example1-app')
+);
+
+
+const example2 = {
+    locale: "it",
+    translations: ftl`
+        ## Closing tabs
+
+        tabs-close-button = Chiudi
+        tabs-close-tooltip = {$tabCount ->
+            [one] Chiudi {$tabCount} scheda
+           *[other] Chiudi {$tabCount} schede
+        }
+        tabs-close-warning =
+            Verranno chiuse {$tabCount} schede. Proseguire?
+
+        ## Syncing
+
+        -sync-brand-name = {$first ->
+           *[uppercase] Account Firefox
+            [lowercase] account Firefox
+        }
+
+        sync-dialog-title = {-sync-brand-name}
+        sync-headline-title =
+            {-sync-brand-name}: il modo migliore
+            per avere i tuoi dati sempre con te
+        sync-signedout-title =
+            Connetti il tuo {-sync-brand-name(first: "lowercase")}
+        `,
+    externals: {
+        tabCount: 2,
+    },
+    height: "30rem",
+};
+
+ReactDOM.render(
+    <Example {...example2}>
+        <RangeInput name="tabCount" min="2" max="9" step="1" />
+    </Example>,
+    document.getElementById('example2-app')
+);
+
+
+const example3 = {
+    locale: "pl",
+    translations: ftl`
+        ## Closing tabs
+
+        tabs-close-button = Zamknij
+        tabs-close-tooltip = {$tabCount ->
+            [one] Zamknij kartę
+            [few] Zamknij {$tabCount} karty
+           *[many] Zamknij { $tabCount } kart
+        }
+        tabs-close-warning = {$tabCount ->
+            [few] Zostaną zamknięte {$tabCount} karty.
+                  Czy chcesz kontynuować?
+           *[many] Zostanie zamkniętych {$tabCount} kart.
+                   Czy chcesz kontynuować?
+        }
+
+        ## Syncing
+
+        -sync-brand-name = {$case ->
+           *[nominative] Konto Firefox
+            [genitive] Konta Firefox
+            [accusative] Kontem Firefox
+        }
+
+        sync-dialog-title = {-sync-brand-name}
+        sync-headline-title =
+            {-sync-brand-name}: Najlepszy sposób na to,
+            aby mieć swoje dane zawsze przy sobie
+        sync-signedout-title =
+            Zaloguj do {-sync-brand-name(case: "genitive")}
+        `,
+    externals: {
+        tabCount: 2,
+    },
+    height: "37rem",
+};
+
+ReactDOM.render(
+    <Example {...example3}>
+        <RangeInput name="tabCount" min="2" max="9" step="1" />
+    </Example>,
+    document.getElementById('example3-app')
 );

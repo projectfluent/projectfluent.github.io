@@ -143,44 +143,38 @@ body > div > * {
 
 /* Main */
 
-main {
+#above-the-fold {
   display: flex;
   padding-top: 2rem !important;
   padding-bottom: 5rem !important;
 }
 
-main > ul,
-main > aside {
+#above-the-fold > ul {
   flex: 1;
 }
 
-main > ul > li {
+#above-the-fold > ul > li {
   margin-top: 1rem;
   margin-bottom: 2rem;
   padding-right: 2rem;
 }
 
-main > ul > li > h1 {
+#above-the-fold > ul > li > h1 {
   font-weight: 300;
   margin-bottom: 1rem;
   font-size: 2rem;
 }
 
-main > ul > li > p > a {
+#above-the-fold > ul > li > p > a {
   color: var(--main-accent-color);
 }
 
-main > ul > li > p > a:hover {
+#above-the-fold > ul > li > p > a:hover {
   color: var(--main-accent-darker-color);
 }
 
-main > aside > .variables {
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid var(--main-accent-color);
-  display: grid;
-  grid-template-columns: 2fr 5fr;
-  grid-template-rows: auto;
-  grid-row-gap: 0.5rem;
+#above-the-fold .example-vertical {
+  flex: 1;
 }
 
 
@@ -189,7 +183,7 @@ main > aside > .variables {
 #explainer {
   align-self: center;
   padding-top: 2rem;
-  padding-bottom: 5rem;
+  padding-bottom: 2rem;
   line-height: 1.5rem;
 }
 
@@ -219,59 +213,58 @@ main > aside > .variables {
   padding-bottom: 5rem;
 }
 
-#examples h1,
-#examples h2 {
+#examples article {
+  display: flex;
+  margin-bottom: 6rem;
+}
+
+#examples .example-description {
+  flex: 3;
+  margin-left: 2rem;
+}
+
+#examples h1 {
   font-size: 2rem;
   font-weight: 300;
-  margin: 2rem 0;
+  margin: 4rem 0 2rem 0;
 }
 
-#examples .results {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.example-vertical {
-  display: grid;
-  grid-template-rows: 18rem 10rem 2rem auto;
-}
-
-.example-vertical > .results {
-  grid-row: 4;
-}
-
-.example-horizontal {
-  display: grid;
-  grid-template-columns: 4fr 1.5fr 2rem 2.5fr;
-  grid-row-gap: 2rem;
-}
-
-.example-horizontal > .variables {
-  border-left: 1px solid #ddd;
-  border-right: 1px solid var(--main-accent-color);
-}
-
-.example-horizontal > .variables dt {
-  text-align: left;
-  line-height: 2rem;
-}
-
-.example-horizontal > .variables dd {
+#examples h2 {
+  font-size: 1.4;
+  font-weight: 300;
   margin-bottom: 1rem;
 }
 
-.example-horizontal > .results {
-  grid-column: 4;
+#examples .example-vertical {
+  flex: 4;
+  border-top: 1px solid var(--main-accent-color);
 }
 
-.example-horizontal > .results dt {
-  display: none;
+.example-vertical .variables {
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid var(--main-accent-color);
+  display: grid;
+  grid-template-columns: 2fr 5fr;
+  grid-template-rows: auto;
+  grid-row-gap: 0.5rem;
 }
 
-.example-horizontal > .results dd {
-  grid-column: 1 / span 2;
+.example-vertical .results {
+  margin-top: 2rem;
 }
+
+
+/* Text content */
+
+article p {
+  margin-bottom: 1rem;
+}
+
+article code {
+  background-color: var(--accent-bg-text-color);
+}
+
+
 
 /* Footer */
 
@@ -325,7 +318,8 @@ dl.variables > dd.radio {
   display: grid;
   grid-template-columns: 1fr 2fr;
   grid-template-rows: auto;
-  align-items: center;
+  grid-row-gap: .5rem;
+  align-items: start;
 }
 
 .output > dt {
