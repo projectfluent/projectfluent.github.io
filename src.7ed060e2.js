@@ -324,7 +324,7 @@ checkPropTypes.resetWarningCache = function () {
 
 module.exports = checkPropTypes;
 },{"./lib/ReactPropTypesSecret":"../node_modules/prop-types/lib/ReactPropTypesSecret.js"}],"../node_modules/react/cjs/react.development.js":[function(require,module,exports) {
-/** @license React v16.8.5
+/** @license React v16.8.6
  * react.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -343,7 +343,7 @@ if ("development" !== "production") {
     var checkPropTypes = require('prop-types/checkPropTypes'); // TODO: this is special because it gets imported during build.
 
 
-    var ReactVersion = '16.8.5'; // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
+    var ReactVersion = '16.8.6'; // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
     // nor polyfill, then a plain number is used for performance.
 
     var hasSymbol = typeof Symbol === 'function' && Symbol.for;
@@ -2255,7 +2255,7 @@ if ("development" === 'production') {
 }
 },{"./cjs/react.development.js":"../node_modules/react/cjs/react.development.js"}],"../node_modules/scheduler/cjs/scheduler.development.js":[function(require,module,exports) {
 var global = arguments[3];
-/** @license React v0.13.5
+/** @license React v0.13.6
  * scheduler.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -2975,7 +2975,7 @@ if ("development" === 'production') {
   module.exports = require('./cjs/scheduler.development.js');
 }
 },{"./cjs/scheduler.development.js":"../node_modules/scheduler/cjs/scheduler.development.js"}],"../node_modules/scheduler/cjs/scheduler-tracing.development.js":[function(require,module,exports) {
-/** @license React v0.13.5
+/** @license React v0.13.6
  * scheduler-tracing.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -3371,7 +3371,7 @@ if ("development" === 'production') {
   module.exports = require('./cjs/scheduler-tracing.development.js');
 }
 },{"./cjs/scheduler-tracing.development.js":"../node_modules/scheduler/cjs/scheduler-tracing.development.js"}],"../node_modules/react-dom/cjs/react-dom.development.js":[function(require,module,exports) {
-/** @license React v16.8.5
+/** @license React v16.8.6
  * react-dom.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -8935,16 +8935,29 @@ if ("development" !== "production") {
       return node && node.ownerDocument && containsNode(node.ownerDocument.documentElement, node);
     }
 
+    function isSameOriginFrame(iframe) {
+      try {
+        // Accessing the contentDocument of a HTMLIframeElement can cause the browser
+        // to throw, e.g. if it has a cross-origin src attribute.
+        // Safari will show an error in the console when the access results in "Blocked a frame with origin". e.g:
+        // iframe.contentDocument.defaultView;
+        // A safety way is to access one of the cross origin properties: Window or Location
+        // Which might result in "SecurityError" DOM Exception and it is compatible to Safari.
+        // https://html.spec.whatwg.org/multipage/browsers.html#integration-with-idl
+        return typeof iframe.contentWindow.location.href === 'string';
+      } catch (err) {
+        return false;
+      }
+    }
+
     function getActiveElementDeep() {
       var win = window;
       var element = getActiveElement();
 
       while (element instanceof win.HTMLIFrameElement) {
-        // Accessing the contentDocument of a HTMLIframeElement can cause the browser
-        // to throw, e.g. if it has a cross-origin src attribute
-        try {
-          win = element.contentDocument.defaultView;
-        } catch (e) {
+        if (isSameOriginFrame(element)) {
+          win = element.contentWindow;
+        } else {
           return element;
         }
 
@@ -15101,14 +15114,34 @@ if ("development" !== "production") {
       var unmaskedContext = emptyContextObject;
       var context = null;
       var contextType = ctor.contextType;
+      {
+        if ('contextType' in ctor) {
+          var isValid = // Allow null for conditional declaration
+          contextType === null || contextType !== undefined && contextType.$$typeof === REACT_CONTEXT_TYPE && contextType._context === undefined; // Not a <Context.Consumer>
 
-      if (typeof contextType === 'object' && contextType !== null) {
-        {
-          if (contextType.$$typeof !== REACT_CONTEXT_TYPE && !didWarnAboutInvalidateContextType.has(ctor)) {
+          if (!isValid && !didWarnAboutInvalidateContextType.has(ctor)) {
             didWarnAboutInvalidateContextType.add(ctor);
-            warningWithoutStack$1(false, '%s defines an invalid contextType. ' + 'contextType should point to the Context object returned by React.createContext(). ' + 'Did you accidentally pass the Context.Provider instead?', getComponentName(ctor) || 'Component');
+            var addendum = '';
+
+            if (contextType === undefined) {
+              addendum = ' However, it is set to undefined. ' + 'This can be caused by a typo or by mixing up named and default imports. ' + 'This can also happen due to a circular dependency, so ' + 'try moving the createContext() call to a separate file.';
+            } else if (typeof contextType !== 'object') {
+              addendum = ' However, it is set to a ' + typeof contextType + '.';
+            } else if (contextType.$$typeof === REACT_PROVIDER_TYPE) {
+              addendum = ' Did you accidentally pass the Context.Provider instead?';
+            } else if (contextType._context !== undefined) {
+              // <Context.Consumer>
+              addendum = ' Did you accidentally pass the Context.Consumer instead?';
+            } else {
+              addendum = ' However, it is set to an object with keys {' + Object.keys(contextType).join(', ') + '}.';
+            }
+
+            warningWithoutStack$1(false, '%s defines an invalid contextType. ' + 'contextType should point to the Context object returned by React.createContext().%s', getComponentName(ctor) || 'Component', addendum);
           }
         }
+      }
+
+      if (typeof contextType === 'object' && contextType !== null) {
         context = readContext(contextType);
       } else {
         unmaskedContext = getUnmaskedContext(workInProgress, ctor, true);
@@ -16965,8 +16998,8 @@ if ("development" !== "production") {
       var queue = hook.queue = {
         last: null,
         dispatch: null,
-        eagerReducer: reducer,
-        eagerState: initialState
+        lastRenderedReducer: reducer,
+        lastRenderedState: initialState
       };
       var dispatch = queue.dispatch = dispatchAction.bind(null, // Flow doesn't know this is non-null, but we do.
       currentlyRenderingFiber$1, queue);
@@ -16977,6 +17010,7 @@ if ("development" !== "production") {
       var hook = updateWorkInProgressHook();
       var queue = hook.queue;
       !(queue !== null) ? invariant(false, 'Should have a queue. This is likely a bug in React. Please file an issue.') : void 0;
+      queue.lastRenderedReducer = reducer;
 
       if (numberOfReRenders > 0) {
         // This is a re-render. Apply the new render phase updates to the previous
@@ -17015,8 +17049,7 @@ if ("development" !== "production") {
               hook.baseState = newState;
             }
 
-            queue.eagerReducer = reducer;
-            queue.eagerState = newState;
+            queue.lastRenderedState = newState;
             return [newState, _dispatch];
           }
         }
@@ -17100,8 +17133,7 @@ if ("development" !== "production") {
         hook.memoizedState = _newState;
         hook.baseUpdate = newBaseUpdate;
         hook.baseState = newBaseState;
-        queue.eagerReducer = reducer;
-        queue.eagerState = _newState;
+        queue.lastRenderedState = _newState;
       }
 
       var dispatch = queue.dispatch;
@@ -17119,8 +17151,8 @@ if ("development" !== "production") {
       var queue = hook.queue = {
         last: null,
         dispatch: null,
-        eagerReducer: basicStateReducer,
-        eagerState: initialState
+        lastRenderedReducer: basicStateReducer,
+        lastRenderedState: initialState
       };
       var dispatch = queue.dispatch = dispatchAction.bind(null, // Flow doesn't know this is non-null, but we do.
       currentlyRenderingFiber$1, queue);
@@ -17414,9 +17446,9 @@ if ("development" !== "production") {
           // The queue is currently empty, which means we can eagerly compute the
           // next state before entering the render phase. If the new state is the
           // same as the current state, we may be able to bail out entirely.
-          var _eagerReducer = queue.eagerReducer;
+          var _lastRenderedReducer = queue.lastRenderedReducer;
 
-          if (_eagerReducer !== null) {
+          if (_lastRenderedReducer !== null) {
             var prevDispatcher = void 0;
             {
               prevDispatcher = ReactCurrentDispatcher$1.current;
@@ -17424,15 +17456,15 @@ if ("development" !== "production") {
             }
 
             try {
-              var currentState = queue.eagerState;
+              var currentState = queue.lastRenderedState;
 
-              var _eagerState = _eagerReducer(currentState, action); // Stash the eagerly computed state, and the reducer used to compute
+              var _eagerState = _lastRenderedReducer(currentState, action); // Stash the eagerly computed state, and the reducer used to compute
               // it, on the update object. If the reducer hasn't changed by the
               // time we enter the render phase, then the eager state can be used
               // without calling the reducer again.
 
 
-              _update2.eagerReducer = _eagerReducer;
+              _update2.eagerReducer = _lastRenderedReducer;
               _update2.eagerState = _eagerState;
 
               if (is(_eagerState, currentState)) {
@@ -25138,7 +25170,7 @@ if ("development" !== "production") {
     } // TODO: this is special because it gets imported during build.
 
 
-    var ReactVersion = '16.8.5'; // TODO: This type is shared between the reconciler and ReactDOM, but will
+    var ReactVersion = '16.8.6'; // TODO: This type is shared between the reconciler and ReactDOM, but will
     // eventually be lifted out to the renderer.
 
     var ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
@@ -25716,8 +25748,70 @@ if ("development" === 'production') {
 } else {
   module.exports = require('./cjs/react-dom.development.js');
 }
-},{"./cjs/react-dom.development.js":"../node_modules/react-dom/cjs/react-dom.development.js"}],"../node_modules/react-is/cjs/react-is.development.js":[function(require,module,exports) {
-/** @license React v16.8.5
+},{"./cjs/react-dom.development.js":"../node_modules/react-dom/cjs/react-dom.development.js"}],"../node_modules/@fluent/dedent/src/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ftl;
+// A blank line may contain spaces and tabs.
+const RE_BLANK = /^[ \t]*$/;
+/**
+ * Template literal tag for dedenting Fluent code.
+ *
+ * Strip the indent of the last line from each line of the input. Remove the
+ * first and the last line from the output. The snippet must start on a new
+ * line and it must end on a line of its own, with the closing delimiter on a
+ * next line.
+ *
+ * @param {Array<string>} strings
+ * @param {...any} values
+ * @returns string
+ */
+
+function ftl(strings) {
+  for (var _len = arguments.length, values = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    values[_key - 1] = arguments[_key];
+  }
+
+  let code = strings.reduce((acc, cur) => acc + values.shift() + cur);
+  let lines = code.split("\n");
+  let _ref = [lines.shift(), lines.pop()],
+      first = _ref[0],
+      commonIndent = _ref[1];
+
+  if (!RE_BLANK.test(first)) {
+    throw new RangeError("Content must start on a new line.");
+  }
+
+  if (!RE_BLANK.test(commonIndent)) {
+    throw new RangeError("Closing delimiter must appear on a new line.");
+  }
+
+  function dedent(line, idx) {
+    let lineIndent = line.slice(0, commonIndent.length);
+
+    if (lineIndent.length === 0) {
+      // Empty blank lines are preserved even if technically they are not
+      // indented at all. This also short-circuits the dedentation logic when
+      // commonIndent.length is 0, i.e. when all indents should be kept.
+      return line;
+    }
+
+    if (lineIndent !== commonIndent) {
+      // The indentation of the line must match commonIndent exacty.
+      throw new RangeError(`Insufficient indentation in line ${idx + 1}.`);
+    } // Strip commonIndent.
+
+
+    return line.slice(commonIndent.length);
+  }
+
+  return lines.map(dedent).join("\n");
+}
+},{}],"../node_modules/react-is/cjs/react-is.development.js":[function(require,module,exports) {
+/** @license React v16.8.6
  * react-is.development.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -48756,506 +48850,727 @@ exports.version = "1.2.9";
         
 module.exports = window.ace.acequire("ace/ace");
 },{}],"../node_modules/react-ace/lib/editorOptions.js":[function(require,module,exports) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var editorOptions = ['minLines', 'maxLines', 'readOnly', 'highlightActiveLine', 'tabSize', 'enableBasicAutocompletion', 'enableLiveAutocompletion', 'enableSnippets'];
-
-var editorEvents = ['onChange', 'onFocus', 'onInput', 'onBlur', 'onCopy', 'onPaste', 'onSelectionChange', 'onCursorChange', 'onScroll', 'handleOptions', 'updateRef'];
-var getAceInstance = function getAceInstance() {
-  var ace = void 0;
-  // Fallback for ace.require when vanilla ACE is hosted over a CDN
-  if (window.ace) {
-    ace = window.ace;
-    ace.acequire = window.ace.require || window.ace.acequire;
-  } else {
-    ace = require('brace');
-  }
-  return ace;
-};
-
-var debounce = function debounce(fn, delay) {
-  var timer = null;
-  return function () {
-    var context = this,
-        args = arguments;
-    clearTimeout(timer);
-    timer = setTimeout(function () {
-      fn.apply(context, args);
-    }, delay);
-  };
-};
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var editorOptions = [
+    "minLines",
+    "maxLines",
+    "readOnly",
+    "highlightActiveLine",
+    "tabSize",
+    "enableBasicAutocompletion",
+    "enableLiveAutocompletion",
+    "enableSnippets"
+];
 exports.editorOptions = editorOptions;
+var editorEvents = [
+    "onChange",
+    "onFocus",
+    "onInput",
+    "onBlur",
+    "onCopy",
+    "onPaste",
+    "onSelectionChange",
+    "onCursorChange",
+    "onScroll",
+    "handleOptions",
+    "updateRef"
+];
 exports.editorEvents = editorEvents;
-exports.debounce = debounce;
+var getAceInstance = function () {
+    var ace;
+    // Fallback for ace.require when vanilla ACE is hosted over a CDN
+    if (window.ace) {
+        ace = window.ace;
+        ace.acequire = window.ace.require || window.ace.acequire;
+    }
+    else {
+        ace = require("brace");
+    }
+    return ace;
+};
 exports.getAceInstance = getAceInstance;
+var debounce = function (fn, delay) {
+    var timer = null;
+    return function () {
+        var context = this;
+        var args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            fn.apply(context, args);
+        }, delay);
+    };
+};
+exports.debounce = debounce;
+
 },{"brace":"../node_modules/brace/index.js"}],"../node_modules/react-ace/lib/ace.js":[function(require,module,exports) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _lodash = require('lodash.isequal');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _editorOptions = require('./editorOptions.js');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var ace = (0, _editorOptions.getAceInstance)();
-
-var _ace$acequire = ace.acequire('ace/range'),
-    Range = _ace$acequire.Range;
-
-var ReactAce = function (_Component) {
-  _inherits(ReactAce, _Component);
-
-  function ReactAce(props) {
-    _classCallCheck(this, ReactAce);
-
-    var _this = _possibleConstructorReturn(this, (ReactAce.__proto__ || Object.getPrototypeOf(ReactAce)).call(this, props));
-
-    _editorOptions.editorEvents.forEach(function (method) {
-      _this[method] = _this[method].bind(_this);
-    });
-    _this.debounce = _editorOptions.debounce;
-    return _this;
-  }
-
-  _createClass(ReactAce, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      var _props = this.props,
-          className = _props.className,
-          onBeforeLoad = _props.onBeforeLoad,
-          onValidate = _props.onValidate,
-          mode = _props.mode,
-          focus = _props.focus,
-          theme = _props.theme,
-          fontSize = _props.fontSize,
-          value = _props.value,
-          defaultValue = _props.defaultValue,
-          cursorStart = _props.cursorStart,
-          showGutter = _props.showGutter,
-          wrapEnabled = _props.wrapEnabled,
-          showPrintMargin = _props.showPrintMargin,
-          _props$scrollMargin = _props.scrollMargin,
-          scrollMargin = _props$scrollMargin === undefined ? [0, 0, 0, 0] : _props$scrollMargin,
-          keyboardHandler = _props.keyboardHandler,
-          onLoad = _props.onLoad,
-          commands = _props.commands,
-          annotations = _props.annotations,
-          markers = _props.markers;
-
-
-      this.editor = ace.edit(this.refEditor);
-
-      if (onBeforeLoad) {
-        onBeforeLoad(ace);
-      }
-
-      var editorProps = Object.keys(this.props.editorProps);
-      for (var i = 0; i < editorProps.length; i++) {
-        this.editor[editorProps[i]] = this.props.editorProps[editorProps[i]];
-      }
-      if (this.props.debounceChangePeriod) {
-        this.onChange = this.debounce(this.onChange, this.props.debounceChangePeriod);
-      }
-      this.editor.renderer.setScrollMargin(scrollMargin[0], scrollMargin[1], scrollMargin[2], scrollMargin[3]);
-      this.editor.getSession().setMode('ace/mode/' + mode);
-      this.editor.setTheme('ace/theme/' + theme);
-      this.editor.setFontSize(fontSize);
-      this.editor.getSession().setValue(!defaultValue ? value : defaultValue, cursorStart);
-      this.editor.navigateFileEnd();
-      this.editor.renderer.setShowGutter(showGutter);
-      this.editor.getSession().setUseWrapMode(wrapEnabled);
-      this.editor.setShowPrintMargin(showPrintMargin);
-      this.editor.on('focus', this.onFocus);
-      this.editor.on('blur', this.onBlur);
-      this.editor.on('copy', this.onCopy);
-      this.editor.on('paste', this.onPaste);
-      this.editor.on('change', this.onChange);
-      this.editor.on('input', this.onInput);
-      this.editor.getSession().selection.on('changeSelection', this.onSelectionChange);
-      this.editor.getSession().selection.on('changeCursor', this.onCursorChange);
-      if (onValidate) {
-        this.editor.getSession().on('changeAnnotation', function () {
-          var annotations = _this2.editor.getSession().getAnnotations();
-          _this2.props.onValidate(annotations);
-        });
-      }
-      this.editor.session.on('changeScrollTop', this.onScroll);
-      this.editor.getSession().setAnnotations(annotations || []);
-      if (markers && markers.length > 0) {
-        this.handleMarkers(markers);
-      }
-
-      // get a list of possible options to avoid 'misspelled option errors'
-      var availableOptions = this.editor.$options;
-      for (var _i = 0; _i < _editorOptions.editorOptions.length; _i++) {
-        var option = _editorOptions.editorOptions[_i];
-        if (availableOptions.hasOwnProperty(option)) {
-          this.editor.setOption(option, this.props[option]);
-        } else if (this.props[option]) {
-          console.warn('ReactAce: editor option ' + option + ' was activated but not found. Did you need to import a related tool or did you possibly mispell the option?');
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
         }
-      }
-      this.handleOptions(this.props);
-
-      if (Array.isArray(commands)) {
-        commands.forEach(function (command) {
-          if (typeof command.exec == 'string') {
-            _this2.editor.commands.bindKey(command.bindKey, command.exec);
-          } else {
-            _this2.editor.commands.addCommand(command);
-          }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var PropTypes = require("prop-types");
+var React = require("react");
+var isEqual = require("lodash.isequal");
+var editorOptions_1 = require("./editorOptions");
+var ace = editorOptions_1.getAceInstance();
+var Range = ace.acequire("ace/range").Range;
+var ReactAce = /** @class */ (function (_super) {
+    __extends(ReactAce, _super);
+    function ReactAce(props) {
+        var _this = _super.call(this, props) || this;
+        editorOptions_1.editorEvents.forEach(function (method) {
+            _this[method] = _this[method].bind(_this);
         });
-      }
-
-      if (keyboardHandler) {
-        this.editor.setKeyboardHandler('ace/keyboard/' + keyboardHandler);
-      }
-
-      if (className) {
-        this.refEditor.className += ' ' + className;
-      }
-
-      if (onLoad) {
-        onLoad(this.editor);
-      }
-
-      this.editor.resize();
-
-      if (focus) {
-        this.editor.focus();
-      }
+        _this.debounce = editorOptions_1.debounce;
+        return _this;
     }
-  }, {
-    key: 'componentDidUpdate',
-    value: function componentDidUpdate(prevProps) {
-      var oldProps = prevProps;
-      var nextProps = this.props;
-
-      for (var i = 0; i < _editorOptions.editorOptions.length; i++) {
-        var option = _editorOptions.editorOptions[i];
-        if (nextProps[option] !== oldProps[option]) {
-          this.editor.setOption(option, nextProps[option]);
+    ReactAce.prototype.componentDidMount = function () {
+        var _this = this;
+        var _a = this.props, className = _a.className, onBeforeLoad = _a.onBeforeLoad, onValidate = _a.onValidate, mode = _a.mode, focus = _a.focus, theme = _a.theme, fontSize = _a.fontSize, value = _a.value, defaultValue = _a.defaultValue, cursorStart = _a.cursorStart, showGutter = _a.showGutter, wrapEnabled = _a.wrapEnabled, showPrintMargin = _a.showPrintMargin, _b = _a.scrollMargin, scrollMargin = _b === void 0 ? [0, 0, 0, 0] : _b, keyboardHandler = _a.keyboardHandler, onLoad = _a.onLoad, commands = _a.commands, annotations = _a.annotations, markers = _a.markers, placeholder = _a.placeholder;
+        this.editor = ace.edit(this.refEditor);
+        if (onBeforeLoad) {
+            onBeforeLoad(ace);
         }
-      }
-
-      if (nextProps.className !== oldProps.className) {
-        var appliedClasses = this.refEditor.className;
-        var appliedClassesArray = appliedClasses.trim().split(' ');
-        var oldClassesArray = oldProps.className.trim().split(' ');
-        oldClassesArray.forEach(function (oldClass) {
-          var index = appliedClassesArray.indexOf(oldClass);
-          appliedClassesArray.splice(index, 1);
+        var editorProps = Object.keys(this.props.editorProps);
+        for (var i = 0; i < editorProps.length; i++) {
+            this.editor[editorProps[i]] = this.props.editorProps[editorProps[i]];
+        }
+        if (this.props.debounceChangePeriod) {
+            this.onChange = this.debounce(this.onChange, this.props.debounceChangePeriod);
+        }
+        this.editor.renderer.setScrollMargin(scrollMargin[0], scrollMargin[1], scrollMargin[2], scrollMargin[3]);
+        this.editor.getSession().setMode("ace/mode/" + mode);
+        this.editor.setTheme("ace/theme/" + theme);
+        this.editor.setFontSize(fontSize);
+        this.editor
+            .getSession()
+            .setValue(!defaultValue ? value : defaultValue, cursorStart);
+        if (this.props.navigateToFileEnd) {
+            this.editor.navigateFileEnd();
+        }
+        this.editor.renderer.setShowGutter(showGutter);
+        this.editor.getSession().setUseWrapMode(wrapEnabled);
+        this.editor.setShowPrintMargin(showPrintMargin);
+        this.editor.on("focus", this.onFocus);
+        this.editor.on("blur", this.onBlur);
+        this.editor.on("copy", this.onCopy);
+        this.editor.on("paste", this.onPaste);
+        this.editor.on("change", this.onChange);
+        this.editor.on("input", this.onInput);
+        if (placeholder) {
+            this.updatePlaceholder();
+        }
+        this.editor
+            .getSession()
+            .selection.on("changeSelection", this.onSelectionChange);
+        this.editor.getSession().selection.on("changeCursor", this.onCursorChange);
+        if (onValidate) {
+            this.editor.getSession().on("changeAnnotation", function () {
+                // tslint:disable-next-line:no-shadowed-variable
+                var annotations = _this.editor.getSession().getAnnotations();
+                _this.props.onValidate(annotations);
+            });
+        }
+        this.editor.session.on("changeScrollTop", this.onScroll);
+        this.editor.getSession().setAnnotations(annotations || []);
+        if (markers && markers.length > 0) {
+            this.handleMarkers(markers);
+        }
+        // get a list of possible options to avoid 'misspelled option errors'
+        var availableOptions = this.editor.$options;
+        editorOptions_1.editorOptions.forEach(function (option) {
+            if (availableOptions.hasOwnProperty(option)) {
+                _this.editor.setOption(option, _this.props[option]);
+            }
+            else if (_this.props[option]) {
+                console.warn("ReactAce: editor option " + option + " was activated but not found. Did you need to import a related tool or did you possibly mispell the option?");
+            }
         });
-        this.refEditor.className = ' ' + nextProps.className + ' ' + appliedClassesArray.join(' ');
-      }
-
-      // First process editor value, as it may create a new session (see issue #300)
-      if (this.editor && this.editor.getValue() !== nextProps.value) {
-        // editor.setValue is a synchronous function call, change event is emitted before setValue return.
-        this.silent = true;
-        var pos = this.editor.session.selection.toJSON();
-        this.editor.setValue(nextProps.value, nextProps.cursorStart);
-        this.editor.session.selection.fromJSON(pos);
-        this.silent = false;
-      }
-
-      if (nextProps.mode !== oldProps.mode) {
-        this.editor.getSession().setMode('ace/mode/' + nextProps.mode);
-      }
-      if (nextProps.theme !== oldProps.theme) {
-        this.editor.setTheme('ace/theme/' + nextProps.theme);
-      }
-      if (nextProps.keyboardHandler !== oldProps.keyboardHandler) {
-        if (nextProps.keyboardHandler) {
-          this.editor.setKeyboardHandler('ace/keyboard/' + nextProps.keyboardHandler);
-        } else {
-          this.editor.setKeyboardHandler(null);
+        this.handleOptions(this.props);
+        if (Array.isArray(commands)) {
+            commands.forEach(function (command) {
+                if (typeof command.exec === "string") {
+                    _this.editor.commands.bindKey(command.bindKey, command.exec);
+                }
+                else {
+                    _this.editor.commands.addCommand(command);
+                }
+            });
         }
-      }
-      if (nextProps.fontSize !== oldProps.fontSize) {
-        this.editor.setFontSize(nextProps.fontSize);
-      }
-      if (nextProps.wrapEnabled !== oldProps.wrapEnabled) {
-        this.editor.getSession().setUseWrapMode(nextProps.wrapEnabled);
-      }
-      if (nextProps.showPrintMargin !== oldProps.showPrintMargin) {
-        this.editor.setShowPrintMargin(nextProps.showPrintMargin);
-      }
-      if (nextProps.showGutter !== oldProps.showGutter) {
-        this.editor.renderer.setShowGutter(nextProps.showGutter);
-      }
-      if (!(0, _lodash2.default)(nextProps.setOptions, oldProps.setOptions)) {
-        this.handleOptions(nextProps);
-      }
-      if (!(0, _lodash2.default)(nextProps.annotations, oldProps.annotations)) {
-        this.editor.getSession().setAnnotations(nextProps.annotations || []);
-      }
-      if (!(0, _lodash2.default)(nextProps.markers, oldProps.markers) && Array.isArray(nextProps.markers)) {
-        this.handleMarkers(nextProps.markers);
-      }
-
-      // this doesn't look like it works at all....
-      if (!(0, _lodash2.default)(nextProps.scrollMargin, oldProps.scrollMargin)) {
-        this.handleScrollMargins(nextProps.scrollMargin);
-      }
-
-      if (prevProps.height !== this.props.height || prevProps.width !== this.props.width) {
+        if (keyboardHandler) {
+            this.editor.setKeyboardHandler("ace/keyboard/" + keyboardHandler);
+        }
+        if (className) {
+            this.refEditor.className += " " + className;
+        }
+        if (onLoad) {
+            onLoad(this.editor);
+        }
         this.editor.resize();
-      }
-      if (this.props.focus && !prevProps.focus) {
-        this.editor.focus();
-      }
-    }
-  }, {
-    key: 'handleScrollMargins',
-    value: function handleScrollMargins() {
-      var margins = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [0, 0, 0, 0];
-
-      this.editor.renderer.setScrollMargins(margins[0], margins[1], margins[2], margins[3]);
-    }
-  }, {
-    key: 'componentWillUnmount',
-    value: function componentWillUnmount() {
-      this.editor.destroy();
-      this.editor = null;
-    }
-  }, {
-    key: 'onChange',
-    value: function onChange(event) {
-      if (this.props.onChange && !this.silent) {
-        var value = this.editor.getValue();
-        this.props.onChange(value, event);
-      }
-    }
-  }, {
-    key: 'onSelectionChange',
-    value: function onSelectionChange(event) {
-      if (this.props.onSelectionChange) {
-        var value = this.editor.getSelection();
-        this.props.onSelectionChange(value, event);
-      }
-    }
-  }, {
-    key: 'onCursorChange',
-    value: function onCursorChange(event) {
-      if (this.props.onCursorChange) {
-        var value = this.editor.getSelection();
-        this.props.onCursorChange(value, event);
-      }
-    }
-  }, {
-    key: 'onInput',
-    value: function onInput(event) {
-      if (this.props.onInput) {
-        this.props.onInput(event);
-      }
-    }
-  }, {
-    key: 'onFocus',
-    value: function onFocus(event) {
-      if (this.props.onFocus) {
-        this.props.onFocus(event, this.editor);
-      }
-    }
-  }, {
-    key: 'onBlur',
-    value: function onBlur(event) {
-      if (this.props.onBlur) {
-        this.props.onBlur(event, this.editor);
-      }
-    }
-  }, {
-    key: 'onCopy',
-    value: function onCopy(text) {
-      if (this.props.onCopy) {
-        this.props.onCopy(text);
-      }
-    }
-  }, {
-    key: 'onPaste',
-    value: function onPaste(text) {
-      if (this.props.onPaste) {
-        this.props.onPaste(text);
-      }
-    }
-  }, {
-    key: 'onScroll',
-    value: function onScroll() {
-      if (this.props.onScroll) {
-        this.props.onScroll(this.editor);
-      }
-    }
-  }, {
-    key: 'handleOptions',
-    value: function handleOptions(props) {
-      var setOptions = Object.keys(props.setOptions);
-      for (var y = 0; y < setOptions.length; y++) {
-        this.editor.setOption(setOptions[y], props.setOptions[setOptions[y]]);
-      }
-    }
-  }, {
-    key: 'handleMarkers',
-    value: function handleMarkers(markers) {
-      var _this3 = this;
-
-      // remove foreground markers
-      var currentMarkers = this.editor.getSession().getMarkers(true);
-      for (var i in currentMarkers) {
-        if (currentMarkers.hasOwnProperty(i)) {
-          this.editor.getSession().removeMarker(currentMarkers[i].id);
+        if (focus) {
+            this.editor.focus();
         }
-      }
-      // remove background markers
-      currentMarkers = this.editor.getSession().getMarkers(false);
-      for (var _i2 in currentMarkers) {
-        if (currentMarkers.hasOwnProperty(_i2)) {
-          this.editor.getSession().removeMarker(currentMarkers[_i2].id);
+    };
+    ReactAce.prototype.componentDidUpdate = function (prevProps) {
+        var oldProps = prevProps;
+        var nextProps = this.props;
+        for (var i = 0; i < editorOptions_1.editorOptions.length; i++) {
+            var option = editorOptions_1.editorOptions[i];
+            if (nextProps[option] !== oldProps[option]) {
+                this.editor.setOption(option, nextProps[option]);
+            }
         }
-      }
-      // add new markers
-      markers.forEach(function (_ref) {
-        var startRow = _ref.startRow,
-            startCol = _ref.startCol,
-            endRow = _ref.endRow,
-            endCol = _ref.endCol,
-            className = _ref.className,
-            type = _ref.type,
-            _ref$inFront = _ref.inFront,
-            inFront = _ref$inFront === undefined ? false : _ref$inFront;
-
-        var range = new Range(startRow, startCol, endRow, endCol);
-        _this3.editor.getSession().addMarker(range, className, type, inFront);
-      });
-    }
-  }, {
-    key: 'updateRef',
-    value: function updateRef(item) {
-      this.refEditor = item;
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var _props2 = this.props,
-          name = _props2.name,
-          width = _props2.width,
-          height = _props2.height,
-          style = _props2.style;
-
-      var divStyle = _extends({ width: width, height: height }, style);
-      return _react2.default.createElement('div', { ref: this.updateRef, id: name, style: divStyle });
-    }
-  }]);
-
-  return ReactAce;
-}(_react.Component);
-
+        if (nextProps.className !== oldProps.className) {
+            var appliedClasses = this.refEditor.className;
+            var appliedClassesArray_1 = appliedClasses.trim().split(" ");
+            var oldClassesArray = oldProps.className.trim().split(" ");
+            oldClassesArray.forEach(function (oldClass) {
+                var index = appliedClassesArray_1.indexOf(oldClass);
+                appliedClassesArray_1.splice(index, 1);
+            });
+            this.refEditor.className =
+                " " + nextProps.className + " " + appliedClassesArray_1.join(" ");
+        }
+        // First process editor value, as it may create a new session (see issue #300)
+        if (this.editor && this.editor.getValue() !== nextProps.value) {
+            // editor.setValue is a synchronous function call, change event is emitted before setValue return.
+            this.silent = true;
+            var pos = this.editor.session.selection.toJSON();
+            this.editor.setValue(nextProps.value, nextProps.cursorStart);
+            this.editor.session.selection.fromJSON(pos);
+            this.silent = false;
+        }
+        if (nextProps.placeholder !== oldProps.placeholder) {
+            this.updatePlaceholder();
+        }
+        if (nextProps.mode !== oldProps.mode) {
+            this.editor.getSession().setMode("ace/mode/" + nextProps.mode);
+        }
+        if (nextProps.theme !== oldProps.theme) {
+            this.editor.setTheme("ace/theme/" + nextProps.theme);
+        }
+        if (nextProps.keyboardHandler !== oldProps.keyboardHandler) {
+            if (nextProps.keyboardHandler) {
+                this.editor.setKeyboardHandler("ace/keyboard/" + nextProps.keyboardHandler);
+            }
+            else {
+                this.editor.setKeyboardHandler(null);
+            }
+        }
+        if (nextProps.fontSize !== oldProps.fontSize) {
+            this.editor.setFontSize(nextProps.fontSize);
+        }
+        if (nextProps.wrapEnabled !== oldProps.wrapEnabled) {
+            this.editor.getSession().setUseWrapMode(nextProps.wrapEnabled);
+        }
+        if (nextProps.showPrintMargin !== oldProps.showPrintMargin) {
+            this.editor.setShowPrintMargin(nextProps.showPrintMargin);
+        }
+        if (nextProps.showGutter !== oldProps.showGutter) {
+            this.editor.renderer.setShowGutter(nextProps.showGutter);
+        }
+        if (!isEqual(nextProps.setOptions, oldProps.setOptions)) {
+            this.handleOptions(nextProps);
+        }
+        if (!isEqual(nextProps.annotations, oldProps.annotations)) {
+            this.editor.getSession().setAnnotations(nextProps.annotations || []);
+        }
+        if (!isEqual(nextProps.markers, oldProps.markers) &&
+            Array.isArray(nextProps.markers)) {
+            this.handleMarkers(nextProps.markers);
+        }
+        // this doesn't look like it works at all....
+        if (!isEqual(nextProps.scrollMargin, oldProps.scrollMargin)) {
+            this.handleScrollMargins(nextProps.scrollMargin);
+        }
+        if (prevProps.height !== this.props.height ||
+            prevProps.width !== this.props.width) {
+            this.editor.resize();
+        }
+        if (this.props.focus && !prevProps.focus) {
+            this.editor.focus();
+        }
+    };
+    ReactAce.prototype.handleScrollMargins = function (margins) {
+        if (margins === void 0) { margins = [0, 0, 0, 0]; }
+        this.editor.renderer.setScrollMargins(margins[0], margins[1], margins[2], margins[3]);
+    };
+    ReactAce.prototype.componentWillUnmount = function () {
+        this.editor.destroy();
+        this.editor = null;
+    };
+    ReactAce.prototype.onChange = function (event) {
+        if (this.props.onChange && !this.silent) {
+            var value = this.editor.getValue();
+            this.props.onChange(value, event);
+        }
+    };
+    ReactAce.prototype.onSelectionChange = function (event) {
+        if (this.props.onSelectionChange) {
+            var value = this.editor.getSelection();
+            this.props.onSelectionChange(value, event);
+        }
+    };
+    ReactAce.prototype.onCursorChange = function (event) {
+        if (this.props.onCursorChange) {
+            var value = this.editor.getSelection();
+            this.props.onCursorChange(value, event);
+        }
+    };
+    ReactAce.prototype.onInput = function (event) {
+        if (this.props.onInput) {
+            this.props.onInput(event);
+        }
+        if (this.props.placeholder) {
+            this.updatePlaceholder();
+        }
+    };
+    ReactAce.prototype.onFocus = function (event) {
+        if (this.props.onFocus) {
+            this.props.onFocus(event, this.editor);
+        }
+    };
+    ReactAce.prototype.onBlur = function (event) {
+        if (this.props.onBlur) {
+            this.props.onBlur(event, this.editor);
+        }
+    };
+    ReactAce.prototype.onCopy = function (text) {
+        if (this.props.onCopy) {
+            this.props.onCopy(text);
+        }
+    };
+    ReactAce.prototype.onPaste = function (text) {
+        if (this.props.onPaste) {
+            this.props.onPaste(text);
+        }
+    };
+    ReactAce.prototype.onScroll = function () {
+        if (this.props.onScroll) {
+            this.props.onScroll(this.editor);
+        }
+    };
+    ReactAce.prototype.handleOptions = function (props) {
+        var setOptions = Object.keys(props.setOptions);
+        for (var y = 0; y < setOptions.length; y++) {
+            this.editor.setOption(setOptions[y], props.setOptions[setOptions[y]]);
+        }
+    };
+    ReactAce.prototype.handleMarkers = function (markers) {
+        var _this = this;
+        // remove foreground markers
+        var currentMarkers = this.editor.getSession().getMarkers(true);
+        for (var i in currentMarkers) {
+            if (currentMarkers.hasOwnProperty(i)) {
+                this.editor.getSession().removeMarker(currentMarkers[i].id);
+            }
+        }
+        // remove background markers except active line marker and selected word marker
+        currentMarkers = this.editor.getSession().getMarkers(false);
+        for (var i in currentMarkers) {
+            if (currentMarkers.hasOwnProperty(i) &&
+                currentMarkers[i].clazz !== "ace_active-line" &&
+                currentMarkers[i].clazz !== "ace_selected-word") {
+                this.editor.getSession().removeMarker(currentMarkers[i].id);
+            }
+        }
+        // add new markers
+        markers.forEach(function (_a) {
+            var startRow = _a.startRow, startCol = _a.startCol, endRow = _a.endRow, endCol = _a.endCol, className = _a.className, type = _a.type, _b = _a.inFront, inFront = _b === void 0 ? false : _b;
+            var range = new Range(startRow, startCol, endRow, endCol);
+            _this.editor.getSession().addMarker(range, className, type, inFront);
+        });
+    };
+    ReactAce.prototype.updatePlaceholder = function () {
+        // Adapted from https://stackoverflow.com/questions/26695708/how-can-i-add-placeholder-text-when-the-editor-is-empty
+        var editor = this.editor;
+        var placeholder = this.props.placeholder;
+        var showPlaceholder = !editor.session.getValue().length;
+        var node = editor.renderer.placeholderNode;
+        if (!showPlaceholder && node) {
+            editor.renderer.scroller.removeChild(editor.renderer.placeholderNode);
+            editor.renderer.placeholderNode = null;
+        }
+        else if (showPlaceholder && !node) {
+            node = editor.renderer.placeholderNode = document.createElement("div");
+            node.textContent = placeholder || "";
+            node.className = "ace_comment ace_placeholder";
+            node.style.padding = "0 9px";
+            node.style.position = "absolute";
+            node.style.zIndex = "3";
+            editor.renderer.scroller.appendChild(node);
+        }
+        else if (showPlaceholder && node) {
+            node.textContent = placeholder;
+        }
+    };
+    ReactAce.prototype.updateRef = function (item) {
+        this.refEditor = item;
+    };
+    ReactAce.prototype.render = function () {
+        var _a = this.props, name = _a.name, width = _a.width, height = _a.height, style = _a.style;
+        var divStyle = __assign({ width: width, height: height }, style);
+        return React.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
+    };
+    ReactAce.propTypes = {
+        mode: PropTypes.string,
+        focus: PropTypes.bool,
+        theme: PropTypes.string,
+        name: PropTypes.string,
+        className: PropTypes.string,
+        height: PropTypes.string,
+        width: PropTypes.string,
+        fontSize: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        showGutter: PropTypes.bool,
+        onChange: PropTypes.func,
+        onCopy: PropTypes.func,
+        onPaste: PropTypes.func,
+        onFocus: PropTypes.func,
+        onInput: PropTypes.func,
+        onBlur: PropTypes.func,
+        onScroll: PropTypes.func,
+        value: PropTypes.string,
+        defaultValue: PropTypes.string,
+        onLoad: PropTypes.func,
+        onSelectionChange: PropTypes.func,
+        onCursorChange: PropTypes.func,
+        onBeforeLoad: PropTypes.func,
+        onValidate: PropTypes.func,
+        minLines: PropTypes.number,
+        maxLines: PropTypes.number,
+        readOnly: PropTypes.bool,
+        highlightActiveLine: PropTypes.bool,
+        tabSize: PropTypes.number,
+        showPrintMargin: PropTypes.bool,
+        cursorStart: PropTypes.number,
+        debounceChangePeriod: PropTypes.number,
+        editorProps: PropTypes.object,
+        setOptions: PropTypes.object,
+        style: PropTypes.object,
+        scrollMargin: PropTypes.array,
+        annotations: PropTypes.array,
+        markers: PropTypes.array,
+        keyboardHandler: PropTypes.string,
+        wrapEnabled: PropTypes.bool,
+        enableSnippets: PropTypes.bool,
+        enableBasicAutocompletion: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.array
+        ]),
+        enableLiveAutocompletion: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.array
+        ]),
+        navigateToFileEnd: PropTypes.bool,
+        commands: PropTypes.array,
+        placeholder: PropTypes.string
+    };
+    ReactAce.defaultProps = {
+        name: "brace-editor",
+        focus: false,
+        mode: "",
+        theme: "",
+        height: "500px",
+        width: "500px",
+        value: "",
+        fontSize: 12,
+        enableSnippets: false,
+        showGutter: true,
+        onChange: null,
+        onPaste: null,
+        onLoad: null,
+        onScroll: null,
+        minLines: null,
+        maxLines: null,
+        readOnly: false,
+        highlightActiveLine: true,
+        showPrintMargin: true,
+        tabSize: 4,
+        cursorStart: 1,
+        editorProps: {},
+        style: {},
+        scrollMargin: [0, 0, 0, 0],
+        setOptions: {},
+        wrapEnabled: false,
+        enableBasicAutocompletion: false,
+        enableLiveAutocompletion: false,
+        placeholder: null,
+        navigateToFileEnd: true
+    };
+    return ReactAce;
+}(React.Component));
 exports.default = ReactAce;
 
+},{"prop-types":"../node_modules/prop-types/index.js","react":"../node_modules/react/index.js","lodash.isequal":"../node_modules/lodash.isequal/index.js","./editorOptions":"../node_modules/react-ace/lib/editorOptions.js"}],"../node_modules/brace/ext/split.js":[function(require,module,exports) {
+ace.define("ace/split",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/lib/event_emitter","ace/editor","ace/virtual_renderer","ace/edit_session"], function(acequire, exports, module) {
+"use strict";
 
-ReactAce.propTypes = {
-  mode: _propTypes2.default.string,
-  focus: _propTypes2.default.bool,
-  theme: _propTypes2.default.string,
-  name: _propTypes2.default.string,
-  className: _propTypes2.default.string,
-  height: _propTypes2.default.string,
-  width: _propTypes2.default.string,
-  fontSize: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.string]),
-  showGutter: _propTypes2.default.bool,
-  onChange: _propTypes2.default.func,
-  onCopy: _propTypes2.default.func,
-  onPaste: _propTypes2.default.func,
-  onFocus: _propTypes2.default.func,
-  onInput: _propTypes2.default.func,
-  onBlur: _propTypes2.default.func,
-  onScroll: _propTypes2.default.func,
-  value: _propTypes2.default.string,
-  defaultValue: _propTypes2.default.string,
-  onLoad: _propTypes2.default.func,
-  onSelectionChange: _propTypes2.default.func,
-  onCursorChange: _propTypes2.default.func,
-  onBeforeLoad: _propTypes2.default.func,
-  onValidate: _propTypes2.default.func,
-  minLines: _propTypes2.default.number,
-  maxLines: _propTypes2.default.number,
-  readOnly: _propTypes2.default.bool,
-  highlightActiveLine: _propTypes2.default.bool,
-  tabSize: _propTypes2.default.number,
-  showPrintMargin: _propTypes2.default.bool,
-  cursorStart: _propTypes2.default.number,
-  debounceChangePeriod: _propTypes2.default.number,
-  editorProps: _propTypes2.default.object,
-  setOptions: _propTypes2.default.object,
-  style: _propTypes2.default.object,
-  scrollMargin: _propTypes2.default.array,
-  annotations: _propTypes2.default.array,
-  markers: _propTypes2.default.array,
-  keyboardHandler: _propTypes2.default.string,
-  wrapEnabled: _propTypes2.default.bool,
-  enableBasicAutocompletion: _propTypes2.default.oneOfType([_propTypes2.default.bool, _propTypes2.default.array]),
-  enableLiveAutocompletion: _propTypes2.default.oneOfType([_propTypes2.default.bool, _propTypes2.default.array]),
-  commands: _propTypes2.default.array
+var oop = acequire("./lib/oop");
+var lang = acequire("./lib/lang");
+var EventEmitter = acequire("./lib/event_emitter").EventEmitter;
+
+var Editor = acequire("./editor").Editor;
+var Renderer = acequire("./virtual_renderer").VirtualRenderer;
+var EditSession = acequire("./edit_session").EditSession;
+
+
+var Split = function(container, theme, splits) {
+    this.BELOW = 1;
+    this.BESIDE = 0;
+
+    this.$container = container;
+    this.$theme = theme;
+    this.$splits = 0;
+    this.$editorCSS = "";
+    this.$editors = [];
+    this.$orientation = this.BESIDE;
+
+    this.setSplits(splits || 1);
+    this.$cEditor = this.$editors[0];
+
+
+    this.on("focus", function(editor) {
+        this.$cEditor = editor;
+    }.bind(this));
 };
 
-ReactAce.defaultProps = {
-  name: 'brace-editor',
-  focus: false,
-  mode: '',
-  theme: '',
-  height: '500px',
-  width: '500px',
-  value: '',
-  fontSize: 12,
-  showGutter: true,
-  onChange: null,
-  onPaste: null,
-  onLoad: null,
-  onScroll: null,
-  minLines: null,
-  maxLines: null,
-  readOnly: false,
-  highlightActiveLine: true,
-  showPrintMargin: true,
-  tabSize: 4,
-  cursorStart: 1,
-  editorProps: {},
-  style: {},
-  scrollMargin: [0, 0, 0, 0],
-  setOptions: {},
-  wrapEnabled: false,
-  enableBasicAutocompletion: false,
-  enableLiveAutocompletion: false
-};
-},{"react":"../node_modules/react/index.js","prop-types":"../node_modules/prop-types/index.js","lodash.isequal":"../node_modules/lodash.isequal/index.js","./editorOptions.js":"../node_modules/react-ace/lib/editorOptions.js"}],"../node_modules/lodash.get/index.js":[function(require,module,exports) {
+(function(){
+
+    oop.implement(this, EventEmitter);
+
+    this.$createEditor = function() {
+        var el = document.createElement("div");
+        el.className = this.$editorCSS;
+        el.style.cssText = "position: absolute; top:0px; bottom:0px";
+        this.$container.appendChild(el);
+        var editor = new Editor(new Renderer(el, this.$theme));
+
+        editor.on("focus", function() {
+            this._emit("focus", editor);
+        }.bind(this));
+
+        this.$editors.push(editor);
+        editor.setFontSize(this.$fontSize);
+        return editor;
+    };
+
+    this.setSplits = function(splits) {
+        var editor;
+        if (splits < 1) {
+            throw "The number of splits have to be > 0!";
+        }
+
+        if (splits == this.$splits) {
+            return;
+        } else if (splits > this.$splits) {
+            while (this.$splits < this.$editors.length && this.$splits < splits) {
+                editor = this.$editors[this.$splits];
+                this.$container.appendChild(editor.container);
+                editor.setFontSize(this.$fontSize);
+                this.$splits ++;
+            }
+            while (this.$splits < splits) {
+                this.$createEditor();
+                this.$splits ++;
+            }
+        } else {
+            while (this.$splits > splits) {
+                editor = this.$editors[this.$splits - 1];
+                this.$container.removeChild(editor.container);
+                this.$splits --;
+            }
+        }
+        this.resize();
+    };
+    this.getSplits = function() {
+        return this.$splits;
+    };
+    this.getEditor = function(idx) {
+        return this.$editors[idx];
+    };
+    this.getCurrentEditor = function() {
+        return this.$cEditor;
+    };
+    this.focus = function() {
+        this.$cEditor.focus();
+    };
+    this.blur = function() {
+        this.$cEditor.blur();
+    };
+    this.setTheme = function(theme) {
+        this.$editors.forEach(function(editor) {
+            editor.setTheme(theme);
+        });
+    };
+    this.setKeyboardHandler = function(keybinding) {
+        this.$editors.forEach(function(editor) {
+            editor.setKeyboardHandler(keybinding);
+        });
+    };
+    this.forEach = function(callback, scope) {
+        this.$editors.forEach(callback, scope);
+    };
+
+
+    this.$fontSize = "";
+    this.setFontSize = function(size) {
+        this.$fontSize = size;
+        this.forEach(function(editor) {
+           editor.setFontSize(size);
+        });
+    };
+
+    this.$cloneSession = function(session) {
+        var s = new EditSession(session.getDocument(), session.getMode());
+
+        var undoManager = session.getUndoManager();
+        if (undoManager) {
+            var undoManagerProxy = new UndoManagerProxy(undoManager, s);
+            s.setUndoManager(undoManagerProxy);
+        }
+        s.$informUndoManager = lang.delayedCall(function() { s.$deltas = []; });
+        s.setTabSize(session.getTabSize());
+        s.setUseSoftTabs(session.getUseSoftTabs());
+        s.setOverwrite(session.getOverwrite());
+        s.setBreakpoints(session.getBreakpoints());
+        s.setUseWrapMode(session.getUseWrapMode());
+        s.setUseWorker(session.getUseWorker());
+        s.setWrapLimitRange(session.$wrapLimitRange.min,
+                            session.$wrapLimitRange.max);
+        s.$foldData = session.$cloneFoldData();
+
+        return s;
+    };
+    this.setSession = function(session, idx) {
+        var editor;
+        if (idx == null) {
+            editor = this.$cEditor;
+        } else {
+            editor = this.$editors[idx];
+        }
+        var isUsed = this.$editors.some(function(editor) {
+           return editor.session === session;
+        });
+
+        if (isUsed) {
+            session = this.$cloneSession(session);
+        }
+        editor.setSession(session);
+        return session;
+    };
+    this.getOrientation = function() {
+        return this.$orientation;
+    };
+    this.setOrientation = function(orientation) {
+        if (this.$orientation == orientation) {
+            return;
+        }
+        this.$orientation = orientation;
+        this.resize();
+    };
+    this.resize = function() {
+        var width = this.$container.clientWidth;
+        var height = this.$container.clientHeight;
+        var editor;
+
+        if (this.$orientation == this.BESIDE) {
+            var editorWidth = width / this.$splits;
+            for (var i = 0; i < this.$splits; i++) {
+                editor = this.$editors[i];
+                editor.container.style.width = editorWidth + "px";
+                editor.container.style.top = "0px";
+                editor.container.style.left = i * editorWidth + "px";
+                editor.container.style.height = height + "px";
+                editor.resize();
+            }
+        } else {
+            var editorHeight = height / this.$splits;
+            for (var i = 0; i < this.$splits; i++) {
+                editor = this.$editors[i];
+                editor.container.style.width = width + "px";
+                editor.container.style.top = i * editorHeight + "px";
+                editor.container.style.left = "0px";
+                editor.container.style.height = editorHeight + "px";
+                editor.resize();
+            }
+        }
+    };
+
+}).call(Split.prototype);
+
+ 
+function UndoManagerProxy(undoManager, session) {
+    this.$u = undoManager;
+    this.$doc = session;
+}
+
+(function() {
+    this.execute = function(options) {
+        this.$u.execute(options);
+    };
+
+    this.undo = function() {
+        var selectionRange = this.$u.undo(true);
+        if (selectionRange) {
+            this.$doc.selection.setSelectionRange(selectionRange);
+        }
+    };
+
+    this.redo = function() {
+        var selectionRange = this.$u.redo(true);
+        if (selectionRange) {
+            this.$doc.selection.setSelectionRange(selectionRange);
+        }
+    };
+
+    this.reset = function() {
+        this.$u.reset();
+    };
+
+    this.hasUndo = function() {
+        return this.$u.hasUndo();
+    };
+
+    this.hasRedo = function() {
+        return this.$u.hasRedo();
+    };
+}).call(UndoManagerProxy.prototype);
+
+exports.Split = Split;
+});
+
+ace.define("ace/ext/split",["require","exports","module","ace/split"], function(acequire, exports, module) {
+"use strict";
+module.exports = acequire("../split");
+
+});
+                (function() {
+                    ace.acequire(["ace/ext/split"], function() {});
+                })();
+            
+},{}],"../node_modules/lodash.get/index.js":[function(require,module,exports) {
 var global = arguments[3];
 /**
  * lodash (Custom Build) <https://lodash.com/>
@@ -50189,756 +50504,414 @@ function get(object, path, defaultValue) {
 
 module.exports = get;
 
-},{}],"../node_modules/brace/ext/split.js":[function(require,module,exports) {
-ace.define("ace/split",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/lib/event_emitter","ace/editor","ace/virtual_renderer","ace/edit_session"], function(acequire, exports, module) {
-"use strict";
-
-var oop = acequire("./lib/oop");
-var lang = acequire("./lib/lang");
-var EventEmitter = acequire("./lib/event_emitter").EventEmitter;
-
-var Editor = acequire("./editor").Editor;
-var Renderer = acequire("./virtual_renderer").VirtualRenderer;
-var EditSession = acequire("./edit_session").EditSession;
-
-
-var Split = function(container, theme, splits) {
-    this.BELOW = 1;
-    this.BESIDE = 0;
-
-    this.$container = container;
-    this.$theme = theme;
-    this.$splits = 0;
-    this.$editorCSS = "";
-    this.$editors = [];
-    this.$orientation = this.BESIDE;
-
-    this.setSplits(splits || 1);
-    this.$cEditor = this.$editors[0];
-
-
-    this.on("focus", function(editor) {
-        this.$cEditor = editor;
-    }.bind(this));
-};
-
-(function(){
-
-    oop.implement(this, EventEmitter);
-
-    this.$createEditor = function() {
-        var el = document.createElement("div");
-        el.className = this.$editorCSS;
-        el.style.cssText = "position: absolute; top:0px; bottom:0px";
-        this.$container.appendChild(el);
-        var editor = new Editor(new Renderer(el, this.$theme));
-
-        editor.on("focus", function() {
-            this._emit("focus", editor);
-        }.bind(this));
-
-        this.$editors.push(editor);
-        editor.setFontSize(this.$fontSize);
-        return editor;
-    };
-
-    this.setSplits = function(splits) {
-        var editor;
-        if (splits < 1) {
-            throw "The number of splits have to be > 0!";
-        }
-
-        if (splits == this.$splits) {
-            return;
-        } else if (splits > this.$splits) {
-            while (this.$splits < this.$editors.length && this.$splits < splits) {
-                editor = this.$editors[this.$splits];
-                this.$container.appendChild(editor.container);
-                editor.setFontSize(this.$fontSize);
-                this.$splits ++;
-            }
-            while (this.$splits < splits) {
-                this.$createEditor();
-                this.$splits ++;
-            }
-        } else {
-            while (this.$splits > splits) {
-                editor = this.$editors[this.$splits - 1];
-                this.$container.removeChild(editor.container);
-                this.$splits --;
-            }
-        }
-        this.resize();
-    };
-    this.getSplits = function() {
-        return this.$splits;
-    };
-    this.getEditor = function(idx) {
-        return this.$editors[idx];
-    };
-    this.getCurrentEditor = function() {
-        return this.$cEditor;
-    };
-    this.focus = function() {
-        this.$cEditor.focus();
-    };
-    this.blur = function() {
-        this.$cEditor.blur();
-    };
-    this.setTheme = function(theme) {
-        this.$editors.forEach(function(editor) {
-            editor.setTheme(theme);
-        });
-    };
-    this.setKeyboardHandler = function(keybinding) {
-        this.$editors.forEach(function(editor) {
-            editor.setKeyboardHandler(keybinding);
-        });
-    };
-    this.forEach = function(callback, scope) {
-        this.$editors.forEach(callback, scope);
-    };
-
-
-    this.$fontSize = "";
-    this.setFontSize = function(size) {
-        this.$fontSize = size;
-        this.forEach(function(editor) {
-           editor.setFontSize(size);
-        });
-    };
-
-    this.$cloneSession = function(session) {
-        var s = new EditSession(session.getDocument(), session.getMode());
-
-        var undoManager = session.getUndoManager();
-        if (undoManager) {
-            var undoManagerProxy = new UndoManagerProxy(undoManager, s);
-            s.setUndoManager(undoManagerProxy);
-        }
-        s.$informUndoManager = lang.delayedCall(function() { s.$deltas = []; });
-        s.setTabSize(session.getTabSize());
-        s.setUseSoftTabs(session.getUseSoftTabs());
-        s.setOverwrite(session.getOverwrite());
-        s.setBreakpoints(session.getBreakpoints());
-        s.setUseWrapMode(session.getUseWrapMode());
-        s.setUseWorker(session.getUseWorker());
-        s.setWrapLimitRange(session.$wrapLimitRange.min,
-                            session.$wrapLimitRange.max);
-        s.$foldData = session.$cloneFoldData();
-
-        return s;
-    };
-    this.setSession = function(session, idx) {
-        var editor;
-        if (idx == null) {
-            editor = this.$cEditor;
-        } else {
-            editor = this.$editors[idx];
-        }
-        var isUsed = this.$editors.some(function(editor) {
-           return editor.session === session;
-        });
-
-        if (isUsed) {
-            session = this.$cloneSession(session);
-        }
-        editor.setSession(session);
-        return session;
-    };
-    this.getOrientation = function() {
-        return this.$orientation;
-    };
-    this.setOrientation = function(orientation) {
-        if (this.$orientation == orientation) {
-            return;
-        }
-        this.$orientation = orientation;
-        this.resize();
-    };
-    this.resize = function() {
-        var width = this.$container.clientWidth;
-        var height = this.$container.clientHeight;
-        var editor;
-
-        if (this.$orientation == this.BESIDE) {
-            var editorWidth = width / this.$splits;
-            for (var i = 0; i < this.$splits; i++) {
-                editor = this.$editors[i];
-                editor.container.style.width = editorWidth + "px";
-                editor.container.style.top = "0px";
-                editor.container.style.left = i * editorWidth + "px";
-                editor.container.style.height = height + "px";
-                editor.resize();
-            }
-        } else {
-            var editorHeight = height / this.$splits;
-            for (var i = 0; i < this.$splits; i++) {
-                editor = this.$editors[i];
-                editor.container.style.width = width + "px";
-                editor.container.style.top = i * editorHeight + "px";
-                editor.container.style.left = "0px";
-                editor.container.style.height = editorHeight + "px";
-                editor.resize();
-            }
-        }
-    };
-
-}).call(Split.prototype);
-
- 
-function UndoManagerProxy(undoManager, session) {
-    this.$u = undoManager;
-    this.$doc = session;
-}
-
-(function() {
-    this.execute = function(options) {
-        this.$u.execute(options);
-    };
-
-    this.undo = function() {
-        var selectionRange = this.$u.undo(true);
-        if (selectionRange) {
-            this.$doc.selection.setSelectionRange(selectionRange);
-        }
-    };
-
-    this.redo = function() {
-        var selectionRange = this.$u.redo(true);
-        if (selectionRange) {
-            this.$doc.selection.setSelectionRange(selectionRange);
-        }
-    };
-
-    this.reset = function() {
-        this.$u.reset();
-    };
-
-    this.hasUndo = function() {
-        return this.$u.hasUndo();
-    };
-
-    this.hasRedo = function() {
-        return this.$u.hasRedo();
-    };
-}).call(UndoManagerProxy.prototype);
-
-exports.Split = Split;
-});
-
-ace.define("ace/ext/split",["require","exports","module","ace/split"], function(acequire, exports, module) {
-"use strict";
-module.exports = acequire("../split");
-
-});
-                (function() {
-                    ace.acequire(["ace/ext/split"], function() {});
-                })();
-            
 },{}],"../node_modules/react-ace/lib/split.js":[function(require,module,exports) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _editorOptions = require('./editorOptions.js');
-
-require('brace');
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _lodash = require('lodash.isequal');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _lodash3 = require('lodash.get');
-
-var _lodash4 = _interopRequireDefault(_lodash3);
-
-require('brace/ext/split');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var ace = (0, _editorOptions.getAceInstance)();
-
-var _ace$acequire = ace.acequire('ace/range'),
-    Range = _ace$acequire.Range;
-
-var _ace$acequire2 = ace.acequire('ace/split'),
-    Split = _ace$acequire2.Split;
-
-var SplitComponent = function (_Component) {
-  _inherits(SplitComponent, _Component);
-
-  function SplitComponent(props) {
-    _classCallCheck(this, SplitComponent);
-
-    var _this = _possibleConstructorReturn(this, (SplitComponent.__proto__ || Object.getPrototypeOf(SplitComponent)).call(this, props));
-
-    _editorOptions.editorEvents.forEach(function (method) {
-      _this[method] = _this[method].bind(_this);
-    });
-    _this.debounce = _editorOptions.debounce;
-    return _this;
-  }
-
-  _createClass(SplitComponent, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      var _props = this.props,
-          className = _props.className,
-          onBeforeLoad = _props.onBeforeLoad,
-          mode = _props.mode,
-          focus = _props.focus,
-          theme = _props.theme,
-          fontSize = _props.fontSize,
-          value = _props.value,
-          defaultValue = _props.defaultValue,
-          cursorStart = _props.cursorStart,
-          showGutter = _props.showGutter,
-          wrapEnabled = _props.wrapEnabled,
-          showPrintMargin = _props.showPrintMargin,
-          _props$scrollMargin = _props.scrollMargin,
-          scrollMargin = _props$scrollMargin === undefined ? [0, 0, 0, 0] : _props$scrollMargin,
-          keyboardHandler = _props.keyboardHandler,
-          onLoad = _props.onLoad,
-          commands = _props.commands,
-          annotations = _props.annotations,
-          markers = _props.markers,
-          splits = _props.splits;
-
-
-      this.editor = ace.edit(this.refEditor);
-
-      if (onBeforeLoad) {
-        onBeforeLoad(ace);
-      }
-
-      var editorProps = Object.keys(this.props.editorProps);
-
-      var split = new Split(this.editor.container, 'ace/theme/' + theme, splits);
-      this.editor.env.split = split;
-
-      this.splitEditor = split.getEditor(0);
-      this.split = split;
-      // in a split scenario we don't want a print margin for the entire application
-      this.editor.setShowPrintMargin(false);
-      this.editor.renderer.setShowGutter(false);
-      // get a list of possible options to avoid 'misspelled option errors'
-      var availableOptions = this.splitEditor.$options;
-      if (this.props.debounceChangePeriod) {
-        this.onChange = this.debounce(this.onChange, this.props.debounceChangePeriod);
-      }
-      split.forEach(function (editor, index) {
-        for (var i = 0; i < editorProps.length; i++) {
-          editor[editorProps[i]] = _this2.props.editorProps[editorProps[i]];
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
         }
-        var defaultValueForEditor = (0, _lodash4.default)(defaultValue, index);
-        var valueForEditor = (0, _lodash4.default)(value, index, '');
-        editor.session.setUndoManager(new ace.UndoManager());
-        editor.setTheme('ace/theme/' + theme);
-        editor.renderer.setScrollMargin(scrollMargin[0], scrollMargin[1], scrollMargin[2], scrollMargin[3]);
-        editor.getSession().setMode('ace/mode/' + mode);
-        editor.setFontSize(fontSize);
-        editor.renderer.setShowGutter(showGutter);
-        editor.getSession().setUseWrapMode(wrapEnabled);
-        editor.setShowPrintMargin(showPrintMargin);
-        editor.on('focus', _this2.onFocus);
-        editor.on('blur', _this2.onBlur);
-        editor.on('input', _this2.onInput);
-        editor.on('copy', _this2.onCopy);
-        editor.on('paste', _this2.onPaste);
-        editor.on('change', _this2.onChange);
-        editor.getSession().selection.on('changeSelection', _this2.onSelectionChange);
-        editor.getSession().selection.on('changeCursor', _this2.onCursorChange);
-        editor.session.on('changeScrollTop', _this2.onScroll);
-        editor.setValue(defaultValueForEditor === undefined ? valueForEditor : defaultValueForEditor, cursorStart);
-        var newAnnotations = (0, _lodash4.default)(annotations, index, []);
-        var newMarkers = (0, _lodash4.default)(markers, index, []);
-        editor.getSession().setAnnotations(newAnnotations);
-        if (newMarkers && newMarkers.length > 0) {
-          _this2.handleMarkers(newMarkers, editor);
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var editorOptions_1 = require("./editorOptions");
+var ace = editorOptions_1.getAceInstance();
+require("brace");
+var Range = ace.acequire("ace/range").Range;
+require("brace/ext/split");
+var Split = ace.acequire("ace/split").Split;
+var PropTypes = require("prop-types");
+var React = require("react");
+var isEqual = require("lodash.isequal");
+var get = require("lodash.get");
+var SplitComponent = /** @class */ (function (_super) {
+    __extends(SplitComponent, _super);
+    function SplitComponent(props) {
+        var _this = _super.call(this, props) || this;
+        editorOptions_1.editorEvents.forEach(function (method) {
+            _this[method] = _this[method].bind(_this);
+        });
+        _this.debounce = editorOptions_1.debounce;
+        return _this;
+    }
+    SplitComponent.prototype.componentDidMount = function () {
+        var _this = this;
+        var _a = this.props, className = _a.className, onBeforeLoad = _a.onBeforeLoad, mode = _a.mode, focus = _a.focus, theme = _a.theme, fontSize = _a.fontSize, value = _a.value, defaultValue = _a.defaultValue, cursorStart = _a.cursorStart, showGutter = _a.showGutter, wrapEnabled = _a.wrapEnabled, showPrintMargin = _a.showPrintMargin, _b = _a.scrollMargin, scrollMargin = _b === void 0 ? [0, 0, 0, 0] : _b, keyboardHandler = _a.keyboardHandler, onLoad = _a.onLoad, commands = _a.commands, annotations = _a.annotations, markers = _a.markers, splits = _a.splits;
+        this.editor = ace.edit(this.refEditor);
+        if (onBeforeLoad) {
+            onBeforeLoad(ace);
         }
-
-        for (var _i = 0; _i < _editorOptions.editorOptions.length; _i++) {
-          var option = _editorOptions.editorOptions[_i];
-          if (availableOptions.hasOwnProperty(option)) {
-            editor.setOption(option, _this2.props[option]);
-          } else if (_this2.props[option]) {
-            console.warn('ReaceAce: editor option ' + option + ' was activated but not found. Did you need to import a related tool or did you possibly mispell the option?');
-          }
+        var editorProps = Object.keys(this.props.editorProps);
+        var split = new Split(this.editor.container, "ace/theme/" + theme, splits);
+        this.editor.env.split = split;
+        this.splitEditor = split.getEditor(0);
+        this.split = split;
+        // in a split scenario we don't want a print margin for the entire application
+        this.editor.setShowPrintMargin(false);
+        this.editor.renderer.setShowGutter(false);
+        // get a list of possible options to avoid 'misspelled option errors'
+        var availableOptions = this.splitEditor.$options;
+        if (this.props.debounceChangePeriod) {
+            this.onChange = this.debounce(this.onChange, this.props.debounceChangePeriod);
         }
-        _this2.handleOptions(_this2.props, editor);
-
-        if (Array.isArray(commands)) {
-          commands.forEach(function (command) {
-            if (typeof command.exec == 'string') {
-              editor.commands.bindKey(command.bindKey, command.exec);
-            } else {
-              editor.commands.addCommand(command);
+        split.forEach(function (editor, index) {
+            for (var i = 0; i < editorProps.length; i++) {
+                editor[editorProps[i]] = _this.props.editorProps[editorProps[i]];
             }
-          });
-        }
-
-        if (keyboardHandler) {
-          editor.setKeyboardHandler('ace/keyboard/' + keyboardHandler);
-        }
-      });
-
-      if (className) {
-        this.refEditor.className += ' ' + className;
-      }
-
-      if (focus) {
-        this.splitEditor.focus();
-      }
-
-      var sp = this.editor.env.split;
-      sp.setOrientation(this.props.orientation === 'below' ? sp.BELOW : sp.BESIDE);
-      sp.resize(true);
-      if (onLoad) {
-        onLoad(sp);
-      }
-    }
-  }, {
-    key: 'componentDidUpdate',
-    value: function componentDidUpdate(prevProps) {
-      var _this3 = this;
-
-      var oldProps = prevProps;
-      var nextProps = this.props;
-
-      var split = this.editor.env.split;
-
-      if (nextProps.splits !== oldProps.splits) {
-        split.setSplits(nextProps.splits);
-      }
-
-      if (nextProps.orientation !== oldProps.orientation) {
-        split.setOrientation(nextProps.orientation === 'below' ? split.BELOW : split.BESIDE);
-      }
-
-      split.forEach(function (editor, index) {
-        if (nextProps.mode !== oldProps.mode) {
-          editor.getSession().setMode('ace/mode/' + nextProps.mode);
-        }
-        if (nextProps.keyboardHandler !== oldProps.keyboardHandler) {
-          if (nextProps.keyboardHandler) {
-            editor.setKeyboardHandler('ace/keyboard/' + nextProps.keyboardHandler);
-          } else {
-            editor.setKeyboardHandler(null);
-          }
-        }
-        if (nextProps.fontSize !== oldProps.fontSize) {
-          editor.setFontSize(nextProps.fontSize);
-        }
-        if (nextProps.wrapEnabled !== oldProps.wrapEnabled) {
-          editor.getSession().setUseWrapMode(nextProps.wrapEnabled);
-        }
-        if (nextProps.showPrintMargin !== oldProps.showPrintMargin) {
-          editor.setShowPrintMargin(nextProps.showPrintMargin);
-        }
-        if (nextProps.showGutter !== oldProps.showGutter) {
-          editor.renderer.setShowGutter(nextProps.showGutter);
-        }
-
-        for (var i = 0; i < _editorOptions.editorOptions.length; i++) {
-          var option = _editorOptions.editorOptions[i];
-          if (nextProps[option] !== oldProps[option]) {
-            editor.setOption(option, nextProps[option]);
-          }
-        }
-        if (!(0, _lodash2.default)(nextProps.setOptions, oldProps.setOptions)) {
-          _this3.handleOptions(nextProps, editor);
-        }
-        var nextValue = (0, _lodash4.default)(nextProps.value, index, '');
-        if (editor.getValue() !== nextValue) {
-          // editor.setValue is a synchronous function call, change event is emitted before setValue return.
-          _this3.silent = true;
-          var pos = editor.session.selection.toJSON();
-          editor.setValue(nextValue, nextProps.cursorStart);
-          editor.session.selection.fromJSON(pos);
-          _this3.silent = false;
-        }
-        var newAnnotations = (0, _lodash4.default)(nextProps.annotations, index, []);
-        var oldAnnotations = (0, _lodash4.default)(oldProps.annotations, index, []);
-        if (!(0, _lodash2.default)(newAnnotations, oldAnnotations)) {
-          editor.getSession().setAnnotations(newAnnotations);
-        }
-
-        var newMarkers = (0, _lodash4.default)(nextProps.markers, index, []);
-        var oldMarkers = (0, _lodash4.default)(oldProps.markers, index, []);
-        if (!(0, _lodash2.default)(newMarkers, oldMarkers) && Array.isArray(newMarkers)) {
-          _this3.handleMarkers(newMarkers, editor);
-        }
-      });
-
-      if (nextProps.className !== oldProps.className) {
-        var appliedClasses = this.refEditor.className;
-        var appliedClassesArray = appliedClasses.trim().split(' ');
-        var oldClassesArray = oldProps.className.trim().split(' ');
-        oldClassesArray.forEach(function (oldClass) {
-          var index = appliedClassesArray.indexOf(oldClass);
-          appliedClassesArray.splice(index, 1);
+            var defaultValueForEditor = get(defaultValue, index);
+            var valueForEditor = get(value, index, "");
+            editor.session.setUndoManager(new ace.UndoManager());
+            editor.setTheme("ace/theme/" + theme);
+            editor.renderer.setScrollMargin(scrollMargin[0], scrollMargin[1], scrollMargin[2], scrollMargin[3]);
+            editor.getSession().setMode("ace/mode/" + mode);
+            editor.setFontSize(fontSize);
+            editor.renderer.setShowGutter(showGutter);
+            editor.getSession().setUseWrapMode(wrapEnabled);
+            editor.setShowPrintMargin(showPrintMargin);
+            editor.on("focus", _this.onFocus);
+            editor.on("blur", _this.onBlur);
+            editor.on("input", _this.onInput);
+            editor.on("copy", _this.onCopy);
+            editor.on("paste", _this.onPaste);
+            editor.on("change", _this.onChange);
+            editor
+                .getSession()
+                .selection.on("changeSelection", _this.onSelectionChange);
+            editor.getSession().selection.on("changeCursor", _this.onCursorChange);
+            editor.session.on("changeScrollTop", _this.onScroll);
+            editor.setValue(defaultValueForEditor === undefined
+                ? valueForEditor
+                : defaultValueForEditor, cursorStart);
+            var newAnnotations = get(annotations, index, []);
+            var newMarkers = get(markers, index, []);
+            editor.getSession().setAnnotations(newAnnotations);
+            if (newMarkers && newMarkers.length > 0) {
+                _this.handleMarkers(newMarkers, editor);
+            }
+            for (var i = 0; i < editorOptions_1.editorOptions.length; i++) {
+                var option = editorOptions_1.editorOptions[i];
+                if (availableOptions.hasOwnProperty(option)) {
+                    editor.setOption(option, _this.props[option]);
+                }
+                else if (_this.props[option]) {
+                    console.warn("ReaceAce: editor option " + option + " was activated but not found. Did you need to import a related tool or did you possibly mispell the option?");
+                }
+            }
+            _this.handleOptions(_this.props, editor);
+            if (Array.isArray(commands)) {
+                commands.forEach(function (command) {
+                    if (typeof command.exec === "string") {
+                        editor.commands.bindKey(command.bindKey, command.exec);
+                    }
+                    else {
+                        editor.commands.addCommand(command);
+                    }
+                });
+            }
+            if (keyboardHandler) {
+                editor.setKeyboardHandler("ace/keyboard/" + keyboardHandler);
+            }
         });
-        this.refEditor.className = ' ' + nextProps.className + ' ' + appliedClassesArray.join(' ');
-      }
-
-      if (nextProps.theme !== oldProps.theme) {
-        split.setTheme('ace/theme/' + nextProps.theme);
-      }
-
-      if (nextProps.focus && !oldProps.focus) {
-        this.splitEditor.focus();
-      }
-      if (nextProps.height !== this.props.height || nextProps.width !== this.props.width) {
-        this.editor.resize();
-      }
-    }
-  }, {
-    key: 'componentWillUnmount',
-    value: function componentWillUnmount() {
-      this.editor.destroy();
-      this.editor = null;
-    }
-  }, {
-    key: 'onChange',
-    value: function onChange(event) {
-      if (this.props.onChange && !this.silent) {
-        var value = [];
-        this.editor.env.split.forEach(function (editor) {
-          value.push(editor.getValue());
-        });
-        this.props.onChange(value, event);
-      }
-    }
-  }, {
-    key: 'onSelectionChange',
-    value: function onSelectionChange(event) {
-      if (this.props.onSelectionChange) {
-        var value = [];
-        this.editor.env.split.forEach(function (editor) {
-          value.push(editor.getSelection());
-        });
-        this.props.onSelectionChange(value, event);
-      }
-    }
-  }, {
-    key: 'onCursorChange',
-    value: function onCursorChange(event) {
-      if (this.props.onCursorChange) {
-        var value = [];
-        this.editor.env.split.forEach(function (editor) {
-          value.push(editor.getSelection());
-        });
-        this.props.onCursorChange(value, event);
-      }
-    }
-  }, {
-    key: 'onFocus',
-    value: function onFocus(event) {
-      if (this.props.onFocus) {
-        this.props.onFocus(event);
-      }
-    }
-  }, {
-    key: 'onInput',
-    value: function onInput(event) {
-      if (this.props.onInput) {
-        this.props.onInput(event);
-      }
-    }
-  }, {
-    key: 'onBlur',
-    value: function onBlur(event) {
-      if (this.props.onBlur) {
-        this.props.onBlur(event);
-      }
-    }
-  }, {
-    key: 'onCopy',
-    value: function onCopy(text) {
-      if (this.props.onCopy) {
-        this.props.onCopy(text);
-      }
-    }
-  }, {
-    key: 'onPaste',
-    value: function onPaste(text) {
-      if (this.props.onPaste) {
-        this.props.onPaste(text);
-      }
-    }
-  }, {
-    key: 'onScroll',
-    value: function onScroll() {
-      if (this.props.onScroll) {
-        this.props.onScroll(this.editor);
-      }
-    }
-  }, {
-    key: 'handleOptions',
-    value: function handleOptions(props, editor) {
-      var setOptions = Object.keys(props.setOptions);
-      for (var y = 0; y < setOptions.length; y++) {
-        editor.setOption(setOptions[y], props.setOptions[setOptions[y]]);
-      }
-    }
-  }, {
-    key: 'handleMarkers',
-    value: function handleMarkers(markers, editor) {
-      // remove foreground markers
-      var currentMarkers = editor.getSession().getMarkers(true);
-      for (var i in currentMarkers) {
-        if (currentMarkers.hasOwnProperty(i)) {
-          editor.getSession().removeMarker(currentMarkers[i].id);
+        if (className) {
+            this.refEditor.className += " " + className;
         }
-      }
-      // remove background markers
-      currentMarkers = editor.getSession().getMarkers(false);
-      for (var _i2 in currentMarkers) {
-        if (currentMarkers.hasOwnProperty(_i2)) {
-          editor.getSession().removeMarker(currentMarkers[_i2].id);
+        if (focus) {
+            this.splitEditor.focus();
         }
-      }
-      // add new markers
-      markers.forEach(function (_ref) {
-        var startRow = _ref.startRow,
-            startCol = _ref.startCol,
-            endRow = _ref.endRow,
-            endCol = _ref.endCol,
-            className = _ref.className,
-            type = _ref.type,
-            _ref$inFront = _ref.inFront,
-            inFront = _ref$inFront === undefined ? false : _ref$inFront;
-
-        var range = new Range(startRow, startCol, endRow, endCol);
-        editor.getSession().addMarker(range, className, type, inFront);
-      });
-    }
-  }, {
-    key: 'updateRef',
-    value: function updateRef(item) {
-      this.refEditor = item;
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var _props2 = this.props,
-          name = _props2.name,
-          width = _props2.width,
-          height = _props2.height,
-          style = _props2.style;
-
-      var divStyle = _extends({ width: width, height: height }, style);
-      return _react2.default.createElement('div', { ref: this.updateRef, id: name, style: divStyle });
-    }
-  }]);
-
-  return SplitComponent;
-}(_react.Component);
-
+        var sp = this.editor.env.split;
+        sp.setOrientation(this.props.orientation === "below" ? sp.BELOW : sp.BESIDE);
+        sp.resize(true);
+        if (onLoad) {
+            onLoad(sp);
+        }
+    };
+    SplitComponent.prototype.componentDidUpdate = function (prevProps) {
+        var _this = this;
+        var oldProps = prevProps;
+        var nextProps = this.props;
+        var split = this.editor.env.split;
+        if (nextProps.splits !== oldProps.splits) {
+            split.setSplits(nextProps.splits);
+        }
+        if (nextProps.orientation !== oldProps.orientation) {
+            split.setOrientation(nextProps.orientation === "below" ? split.BELOW : split.BESIDE);
+        }
+        split.forEach(function (editor, index) {
+            if (nextProps.mode !== oldProps.mode) {
+                editor.getSession().setMode("ace/mode/" + nextProps.mode);
+            }
+            if (nextProps.keyboardHandler !== oldProps.keyboardHandler) {
+                if (nextProps.keyboardHandler) {
+                    editor.setKeyboardHandler("ace/keyboard/" + nextProps.keyboardHandler);
+                }
+                else {
+                    editor.setKeyboardHandler(null);
+                }
+            }
+            if (nextProps.fontSize !== oldProps.fontSize) {
+                editor.setFontSize(nextProps.fontSize);
+            }
+            if (nextProps.wrapEnabled !== oldProps.wrapEnabled) {
+                editor.getSession().setUseWrapMode(nextProps.wrapEnabled);
+            }
+            if (nextProps.showPrintMargin !== oldProps.showPrintMargin) {
+                editor.setShowPrintMargin(nextProps.showPrintMargin);
+            }
+            if (nextProps.showGutter !== oldProps.showGutter) {
+                editor.renderer.setShowGutter(nextProps.showGutter);
+            }
+            for (var i = 0; i < editorOptions_1.editorOptions.length; i++) {
+                var option = editorOptions_1.editorOptions[i];
+                if (nextProps[option] !== oldProps[option]) {
+                    editor.setOption(option, nextProps[option]);
+                }
+            }
+            if (!isEqual(nextProps.setOptions, oldProps.setOptions)) {
+                _this.handleOptions(nextProps, editor);
+            }
+            var nextValue = get(nextProps.value, index, "");
+            if (editor.getValue() !== nextValue) {
+                // editor.setValue is a synchronous function call, change event is emitted before setValue return.
+                _this.silent = true;
+                var pos = editor.session.selection.toJSON();
+                editor.setValue(nextValue, nextProps.cursorStart);
+                editor.session.selection.fromJSON(pos);
+                _this.silent = false;
+            }
+            var newAnnotations = get(nextProps.annotations, index, []);
+            var oldAnnotations = get(oldProps.annotations, index, []);
+            if (!isEqual(newAnnotations, oldAnnotations)) {
+                editor.getSession().setAnnotations(newAnnotations);
+            }
+            var newMarkers = get(nextProps.markers, index, []);
+            var oldMarkers = get(oldProps.markers, index, []);
+            if (!isEqual(newMarkers, oldMarkers) && Array.isArray(newMarkers)) {
+                _this.handleMarkers(newMarkers, editor);
+            }
+        });
+        if (nextProps.className !== oldProps.className) {
+            var appliedClasses = this.refEditor.className;
+            var appliedClassesArray_1 = appliedClasses.trim().split(" ");
+            var oldClassesArray = oldProps.className.trim().split(" ");
+            oldClassesArray.forEach(function (oldClass) {
+                var index = appliedClassesArray_1.indexOf(oldClass);
+                appliedClassesArray_1.splice(index, 1);
+            });
+            this.refEditor.className =
+                " " + nextProps.className + " " + appliedClassesArray_1.join(" ");
+        }
+        if (nextProps.theme !== oldProps.theme) {
+            split.setTheme("ace/theme/" + nextProps.theme);
+        }
+        if (nextProps.focus && !oldProps.focus) {
+            this.splitEditor.focus();
+        }
+        if (nextProps.height !== this.props.height ||
+            nextProps.width !== this.props.width) {
+            this.editor.resize();
+        }
+    };
+    SplitComponent.prototype.componentWillUnmount = function () {
+        this.editor.destroy();
+        this.editor = null;
+    };
+    SplitComponent.prototype.onChange = function (event) {
+        if (this.props.onChange && !this.silent) {
+            var value_1 = [];
+            this.editor.env.split.forEach(function (editor) {
+                value_1.push(editor.getValue());
+            });
+            this.props.onChange(value_1, event);
+        }
+    };
+    SplitComponent.prototype.onSelectionChange = function (event) {
+        if (this.props.onSelectionChange) {
+            var value_2 = [];
+            this.editor.env.split.forEach(function (editor) {
+                value_2.push(editor.getSelection());
+            });
+            this.props.onSelectionChange(value_2, event);
+        }
+    };
+    SplitComponent.prototype.onCursorChange = function (event) {
+        if (this.props.onCursorChange) {
+            var value_3 = [];
+            this.editor.env.split.forEach(function (editor) {
+                value_3.push(editor.getSelection());
+            });
+            this.props.onCursorChange(value_3, event);
+        }
+    };
+    SplitComponent.prototype.onFocus = function (event) {
+        if (this.props.onFocus) {
+            this.props.onFocus(event);
+        }
+    };
+    SplitComponent.prototype.onInput = function (event) {
+        if (this.props.onInput) {
+            this.props.onInput(event);
+        }
+    };
+    SplitComponent.prototype.onBlur = function (event) {
+        if (this.props.onBlur) {
+            this.props.onBlur(event);
+        }
+    };
+    SplitComponent.prototype.onCopy = function (text) {
+        if (this.props.onCopy) {
+            this.props.onCopy(text);
+        }
+    };
+    SplitComponent.prototype.onPaste = function (text) {
+        if (this.props.onPaste) {
+            this.props.onPaste(text);
+        }
+    };
+    SplitComponent.prototype.onScroll = function () {
+        if (this.props.onScroll) {
+            this.props.onScroll(this.editor);
+        }
+    };
+    SplitComponent.prototype.handleOptions = function (props, editor) {
+        var setOptions = Object.keys(props.setOptions);
+        for (var y = 0; y < setOptions.length; y++) {
+            editor.setOption(setOptions[y], props.setOptions[setOptions[y]]);
+        }
+    };
+    SplitComponent.prototype.handleMarkers = function (markers, editor) {
+        // remove foreground markers
+        var currentMarkers = editor.getSession().getMarkers(true);
+        for (var i in currentMarkers) {
+            if (currentMarkers.hasOwnProperty(i)) {
+                editor.getSession().removeMarker(currentMarkers[i].id);
+            }
+        }
+        // remove background markers
+        currentMarkers = editor.getSession().getMarkers(false);
+        for (var i in currentMarkers) {
+            if (currentMarkers.hasOwnProperty(i)) {
+                editor.getSession().removeMarker(currentMarkers[i].id);
+            }
+        }
+        // add new markers
+        markers.forEach(function (_a) {
+            var startRow = _a.startRow, startCol = _a.startCol, endRow = _a.endRow, endCol = _a.endCol, className = _a.className, type = _a.type, _b = _a.inFront, inFront = _b === void 0 ? false : _b;
+            var range = new Range(startRow, startCol, endRow, endCol);
+            editor.getSession().addMarker(range, className, type, inFront);
+        });
+    };
+    SplitComponent.prototype.updateRef = function (item) {
+        this.refEditor = item;
+    };
+    SplitComponent.prototype.render = function () {
+        var _a = this.props, name = _a.name, width = _a.width, height = _a.height, style = _a.style;
+        var divStyle = __assign({ width: width, height: height }, style);
+        return React.createElement("div", { ref: this.updateRef, id: name, style: divStyle });
+    };
+    SplitComponent.propTypes = {
+        className: PropTypes.string,
+        debounceChangePeriod: PropTypes.number,
+        defaultValue: PropTypes.arrayOf(PropTypes.string),
+        focus: PropTypes.bool,
+        fontSize: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        height: PropTypes.string,
+        mode: PropTypes.string,
+        name: PropTypes.string,
+        onBlur: PropTypes.func,
+        onChange: PropTypes.func,
+        onCopy: PropTypes.func,
+        onFocus: PropTypes.func,
+        onInput: PropTypes.func,
+        onLoad: PropTypes.func,
+        onPaste: PropTypes.func,
+        onScroll: PropTypes.func,
+        orientation: PropTypes.string,
+        showGutter: PropTypes.bool,
+        splits: PropTypes.number,
+        theme: PropTypes.string,
+        value: PropTypes.arrayOf(PropTypes.string),
+        width: PropTypes.string,
+        onSelectionChange: PropTypes.func,
+        onCursorChange: PropTypes.func,
+        onBeforeLoad: PropTypes.func,
+        minLines: PropTypes.number,
+        maxLines: PropTypes.number,
+        readOnly: PropTypes.bool,
+        highlightActiveLine: PropTypes.bool,
+        tabSize: PropTypes.number,
+        showPrintMargin: PropTypes.bool,
+        cursorStart: PropTypes.number,
+        editorProps: PropTypes.object,
+        setOptions: PropTypes.object,
+        style: PropTypes.object,
+        scrollMargin: PropTypes.array,
+        annotations: PropTypes.array,
+        markers: PropTypes.array,
+        keyboardHandler: PropTypes.string,
+        wrapEnabled: PropTypes.bool,
+        enableBasicAutocompletion: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.array
+        ]),
+        enableLiveAutocompletion: PropTypes.oneOfType([
+            PropTypes.bool,
+            PropTypes.array
+        ]),
+        commands: PropTypes.array
+    };
+    SplitComponent.defaultProps = {
+        name: "brace-editor",
+        focus: false,
+        orientation: "beside",
+        splits: 2,
+        mode: "",
+        theme: "",
+        height: "500px",
+        width: "500px",
+        value: [],
+        fontSize: 12,
+        showGutter: true,
+        onChange: null,
+        onPaste: null,
+        onLoad: null,
+        onScroll: null,
+        minLines: null,
+        maxLines: null,
+        readOnly: false,
+        highlightActiveLine: true,
+        showPrintMargin: true,
+        tabSize: 4,
+        cursorStart: 1,
+        editorProps: {},
+        style: {},
+        scrollMargin: [0, 0, 0, 0],
+        setOptions: {},
+        wrapEnabled: false,
+        enableBasicAutocompletion: false,
+        enableLiveAutocompletion: false
+    };
+    return SplitComponent;
+}(React.Component));
 exports.default = SplitComponent;
 
-
-SplitComponent.propTypes = {
-  mode: _propTypes2.default.string,
-  splits: _propTypes2.default.number,
-  orientation: _propTypes2.default.string,
-  focus: _propTypes2.default.bool,
-  theme: _propTypes2.default.string,
-  name: _propTypes2.default.string,
-  className: _propTypes2.default.string,
-  height: _propTypes2.default.string,
-  width: _propTypes2.default.string,
-  fontSize: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.string]),
-  showGutter: _propTypes2.default.bool,
-  onChange: _propTypes2.default.func,
-  onCopy: _propTypes2.default.func,
-  onPaste: _propTypes2.default.func,
-  onFocus: _propTypes2.default.func,
-  onInput: _propTypes2.default.func,
-  onBlur: _propTypes2.default.func,
-  onScroll: _propTypes2.default.func,
-  value: _propTypes2.default.arrayOf(_propTypes2.default.string),
-  defaultValue: _propTypes2.default.arrayOf(_propTypes2.default.string),
-  debounceChangePeriod: _propTypes2.default.number,
-  onLoad: _propTypes2.default.func,
-  onSelectionChange: _propTypes2.default.func,
-  onCursorChange: _propTypes2.default.func,
-  onBeforeLoad: _propTypes2.default.func,
-  minLines: _propTypes2.default.number,
-  maxLines: _propTypes2.default.number,
-  readOnly: _propTypes2.default.bool,
-  highlightActiveLine: _propTypes2.default.bool,
-  tabSize: _propTypes2.default.number,
-  showPrintMargin: _propTypes2.default.bool,
-  cursorStart: _propTypes2.default.number,
-  editorProps: _propTypes2.default.object,
-  setOptions: _propTypes2.default.object,
-  style: _propTypes2.default.object,
-  scrollMargin: _propTypes2.default.array,
-  annotations: _propTypes2.default.array,
-  markers: _propTypes2.default.array,
-  keyboardHandler: _propTypes2.default.string,
-  wrapEnabled: _propTypes2.default.bool,
-  enableBasicAutocompletion: _propTypes2.default.oneOfType([_propTypes2.default.bool, _propTypes2.default.array]),
-  enableLiveAutocompletion: _propTypes2.default.oneOfType([_propTypes2.default.bool, _propTypes2.default.array]),
-  commands: _propTypes2.default.array
-};
-
-SplitComponent.defaultProps = {
-  name: 'brace-editor',
-  focus: false,
-  orientation: 'beside',
-  splits: 2,
-  mode: '',
-  theme: '',
-  height: '500px',
-  width: '500px',
-  value: [],
-  fontSize: 12,
-  showGutter: true,
-  onChange: null,
-  onPaste: null,
-  onLoad: null,
-  onScroll: null,
-  minLines: null,
-  maxLines: null,
-  readOnly: false,
-  highlightActiveLine: true,
-  showPrintMargin: true,
-  tabSize: 4,
-  cursorStart: 1,
-  editorProps: {},
-  style: {},
-  scrollMargin: [0, 0, 0, 0],
-  setOptions: {},
-  wrapEnabled: false,
-  enableBasicAutocompletion: false,
-  enableLiveAutocompletion: false
-};
-},{"./editorOptions.js":"../node_modules/react-ace/lib/editorOptions.js","brace":"../node_modules/brace/index.js","react":"../node_modules/react/index.js","prop-types":"../node_modules/prop-types/index.js","lodash.isequal":"../node_modules/lodash.isequal/index.js","lodash.get":"../node_modules/lodash.get/index.js","brace/ext/split":"../node_modules/brace/ext/split.js"}],"../node_modules/diff-match-patch/index.js":[function(require,module,exports) {
+},{"./editorOptions":"../node_modules/react-ace/lib/editorOptions.js","brace":"../node_modules/brace/index.js","brace/ext/split":"../node_modules/brace/ext/split.js","prop-types":"../node_modules/prop-types/index.js","react":"../node_modules/react/index.js","lodash.isequal":"../node_modules/lodash.isequal/index.js","lodash.get":"../node_modules/lodash.get/index.js"}],"../node_modules/diff-match-patch/index.js":[function(require,module,exports) {
 /**
  * Diff Match and Patch
  * Copyright 2018 The diff-match-patch Authors.
@@ -53130,372 +53103,260 @@ module.exports['DIFF_DELETE'] = DIFF_DELETE;
 module.exports['DIFF_INSERT'] = DIFF_INSERT;
 module.exports['DIFF_EQUAL'] = DIFF_EQUAL;
 },{}],"../node_modules/react-ace/lib/diff.js":[function(require,module,exports) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _split = require('./split.js');
-
-var _split2 = _interopRequireDefault(_split);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _diffMatchPatch = require('diff-match-patch');
-
-var _diffMatchPatch2 = _interopRequireDefault(_diffMatchPatch);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var DiffComponent = function (_Component) {
-  _inherits(DiffComponent, _Component);
-
-  function DiffComponent(props) {
-    _classCallCheck(this, DiffComponent);
-
-    var _this = _possibleConstructorReturn(this, (DiffComponent.__proto__ || Object.getPrototypeOf(DiffComponent)).call(this, props));
-
-    _this.state = {
-      value: _this.props.value
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
     };
-    _this.onChange = _this.onChange.bind(_this);
-    _this.diff = _this.diff.bind(_this);
-    return _this;
-  }
-
-  _createClass(DiffComponent, [{
-    key: 'componentDidUpdate',
-    value: function componentDidUpdate() {
-      var value = this.props.value;
-
-
-      if (value !== this.state.value) {
-        this.setState({ value: value });
-      }
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var PropTypes = require("prop-types");
+var React = require("react");
+var split_1 = require("./split");
+var DiffMatchPatch = require("diff-match-patch");
+var DiffComponent = /** @class */ (function (_super) {
+    __extends(DiffComponent, _super);
+    function DiffComponent(props) {
+        var _this = _super.call(this, props) || this;
+        _this.state = {
+            value: _this.props.value
+        };
+        _this.onChange = _this.onChange.bind(_this);
+        _this.diff = _this.diff.bind(_this);
+        return _this;
     }
-  }, {
-    key: 'onChange',
-    value: function onChange(value) {
-      this.setState({
-        value: value
-      });
-      if (this.props.onChange) {
-        this.props.onChange(value);
-      }
-    }
-  }, {
-    key: 'diff',
-    value: function diff() {
-      var dmp = new _diffMatchPatch2.default();
-      var lhString = this.state.value[0];
-      var rhString = this.state.value[1];
-
-      if (lhString.length === 0 && rhString.length === 0) {
-        return [];
-      }
-
-      var diff = dmp.diff_main(lhString, rhString);
-      dmp.diff_cleanupSemantic(diff);
-
-      var diffedLines = this.generateDiffedLines(diff);
-      var codeEditorSettings = this.setCodeMarkers(diffedLines);
-      return codeEditorSettings;
-    }
-  }, {
-    key: 'generateDiffedLines',
-    value: function generateDiffedLines(diff) {
-      var C = {
-        DIFF_EQUAL: 0,
-        DIFF_DELETE: -1,
-        DIFF_INSERT: 1
-      };
-
-      var diffedLines = {
-        left: [],
-        right: []
-      };
-
-      var cursor = {
-        left: 1,
-        right: 1
-      };
-
-      diff.forEach(function (chunk) {
-        var chunkType = chunk[0];
-        var text = chunk[1];
-        var lines = text.split('\n').length - 1;
-
-        // diff-match-patch sometimes returns empty strings at random
-        if (text.length === 0) {
-          return;
+    DiffComponent.prototype.componentDidUpdate = function () {
+        var value = this.props.value;
+        if (value !== this.state.value) {
+            this.setState({ value: value });
         }
-
-        var firstChar = text[0];
-        var lastChar = text[text.length - 1];
-        var linesToHighlight = 0;
-
-        switch (chunkType) {
-          case C.DIFF_EQUAL:
-            cursor.left += lines;
-            cursor.right += lines;
-
-            break;
-          case C.DIFF_DELETE:
-            // If the deletion starts with a newline, push the cursor down to that line
-            if (firstChar === '\n') {
-              cursor.left++;
-              lines--;
-            }
-
-            linesToHighlight = lines;
-
-            // If the deletion does not include a newline, highlight the same line on the right
-            if (linesToHighlight === 0) {
-              diffedLines.right.push({
-                startLine: cursor.right,
-                endLine: cursor.right
-              });
-            }
-
-            // If the last character is a newline, we don't want to highlight that line
-            if (lastChar === '\n') {
-              linesToHighlight -= 1;
-            }
-
-            diffedLines.left.push({
-              startLine: cursor.left,
-              endLine: cursor.left + linesToHighlight
-            });
-
-            cursor.left += lines;
-            break;
-          case C.DIFF_INSERT:
-            // If the insertion starts with a newline, push the cursor down to that line
-            if (firstChar === '\n') {
-              cursor.right++;
-              lines--;
-            }
-
-            linesToHighlight = lines;
-
-            // If the insertion does not include a newline, highlight the same line on the left
-            if (linesToHighlight === 0) {
-              diffedLines.left.push({
-                startLine: cursor.left,
-                endLine: cursor.left
-              });
-            }
-
-            // If the last character is a newline, we don't want to highlight that line
-            if (lastChar === '\n') {
-              linesToHighlight -= 1;
-            }
-
-            diffedLines.right.push({
-              startLine: cursor.right,
-              endLine: cursor.right + linesToHighlight
-            });
-
-            cursor.right += lines;
-            break;
-          default:
-            throw new Error('Diff type was not defined.');
+    };
+    DiffComponent.prototype.onChange = function (value) {
+        this.setState({
+            value: value
+        });
+        if (this.props.onChange) {
+            this.props.onChange(value);
         }
-      });
-      return diffedLines;
-    }
-
+    };
+    DiffComponent.prototype.diff = function () {
+        var dmp = new DiffMatchPatch();
+        var lhString = this.state.value[0];
+        var rhString = this.state.value[1];
+        if (lhString.length === 0 && rhString.length === 0) {
+            return [];
+        }
+        var diff = dmp.diff_main(lhString, rhString);
+        dmp.diff_cleanupSemantic(diff);
+        var diffedLines = this.generateDiffedLines(diff);
+        var codeEditorSettings = this.setCodeMarkers(diffedLines);
+        return codeEditorSettings;
+    };
+    DiffComponent.prototype.generateDiffedLines = function (diff) {
+        var C = {
+            DIFF_EQUAL: 0,
+            DIFF_DELETE: -1,
+            DIFF_INSERT: 1
+        };
+        var diffedLines = {
+            left: [],
+            right: []
+        };
+        var cursor = {
+            left: 1,
+            right: 1
+        };
+        diff.forEach(function (chunk) {
+            var chunkType = chunk[0];
+            var text = chunk[1];
+            var lines = text.split("\n").length - 1;
+            // diff-match-patch sometimes returns empty strings at random
+            if (text.length === 0) {
+                return;
+            }
+            var firstChar = text[0];
+            var lastChar = text[text.length - 1];
+            var linesToHighlight = 0;
+            switch (chunkType) {
+                case C.DIFF_EQUAL:
+                    cursor.left += lines;
+                    cursor.right += lines;
+                    break;
+                case C.DIFF_DELETE:
+                    // If the deletion starts with a newline, push the cursor down to that line
+                    if (firstChar === "\n") {
+                        cursor.left++;
+                        lines--;
+                    }
+                    linesToHighlight = lines;
+                    // If the deletion does not include a newline, highlight the same line on the right
+                    if (linesToHighlight === 0) {
+                        diffedLines.right.push({
+                            startLine: cursor.right,
+                            endLine: cursor.right
+                        });
+                    }
+                    // If the last character is a newline, we don't want to highlight that line
+                    if (lastChar === "\n") {
+                        linesToHighlight -= 1;
+                    }
+                    diffedLines.left.push({
+                        startLine: cursor.left,
+                        endLine: cursor.left + linesToHighlight
+                    });
+                    cursor.left += lines;
+                    break;
+                case C.DIFF_INSERT:
+                    // If the insertion starts with a newline, push the cursor down to that line
+                    if (firstChar === "\n") {
+                        cursor.right++;
+                        lines--;
+                    }
+                    linesToHighlight = lines;
+                    // If the insertion does not include a newline, highlight the same line on the left
+                    if (linesToHighlight === 0) {
+                        diffedLines.left.push({
+                            startLine: cursor.left,
+                            endLine: cursor.left
+                        });
+                    }
+                    // If the last character is a newline, we don't want to highlight that line
+                    if (lastChar === "\n") {
+                        linesToHighlight -= 1;
+                    }
+                    diffedLines.right.push({
+                        startLine: cursor.right,
+                        endLine: cursor.right + linesToHighlight
+                    });
+                    cursor.right += lines;
+                    break;
+                default:
+                    throw new Error("Diff type was not defined.");
+            }
+        });
+        return diffedLines;
+    };
     // Receives a collection of line numbers and iterates through them to highlight appropriately
     // Returns an object that tells the render() method how to display the code editors
-
-  }, {
-    key: 'setCodeMarkers',
-    value: function setCodeMarkers() {
-      var diffedLines = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { left: [], right: [] };
-
-      var codeEditorSettings = [];
-
-      var newMarkerSet = {
-        left: [],
-        right: []
-      };
-
-      for (var i = 0; i < diffedLines.left.length; i++) {
-        var markerObj = {
-          startRow: diffedLines.left[i].startLine - 1,
-          endRow: diffedLines.left[i].endLine,
-          type: 'text',
-          className: 'codeMarker'
+    DiffComponent.prototype.setCodeMarkers = function (diffedLines) {
+        if (diffedLines === void 0) { diffedLines = { left: [], right: [] }; }
+        var codeEditorSettings = [];
+        var newMarkerSet = {
+            left: [],
+            right: []
         };
-        newMarkerSet.left.push(markerObj);
-      }
-
-      for (var _i = 0; _i < diffedLines.right.length; _i++) {
-        var _markerObj = {
-          startRow: diffedLines.right[_i].startLine - 1,
-          endRow: diffedLines.right[_i].endLine,
-          type: 'text',
-          className: 'codeMarker'
-        };
-        newMarkerSet.right.push(_markerObj);
-      }
-
-      codeEditorSettings[0] = newMarkerSet.left;
-      codeEditorSettings[1] = newMarkerSet.right;
-
-      return codeEditorSettings;
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var markers = this.diff();
-      return _react2.default.createElement(_split2.default, {
-        name: this.props.name,
-        className: this.props.className,
-        focus: this.props.focus,
-        orientation: this.props.orientation,
-        splits: this.props.splits,
-        mode: this.props.mode,
-        theme: this.props.theme,
-        height: this.props.height,
-        width: this.props.width,
-        fontSize: this.props.fontSize,
-        showGutter: this.props.showGutter,
-        onChange: this.onChange,
-        onPaste: this.props.onPaste,
-        onLoad: this.props.onLoad,
-        onScroll: this.props.onScroll,
-        minLines: this.props.minLines,
-        maxLines: this.props.maxLines,
-        readOnly: this.props.readOnly,
-        highlightActiveLine: this.props.highlightActiveLine,
-        showPrintMargin: this.props.showPrintMargin,
-        tabSize: this.props.tabSize,
-        cursorStart: this.props.cursorStart,
-        editorProps: this.props.editorProps,
-        style: this.props.style,
-        scrollMargin: this.props.scrollMargin,
-        setOptions: this.props.setOptions,
-        wrapEnabled: this.props.wrapEnabled,
-        enableBasicAutocompletion: this.props.enableBasicAutocompletion,
-        enableLiveAutocompletion: this.props.enableLiveAutocompletion,
-        value: this.state.value,
-        markers: markers
-      });
-    }
-  }]);
-
-  return DiffComponent;
-}(_react.Component);
-
+        for (var i = 0; i < diffedLines.left.length; i++) {
+            var markerObj = {
+                startRow: diffedLines.left[i].startLine - 1,
+                endRow: diffedLines.left[i].endLine,
+                type: "text",
+                className: "codeMarker"
+            };
+            newMarkerSet.left.push(markerObj);
+        }
+        for (var i = 0; i < diffedLines.right.length; i++) {
+            var markerObj = {
+                startRow: diffedLines.right[i].startLine - 1,
+                endRow: diffedLines.right[i].endLine,
+                type: "text",
+                className: "codeMarker"
+            };
+            newMarkerSet.right.push(markerObj);
+        }
+        codeEditorSettings[0] = newMarkerSet.left;
+        codeEditorSettings[1] = newMarkerSet.right;
+        return codeEditorSettings;
+    };
+    DiffComponent.prototype.render = function () {
+        var markers = this.diff();
+        return (React.createElement(split_1.default, { name: this.props.name, className: this.props.className, focus: this.props.focus, orientation: this.props.orientation, splits: this.props.splits, mode: this.props.mode, theme: this.props.theme, height: this.props.height, width: this.props.width, fontSize: this.props.fontSize, showGutter: this.props.showGutter, onChange: this.onChange, onPaste: this.props.onPaste, onLoad: this.props.onLoad, onScroll: this.props.onScroll, minLines: this.props.minLines, maxLines: this.props.maxLines, readOnly: this.props.readOnly, highlightActiveLine: this.props.highlightActiveLine, showPrintMargin: this.props.showPrintMargin, tabSize: this.props.tabSize, cursorStart: this.props.cursorStart, editorProps: this.props.editorProps, style: this.props.style, scrollMargin: this.props.scrollMargin, setOptions: this.props.setOptions, wrapEnabled: this.props.wrapEnabled, enableBasicAutocompletion: this.props.enableBasicAutocompletion, enableLiveAutocompletion: this.props.enableLiveAutocompletion, value: this.state.value, markers: markers }));
+    };
+    DiffComponent.propTypes = {
+        cursorStart: PropTypes.number,
+        editorProps: PropTypes.object,
+        enableBasicAutocompletion: PropTypes.bool,
+        enableLiveAutocompletion: PropTypes.bool,
+        focus: PropTypes.bool,
+        fontSize: PropTypes.number,
+        height: PropTypes.string,
+        highlightActiveLine: PropTypes.bool,
+        maxLines: PropTypes.number,
+        minLines: PropTypes.number,
+        mode: PropTypes.string,
+        name: PropTypes.string,
+        className: PropTypes.string,
+        onLoad: PropTypes.func,
+        onPaste: PropTypes.func,
+        onScroll: PropTypes.func,
+        onChange: PropTypes.func,
+        orientation: PropTypes.string,
+        readOnly: PropTypes.bool,
+        scrollMargin: PropTypes.array,
+        setOptions: PropTypes.object,
+        showGutter: PropTypes.bool,
+        showPrintMargin: PropTypes.bool,
+        splits: PropTypes.number,
+        style: PropTypes.object,
+        tabSize: PropTypes.number,
+        theme: PropTypes.string,
+        value: PropTypes.array,
+        width: PropTypes.string,
+        wrapEnabled: PropTypes.bool
+    };
+    DiffComponent.defaultProps = {
+        cursorStart: 1,
+        editorProps: {},
+        enableBasicAutocompletion: false,
+        enableLiveAutocompletion: false,
+        focus: false,
+        fontSize: 12,
+        height: "500px",
+        highlightActiveLine: true,
+        maxLines: null,
+        minLines: null,
+        mode: "",
+        name: "brace-editor",
+        onLoad: null,
+        onScroll: null,
+        onPaste: null,
+        onChange: null,
+        orientation: "beside",
+        readOnly: false,
+        scrollMargin: [0, 0, 0, 0],
+        setOptions: {},
+        showGutter: true,
+        showPrintMargin: true,
+        splits: 2,
+        style: {},
+        tabSize: 4,
+        theme: "github",
+        value: ["", ""],
+        width: "500px",
+        wrapEnabled: true
+    };
+    return DiffComponent;
+}(React.Component));
 exports.default = DiffComponent;
 
+},{"prop-types":"../node_modules/prop-types/index.js","react":"../node_modules/react/index.js","./split":"../node_modules/react-ace/lib/split.js","diff-match-patch":"../node_modules/diff-match-patch/index.js"}],"../node_modules/react-ace/lib/index.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var ace_1 = require("./ace");
+var diff_1 = require("./diff");
+exports.diff = diff_1.default;
+var split_1 = require("./split");
+exports.split = split_1.default;
+exports.default = ace_1.default;
 
-DiffComponent.propTypes = {
-  cursorStart: _propTypes2.default.number,
-  editorProps: _propTypes2.default.object,
-  enableBasicAutocompletion: _propTypes2.default.bool,
-  enableLiveAutocompletion: _propTypes2.default.bool,
-  focus: _propTypes2.default.bool,
-  fontSize: _propTypes2.default.number,
-  height: _propTypes2.default.string,
-  highlightActiveLine: _propTypes2.default.bool,
-  maxLines: _propTypes2.default.func,
-  minLines: _propTypes2.default.func,
-  mode: _propTypes2.default.string,
-  name: _propTypes2.default.string,
-  className: _propTypes2.default.string,
-  onLoad: _propTypes2.default.func,
-  onPaste: _propTypes2.default.func,
-  onScroll: _propTypes2.default.func,
-  onChange: _propTypes2.default.func,
-  orientation: _propTypes2.default.string,
-  readOnly: _propTypes2.default.bool,
-  scrollMargin: _propTypes2.default.array,
-  setOptions: _propTypes2.default.object,
-  showGutter: _propTypes2.default.bool,
-  showPrintMargin: _propTypes2.default.bool,
-  splits: _propTypes2.default.number,
-  style: _propTypes2.default.object,
-  tabSize: _propTypes2.default.number,
-  theme: _propTypes2.default.string,
-  value: _propTypes2.default.array,
-  width: _propTypes2.default.string,
-  wrapEnabled: _propTypes2.default.bool
-};
-
-DiffComponent.defaultProps = {
-  cursorStart: 1,
-  editorProps: {},
-  enableBasicAutocompletion: false,
-  enableLiveAutocompletion: false,
-  focus: false,
-  fontSize: 12,
-  height: '500px',
-  highlightActiveLine: true,
-  maxLines: null,
-  minLines: null,
-  mode: '',
-  name: 'brace-editor',
-  onLoad: null,
-  onScroll: null,
-  onPaste: null,
-  onChange: null,
-  orientation: 'beside',
-  readOnly: false,
-  scrollMargin: [0, 0, 0, 0],
-  setOptions: {},
-  showGutter: true,
-  showPrintMargin: true,
-  splits: 2,
-  style: {},
-  tabSize: 4,
-  theme: 'github',
-  value: ['', ''],
-  width: '500px',
-  wrapEnabled: true
-};
-},{"./split.js":"../node_modules/react-ace/lib/split.js","react":"../node_modules/react/index.js","prop-types":"../node_modules/prop-types/index.js","diff-match-patch":"../node_modules/diff-match-patch/index.js"}],"../node_modules/react-ace/lib/index.js":[function(require,module,exports) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.diff = exports.split = undefined;
-
-var _ace = require('./ace.js');
-
-var _ace2 = _interopRequireDefault(_ace);
-
-var _split = require('./split.js');
-
-var _split2 = _interopRequireDefault(_split);
-
-var _diff = require('./diff.js');
-
-var _diff2 = _interopRequireDefault(_diff);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.split = _split2.default;
-exports.diff = _diff2.default;
-exports.default = _ace2.default;
-},{"./ace.js":"../node_modules/react-ace/lib/ace.js","./split.js":"../node_modules/react-ace/lib/split.js","./diff.js":"../node_modules/react-ace/lib/diff.js"}],"../node_modules/brace/worker/json.js":[function(require,module,exports) {
+},{"./ace":"../node_modules/react-ace/lib/ace.js","./diff":"../node_modules/react-ace/lib/diff.js","./split":"../node_modules/react-ace/lib/split.js"}],"../node_modules/brace/worker/json.js":[function(require,module,exports) {
 module.exports.id = 'ace/mode/json_worker';
 module.exports.src = "\"no use strict\";!function(window){function resolveModuleId(id,paths){for(var testPath=id,tail=\"\";testPath;){var alias=paths[testPath];if(\"string\"==typeof alias)return alias+tail;if(alias)return alias.location.replace(/\\/*$/,\"/\")+(tail||alias.main||alias.name);if(alias===!1)return\"\";var i=testPath.lastIndexOf(\"/\");if(-1===i)break;tail=testPath.substr(i)+tail,testPath=testPath.slice(0,i)}return id}if(!(void 0!==window.window&&window.document||window.acequire&&window.define)){window.console||(window.console=function(){var msgs=Array.prototype.slice.call(arguments,0);postMessage({type:\"log\",data:msgs})},window.console.error=window.console.warn=window.console.log=window.console.trace=window.console),window.window=window,window.ace=window,window.onerror=function(message,file,line,col,err){postMessage({type:\"error\",data:{message:message,data:err.data,file:file,line:line,col:col,stack:err.stack}})},window.normalizeModule=function(parentId,moduleName){if(-1!==moduleName.indexOf(\"!\")){var chunks=moduleName.split(\"!\");return window.normalizeModule(parentId,chunks[0])+\"!\"+window.normalizeModule(parentId,chunks[1])}if(\".\"==moduleName.charAt(0)){var base=parentId.split(\"/\").slice(0,-1).join(\"/\");for(moduleName=(base?base+\"/\":\"\")+moduleName;-1!==moduleName.indexOf(\".\")&&previous!=moduleName;){var previous=moduleName;moduleName=moduleName.replace(/^\\.\\//,\"\").replace(/\\/\\.\\//,\"/\").replace(/[^\\/]+\\/\\.\\.\\//,\"\")}}return moduleName},window.acequire=function acequire(parentId,id){if(id||(id=parentId,parentId=null),!id.charAt)throw Error(\"worker.js acequire() accepts only (parentId, id) as arguments\");id=window.normalizeModule(parentId,id);var module=window.acequire.modules[id];if(module)return module.initialized||(module.initialized=!0,module.exports=module.factory().exports),module.exports;if(!window.acequire.tlns)return console.log(\"unable to load \"+id);var path=resolveModuleId(id,window.acequire.tlns);return\".js\"!=path.slice(-3)&&(path+=\".js\"),window.acequire.id=id,window.acequire.modules[id]={},importScripts(path),window.acequire(parentId,id)},window.acequire.modules={},window.acequire.tlns={},window.define=function(id,deps,factory){if(2==arguments.length?(factory=deps,\"string\"!=typeof id&&(deps=id,id=window.acequire.id)):1==arguments.length&&(factory=id,deps=[],id=window.acequire.id),\"function\"!=typeof factory)return window.acequire.modules[id]={exports:factory,initialized:!0},void 0;deps.length||(deps=[\"require\",\"exports\",\"module\"]);var req=function(childId){return window.acequire(id,childId)};window.acequire.modules[id]={exports:{},factory:function(){var module=this,returnExports=factory.apply(this,deps.map(function(dep){switch(dep){case\"require\":return req;case\"exports\":return module.exports;case\"module\":return module;default:return req(dep)}}));return returnExports&&(module.exports=returnExports),module}}},window.define.amd={},acequire.tlns={},window.initBaseUrls=function(topLevelNamespaces){for(var i in topLevelNamespaces)acequire.tlns[i]=topLevelNamespaces[i]},window.initSender=function(){var EventEmitter=window.acequire(\"ace/lib/event_emitter\").EventEmitter,oop=window.acequire(\"ace/lib/oop\"),Sender=function(){};return function(){oop.implement(this,EventEmitter),this.callback=function(data,callbackId){postMessage({type:\"call\",id:callbackId,data:data})},this.emit=function(name,data){postMessage({type:\"event\",name:name,data:data})}}.call(Sender.prototype),new Sender};var main=window.main=null,sender=window.sender=null;window.onmessage=function(e){var msg=e.data;if(msg.event&&sender)sender._signal(msg.event,msg.data);else if(msg.command)if(main[msg.command])main[msg.command].apply(main,msg.args);else{if(!window[msg.command])throw Error(\"Unknown command:\"+msg.command);window[msg.command].apply(window,msg.args)}else if(msg.init){window.initBaseUrls(msg.tlns),acequire(\"ace/lib/es5-shim\"),sender=window.sender=window.initSender();var clazz=acequire(msg.module)[msg.classname];main=window.main=new clazz(sender)}}}}(this),ace.define(\"ace/lib/oop\",[\"require\",\"exports\",\"module\"],function(acequire,exports){\"use strict\";exports.inherits=function(ctor,superCtor){ctor.super_=superCtor,ctor.prototype=Object.create(superCtor.prototype,{constructor:{value:ctor,enumerable:!1,writable:!0,configurable:!0}})},exports.mixin=function(obj,mixin){for(var key in mixin)obj[key]=mixin[key];return obj},exports.implement=function(proto,mixin){exports.mixin(proto,mixin)}}),ace.define(\"ace/range\",[\"require\",\"exports\",\"module\"],function(acequire,exports){\"use strict\";var comparePoints=function(p1,p2){return p1.row-p2.row||p1.column-p2.column},Range=function(startRow,startColumn,endRow,endColumn){this.start={row:startRow,column:startColumn},this.end={row:endRow,column:endColumn}};(function(){this.isEqual=function(range){return this.start.row===range.start.row&&this.end.row===range.end.row&&this.start.column===range.start.column&&this.end.column===range.end.column},this.toString=function(){return\"Range: [\"+this.start.row+\"/\"+this.start.column+\"] -> [\"+this.end.row+\"/\"+this.end.column+\"]\"},this.contains=function(row,column){return 0==this.compare(row,column)},this.compareRange=function(range){var cmp,end=range.end,start=range.start;return cmp=this.compare(end.row,end.column),1==cmp?(cmp=this.compare(start.row,start.column),1==cmp?2:0==cmp?1:0):-1==cmp?-2:(cmp=this.compare(start.row,start.column),-1==cmp?-1:1==cmp?42:0)},this.comparePoint=function(p){return this.compare(p.row,p.column)},this.containsRange=function(range){return 0==this.comparePoint(range.start)&&0==this.comparePoint(range.end)},this.intersects=function(range){var cmp=this.compareRange(range);return-1==cmp||0==cmp||1==cmp},this.isEnd=function(row,column){return this.end.row==row&&this.end.column==column},this.isStart=function(row,column){return this.start.row==row&&this.start.column==column},this.setStart=function(row,column){\"object\"==typeof row?(this.start.column=row.column,this.start.row=row.row):(this.start.row=row,this.start.column=column)},this.setEnd=function(row,column){\"object\"==typeof row?(this.end.column=row.column,this.end.row=row.row):(this.end.row=row,this.end.column=column)},this.inside=function(row,column){return 0==this.compare(row,column)?this.isEnd(row,column)||this.isStart(row,column)?!1:!0:!1},this.insideStart=function(row,column){return 0==this.compare(row,column)?this.isEnd(row,column)?!1:!0:!1},this.insideEnd=function(row,column){return 0==this.compare(row,column)?this.isStart(row,column)?!1:!0:!1},this.compare=function(row,column){return this.isMultiLine()||row!==this.start.row?this.start.row>row?-1:row>this.end.row?1:this.start.row===row?column>=this.start.column?0:-1:this.end.row===row?this.end.column>=column?0:1:0:this.start.column>column?-1:column>this.end.column?1:0},this.compareStart=function(row,column){return this.start.row==row&&this.start.column==column?-1:this.compare(row,column)},this.compareEnd=function(row,column){return this.end.row==row&&this.end.column==column?1:this.compare(row,column)},this.compareInside=function(row,column){return this.end.row==row&&this.end.column==column?1:this.start.row==row&&this.start.column==column?-1:this.compare(row,column)},this.clipRows=function(firstRow,lastRow){if(this.end.row>lastRow)var end={row:lastRow+1,column:0};else if(firstRow>this.end.row)var end={row:firstRow,column:0};if(this.start.row>lastRow)var start={row:lastRow+1,column:0};else if(firstRow>this.start.row)var start={row:firstRow,column:0};return Range.fromPoints(start||this.start,end||this.end)},this.extend=function(row,column){var cmp=this.compare(row,column);if(0==cmp)return this;if(-1==cmp)var start={row:row,column:column};else var end={row:row,column:column};return Range.fromPoints(start||this.start,end||this.end)},this.isEmpty=function(){return this.start.row===this.end.row&&this.start.column===this.end.column},this.isMultiLine=function(){return this.start.row!==this.end.row},this.clone=function(){return Range.fromPoints(this.start,this.end)},this.collapseRows=function(){return 0==this.end.column?new Range(this.start.row,0,Math.max(this.start.row,this.end.row-1),0):new Range(this.start.row,0,this.end.row,0)},this.toScreenRange=function(session){var screenPosStart=session.documentToScreenPosition(this.start),screenPosEnd=session.documentToScreenPosition(this.end);return new Range(screenPosStart.row,screenPosStart.column,screenPosEnd.row,screenPosEnd.column)},this.moveBy=function(row,column){this.start.row+=row,this.start.column+=column,this.end.row+=row,this.end.column+=column}}).call(Range.prototype),Range.fromPoints=function(start,end){return new Range(start.row,start.column,end.row,end.column)},Range.comparePoints=comparePoints,Range.comparePoints=function(p1,p2){return p1.row-p2.row||p1.column-p2.column},exports.Range=Range}),ace.define(\"ace/apply_delta\",[\"require\",\"exports\",\"module\"],function(acequire,exports){\"use strict\";exports.applyDelta=function(docLines,delta){var row=delta.start.row,startColumn=delta.start.column,line=docLines[row]||\"\";switch(delta.action){case\"insert\":var lines=delta.lines;if(1===lines.length)docLines[row]=line.substring(0,startColumn)+delta.lines[0]+line.substring(startColumn);else{var args=[row,1].concat(delta.lines);docLines.splice.apply(docLines,args),docLines[row]=line.substring(0,startColumn)+docLines[row],docLines[row+delta.lines.length-1]+=line.substring(startColumn)}break;case\"remove\":var endColumn=delta.end.column,endRow=delta.end.row;row===endRow?docLines[row]=line.substring(0,startColumn)+line.substring(endColumn):docLines.splice(row,endRow-row+1,line.substring(0,startColumn)+docLines[endRow].substring(endColumn))}}}),ace.define(\"ace/lib/event_emitter\",[\"require\",\"exports\",\"module\"],function(acequire,exports){\"use strict\";var EventEmitter={},stopPropagation=function(){this.propagationStopped=!0},preventDefault=function(){this.defaultPrevented=!0};EventEmitter._emit=EventEmitter._dispatchEvent=function(eventName,e){this._eventRegistry||(this._eventRegistry={}),this._defaultHandlers||(this._defaultHandlers={});var listeners=this._eventRegistry[eventName]||[],defaultHandler=this._defaultHandlers[eventName];if(listeners.length||defaultHandler){\"object\"==typeof e&&e||(e={}),e.type||(e.type=eventName),e.stopPropagation||(e.stopPropagation=stopPropagation),e.preventDefault||(e.preventDefault=preventDefault),listeners=listeners.slice();for(var i=0;listeners.length>i&&(listeners[i](e,this),!e.propagationStopped);i++);return defaultHandler&&!e.defaultPrevented?defaultHandler(e,this):void 0}},EventEmitter._signal=function(eventName,e){var listeners=(this._eventRegistry||{})[eventName];if(listeners){listeners=listeners.slice();for(var i=0;listeners.length>i;i++)listeners[i](e,this)}},EventEmitter.once=function(eventName,callback){var _self=this;callback&&this.addEventListener(eventName,function newCallback(){_self.removeEventListener(eventName,newCallback),callback.apply(null,arguments)})},EventEmitter.setDefaultHandler=function(eventName,callback){var handlers=this._defaultHandlers;if(handlers||(handlers=this._defaultHandlers={_disabled_:{}}),handlers[eventName]){var old=handlers[eventName],disabled=handlers._disabled_[eventName];disabled||(handlers._disabled_[eventName]=disabled=[]),disabled.push(old);var i=disabled.indexOf(callback);-1!=i&&disabled.splice(i,1)}handlers[eventName]=callback},EventEmitter.removeDefaultHandler=function(eventName,callback){var handlers=this._defaultHandlers;if(handlers){var disabled=handlers._disabled_[eventName];if(handlers[eventName]==callback)handlers[eventName],disabled&&this.setDefaultHandler(eventName,disabled.pop());else if(disabled){var i=disabled.indexOf(callback);-1!=i&&disabled.splice(i,1)}}},EventEmitter.on=EventEmitter.addEventListener=function(eventName,callback,capturing){this._eventRegistry=this._eventRegistry||{};var listeners=this._eventRegistry[eventName];return listeners||(listeners=this._eventRegistry[eventName]=[]),-1==listeners.indexOf(callback)&&listeners[capturing?\"unshift\":\"push\"](callback),callback},EventEmitter.off=EventEmitter.removeListener=EventEmitter.removeEventListener=function(eventName,callback){this._eventRegistry=this._eventRegistry||{};var listeners=this._eventRegistry[eventName];if(listeners){var index=listeners.indexOf(callback);-1!==index&&listeners.splice(index,1)}},EventEmitter.removeAllListeners=function(eventName){this._eventRegistry&&(this._eventRegistry[eventName]=[])},exports.EventEmitter=EventEmitter}),ace.define(\"ace/anchor\",[\"require\",\"exports\",\"module\",\"ace/lib/oop\",\"ace/lib/event_emitter\"],function(acequire,exports){\"use strict\";var oop=acequire(\"./lib/oop\"),EventEmitter=acequire(\"./lib/event_emitter\").EventEmitter,Anchor=exports.Anchor=function(doc,row,column){this.$onChange=this.onChange.bind(this),this.attach(doc),column===void 0?this.setPosition(row.row,row.column):this.setPosition(row,column)};(function(){function $pointsInOrder(point1,point2,equalPointsInOrder){var bColIsAfter=equalPointsInOrder?point1.column<=point2.column:point1.column<point2.column;return point1.row<point2.row||point1.row==point2.row&&bColIsAfter}function $getTransformedPoint(delta,point,moveIfEqual){var deltaIsInsert=\"insert\"==delta.action,deltaRowShift=(deltaIsInsert?1:-1)*(delta.end.row-delta.start.row),deltaColShift=(deltaIsInsert?1:-1)*(delta.end.column-delta.start.column),deltaStart=delta.start,deltaEnd=deltaIsInsert?deltaStart:delta.end;return $pointsInOrder(point,deltaStart,moveIfEqual)?{row:point.row,column:point.column}:$pointsInOrder(deltaEnd,point,!moveIfEqual)?{row:point.row+deltaRowShift,column:point.column+(point.row==deltaEnd.row?deltaColShift:0)}:{row:deltaStart.row,column:deltaStart.column}}oop.implement(this,EventEmitter),this.getPosition=function(){return this.$clipPositionToDocument(this.row,this.column)},this.getDocument=function(){return this.document},this.$insertRight=!1,this.onChange=function(delta){if(!(delta.start.row==delta.end.row&&delta.start.row!=this.row||delta.start.row>this.row)){var point=$getTransformedPoint(delta,{row:this.row,column:this.column},this.$insertRight);this.setPosition(point.row,point.column,!0)}},this.setPosition=function(row,column,noClip){var pos;if(pos=noClip?{row:row,column:column}:this.$clipPositionToDocument(row,column),this.row!=pos.row||this.column!=pos.column){var old={row:this.row,column:this.column};this.row=pos.row,this.column=pos.column,this._signal(\"change\",{old:old,value:pos})}},this.detach=function(){this.document.removeEventListener(\"change\",this.$onChange)},this.attach=function(doc){this.document=doc||this.document,this.document.on(\"change\",this.$onChange)},this.$clipPositionToDocument=function(row,column){var pos={};return row>=this.document.getLength()?(pos.row=Math.max(0,this.document.getLength()-1),pos.column=this.document.getLine(pos.row).length):0>row?(pos.row=0,pos.column=0):(pos.row=row,pos.column=Math.min(this.document.getLine(pos.row).length,Math.max(0,column))),0>column&&(pos.column=0),pos}}).call(Anchor.prototype)}),ace.define(\"ace/document\",[\"require\",\"exports\",\"module\",\"ace/lib/oop\",\"ace/apply_delta\",\"ace/lib/event_emitter\",\"ace/range\",\"ace/anchor\"],function(acequire,exports){\"use strict\";var oop=acequire(\"./lib/oop\"),applyDelta=acequire(\"./apply_delta\").applyDelta,EventEmitter=acequire(\"./lib/event_emitter\").EventEmitter,Range=acequire(\"./range\").Range,Anchor=acequire(\"./anchor\").Anchor,Document=function(textOrLines){this.$lines=[\"\"],0===textOrLines.length?this.$lines=[\"\"]:Array.isArray(textOrLines)?this.insertMergedLines({row:0,column:0},textOrLines):this.insert({row:0,column:0},textOrLines)};(function(){oop.implement(this,EventEmitter),this.setValue=function(text){var len=this.getLength()-1;this.remove(new Range(0,0,len,this.getLine(len).length)),this.insert({row:0,column:0},text)},this.getValue=function(){return this.getAllLines().join(this.getNewLineCharacter())},this.createAnchor=function(row,column){return new Anchor(this,row,column)},this.$split=0===\"aaa\".split(/a/).length?function(text){return text.replace(/\\r\\n|\\r/g,\"\\n\").split(\"\\n\")}:function(text){return text.split(/\\r\\n|\\r|\\n/)},this.$detectNewLine=function(text){var match=text.match(/^.*?(\\r\\n|\\r|\\n)/m);this.$autoNewLine=match?match[1]:\"\\n\",this._signal(\"changeNewLineMode\")},this.getNewLineCharacter=function(){switch(this.$newLineMode){case\"windows\":return\"\\r\\n\";case\"unix\":return\"\\n\";default:return this.$autoNewLine||\"\\n\"}},this.$autoNewLine=\"\",this.$newLineMode=\"auto\",this.setNewLineMode=function(newLineMode){this.$newLineMode!==newLineMode&&(this.$newLineMode=newLineMode,this._signal(\"changeNewLineMode\"))},this.getNewLineMode=function(){return this.$newLineMode},this.isNewLine=function(text){return\"\\r\\n\"==text||\"\\r\"==text||\"\\n\"==text},this.getLine=function(row){return this.$lines[row]||\"\"},this.getLines=function(firstRow,lastRow){return this.$lines.slice(firstRow,lastRow+1)},this.getAllLines=function(){return this.getLines(0,this.getLength())},this.getLength=function(){return this.$lines.length},this.getTextRange=function(range){return this.getLinesForRange(range).join(this.getNewLineCharacter())},this.getLinesForRange=function(range){var lines;if(range.start.row===range.end.row)lines=[this.getLine(range.start.row).substring(range.start.column,range.end.column)];else{lines=this.getLines(range.start.row,range.end.row),lines[0]=(lines[0]||\"\").substring(range.start.column);var l=lines.length-1;range.end.row-range.start.row==l&&(lines[l]=lines[l].substring(0,range.end.column))}return lines},this.insertLines=function(row,lines){return console.warn(\"Use of document.insertLines is deprecated. Use the insertFullLines method instead.\"),this.insertFullLines(row,lines)},this.removeLines=function(firstRow,lastRow){return console.warn(\"Use of document.removeLines is deprecated. Use the removeFullLines method instead.\"),this.removeFullLines(firstRow,lastRow)},this.insertNewLine=function(position){return console.warn(\"Use of document.insertNewLine is deprecated. Use insertMergedLines(position, ['', '']) instead.\"),this.insertMergedLines(position,[\"\",\"\"])},this.insert=function(position,text){return 1>=this.getLength()&&this.$detectNewLine(text),this.insertMergedLines(position,this.$split(text))},this.insertInLine=function(position,text){var start=this.clippedPos(position.row,position.column),end=this.pos(position.row,position.column+text.length);return this.applyDelta({start:start,end:end,action:\"insert\",lines:[text]},!0),this.clonePos(end)},this.clippedPos=function(row,column){var length=this.getLength();void 0===row?row=length:0>row?row=0:row>=length&&(row=length-1,column=void 0);var line=this.getLine(row);return void 0==column&&(column=line.length),column=Math.min(Math.max(column,0),line.length),{row:row,column:column}},this.clonePos=function(pos){return{row:pos.row,column:pos.column}},this.pos=function(row,column){return{row:row,column:column}},this.$clipPosition=function(position){var length=this.getLength();return position.row>=length?(position.row=Math.max(0,length-1),position.column=this.getLine(length-1).length):(position.row=Math.max(0,position.row),position.column=Math.min(Math.max(position.column,0),this.getLine(position.row).length)),position},this.insertFullLines=function(row,lines){row=Math.min(Math.max(row,0),this.getLength());var column=0;this.getLength()>row?(lines=lines.concat([\"\"]),column=0):(lines=[\"\"].concat(lines),row--,column=this.$lines[row].length),this.insertMergedLines({row:row,column:column},lines)},this.insertMergedLines=function(position,lines){var start=this.clippedPos(position.row,position.column),end={row:start.row+lines.length-1,column:(1==lines.length?start.column:0)+lines[lines.length-1].length};return this.applyDelta({start:start,end:end,action:\"insert\",lines:lines}),this.clonePos(end)},this.remove=function(range){var start=this.clippedPos(range.start.row,range.start.column),end=this.clippedPos(range.end.row,range.end.column);return this.applyDelta({start:start,end:end,action:\"remove\",lines:this.getLinesForRange({start:start,end:end})}),this.clonePos(start)},this.removeInLine=function(row,startColumn,endColumn){var start=this.clippedPos(row,startColumn),end=this.clippedPos(row,endColumn);return this.applyDelta({start:start,end:end,action:\"remove\",lines:this.getLinesForRange({start:start,end:end})},!0),this.clonePos(start)},this.removeFullLines=function(firstRow,lastRow){firstRow=Math.min(Math.max(0,firstRow),this.getLength()-1),lastRow=Math.min(Math.max(0,lastRow),this.getLength()-1);var deleteFirstNewLine=lastRow==this.getLength()-1&&firstRow>0,deleteLastNewLine=this.getLength()-1>lastRow,startRow=deleteFirstNewLine?firstRow-1:firstRow,startCol=deleteFirstNewLine?this.getLine(startRow).length:0,endRow=deleteLastNewLine?lastRow+1:lastRow,endCol=deleteLastNewLine?0:this.getLine(endRow).length,range=new Range(startRow,startCol,endRow,endCol),deletedLines=this.$lines.slice(firstRow,lastRow+1);return this.applyDelta({start:range.start,end:range.end,action:\"remove\",lines:this.getLinesForRange(range)}),deletedLines},this.removeNewLine=function(row){this.getLength()-1>row&&row>=0&&this.applyDelta({start:this.pos(row,this.getLine(row).length),end:this.pos(row+1,0),action:\"remove\",lines:[\"\",\"\"]})},this.replace=function(range,text){if(range instanceof Range||(range=Range.fromPoints(range.start,range.end)),0===text.length&&range.isEmpty())return range.start;if(text==this.getTextRange(range))return range.end;this.remove(range);var end;return end=text?this.insert(range.start,text):range.start},this.applyDeltas=function(deltas){for(var i=0;deltas.length>i;i++)this.applyDelta(deltas[i])},this.revertDeltas=function(deltas){for(var i=deltas.length-1;i>=0;i--)this.revertDelta(deltas[i])},this.applyDelta=function(delta,doNotValidate){var isInsert=\"insert\"==delta.action;(isInsert?1>=delta.lines.length&&!delta.lines[0]:!Range.comparePoints(delta.start,delta.end))||(isInsert&&delta.lines.length>2e4&&this.$splitAndapplyLargeDelta(delta,2e4),applyDelta(this.$lines,delta,doNotValidate),this._signal(\"change\",delta))},this.$splitAndapplyLargeDelta=function(delta,MAX){for(var lines=delta.lines,l=lines.length,row=delta.start.row,column=delta.start.column,from=0,to=0;;){from=to,to+=MAX-1;var chunk=lines.slice(from,to);if(to>l){delta.lines=chunk,delta.start.row=row+from,delta.start.column=column;break}chunk.push(\"\"),this.applyDelta({start:this.pos(row+from,column),end:this.pos(row+to,column=0),action:delta.action,lines:chunk},!0)}},this.revertDelta=function(delta){this.applyDelta({start:this.clonePos(delta.start),end:this.clonePos(delta.end),action:\"insert\"==delta.action?\"remove\":\"insert\",lines:delta.lines.slice()})},this.indexToPosition=function(index,startRow){for(var lines=this.$lines||this.getAllLines(),newlineLength=this.getNewLineCharacter().length,i=startRow||0,l=lines.length;l>i;i++)if(index-=lines[i].length+newlineLength,0>index)return{row:i,column:index+lines[i].length+newlineLength};return{row:l-1,column:lines[l-1].length}},this.positionToIndex=function(pos,startRow){for(var lines=this.$lines||this.getAllLines(),newlineLength=this.getNewLineCharacter().length,index=0,row=Math.min(pos.row,lines.length),i=startRow||0;row>i;++i)index+=lines[i].length+newlineLength;return index+pos.column}}).call(Document.prototype),exports.Document=Document}),ace.define(\"ace/lib/lang\",[\"require\",\"exports\",\"module\"],function(acequire,exports){\"use strict\";exports.last=function(a){return a[a.length-1]},exports.stringReverse=function(string){return string.split(\"\").reverse().join(\"\")},exports.stringRepeat=function(string,count){for(var result=\"\";count>0;)1&count&&(result+=string),(count>>=1)&&(string+=string);return result};var trimBeginRegexp=/^\\s\\s*/,trimEndRegexp=/\\s\\s*$/;exports.stringTrimLeft=function(string){return string.replace(trimBeginRegexp,\"\")},exports.stringTrimRight=function(string){return string.replace(trimEndRegexp,\"\")},exports.copyObject=function(obj){var copy={};for(var key in obj)copy[key]=obj[key];return copy},exports.copyArray=function(array){for(var copy=[],i=0,l=array.length;l>i;i++)copy[i]=array[i]&&\"object\"==typeof array[i]?this.copyObject(array[i]):array[i];return copy},exports.deepCopy=function deepCopy(obj){if(\"object\"!=typeof obj||!obj)return obj;var copy;if(Array.isArray(obj)){copy=[];for(var key=0;obj.length>key;key++)copy[key]=deepCopy(obj[key]);return copy}if(\"[object Object]\"!==Object.prototype.toString.call(obj))return obj;copy={};for(var key in obj)copy[key]=deepCopy(obj[key]);return copy},exports.arrayToMap=function(arr){for(var map={},i=0;arr.length>i;i++)map[arr[i]]=1;return map},exports.createMap=function(props){var map=Object.create(null);for(var i in props)map[i]=props[i];return map},exports.arrayRemove=function(array,value){for(var i=0;array.length>=i;i++)value===array[i]&&array.splice(i,1)},exports.escapeRegExp=function(str){return str.replace(/([.*+?^${}()|[\\]\\/\\\\])/g,\"\\\\$1\")},exports.escapeHTML=function(str){return str.replace(/&/g,\"&#38;\").replace(/\"/g,\"&#34;\").replace(/'/g,\"&#39;\").replace(/</g,\"&#60;\")},exports.getMatchOffsets=function(string,regExp){var matches=[];return string.replace(regExp,function(str){matches.push({offset:arguments[arguments.length-2],length:str.length})}),matches},exports.deferredCall=function(fcn){var timer=null,callback=function(){timer=null,fcn()},deferred=function(timeout){return deferred.cancel(),timer=setTimeout(callback,timeout||0),deferred};return deferred.schedule=deferred,deferred.call=function(){return this.cancel(),fcn(),deferred},deferred.cancel=function(){return clearTimeout(timer),timer=null,deferred},deferred.isPending=function(){return timer},deferred},exports.delayedCall=function(fcn,defaultTimeout){var timer=null,callback=function(){timer=null,fcn()},_self=function(timeout){null==timer&&(timer=setTimeout(callback,timeout||defaultTimeout))};return _self.delay=function(timeout){timer&&clearTimeout(timer),timer=setTimeout(callback,timeout||defaultTimeout)},_self.schedule=_self,_self.call=function(){this.cancel(),fcn()},_self.cancel=function(){timer&&clearTimeout(timer),timer=null},_self.isPending=function(){return timer},_self}}),ace.define(\"ace/worker/mirror\",[\"require\",\"exports\",\"module\",\"ace/range\",\"ace/document\",\"ace/lib/lang\"],function(acequire,exports){\"use strict\";acequire(\"../range\").Range;var Document=acequire(\"../document\").Document,lang=acequire(\"../lib/lang\"),Mirror=exports.Mirror=function(sender){this.sender=sender;var doc=this.doc=new Document(\"\"),deferredUpdate=this.deferredUpdate=lang.delayedCall(this.onUpdate.bind(this)),_self=this;sender.on(\"change\",function(e){var data=e.data;if(data[0].start)doc.applyDeltas(data);else for(var i=0;data.length>i;i+=2){if(Array.isArray(data[i+1]))var d={action:\"insert\",start:data[i],lines:data[i+1]};else var d={action:\"remove\",start:data[i],end:data[i+1]};doc.applyDelta(d,!0)}return _self.$timeout?deferredUpdate.schedule(_self.$timeout):(_self.onUpdate(),void 0)})};(function(){this.$timeout=500,this.setTimeout=function(timeout){this.$timeout=timeout},this.setValue=function(value){this.doc.setValue(value),this.deferredUpdate.schedule(this.$timeout)},this.getValue=function(callbackId){this.sender.callback(this.doc.getValue(),callbackId)},this.onUpdate=function(){},this.isPending=function(){return this.deferredUpdate.isPending()}}).call(Mirror.prototype)}),ace.define(\"ace/mode/json/json_parse\",[\"require\",\"exports\",\"module\"],function(){\"use strict\";var at,ch,text,value,escapee={'\"':'\"',\"\\\\\":\"\\\\\",\"/\":\"/\",b:\"\\b\",f:\"\\f\",n:\"\\n\",r:\"\\r\",t:\"\t\"},error=function(m){throw{name:\"SyntaxError\",message:m,at:at,text:text}},next=function(c){return c&&c!==ch&&error(\"Expected '\"+c+\"' instead of '\"+ch+\"'\"),ch=text.charAt(at),at+=1,ch},number=function(){var number,string=\"\";for(\"-\"===ch&&(string=\"-\",next(\"-\"));ch>=\"0\"&&\"9\">=ch;)string+=ch,next();if(\".\"===ch)for(string+=\".\";next()&&ch>=\"0\"&&\"9\">=ch;)string+=ch;if(\"e\"===ch||\"E\"===ch)for(string+=ch,next(),(\"-\"===ch||\"+\"===ch)&&(string+=ch,next());ch>=\"0\"&&\"9\">=ch;)string+=ch,next();return number=+string,isNaN(number)?(error(\"Bad number\"),void 0):number},string=function(){var hex,i,uffff,string=\"\";if('\"'===ch)for(;next();){if('\"'===ch)return next(),string;if(\"\\\\\"===ch)if(next(),\"u\"===ch){for(uffff=0,i=0;4>i&&(hex=parseInt(next(),16),isFinite(hex));i+=1)uffff=16*uffff+hex;string+=String.fromCharCode(uffff)}else{if(\"string\"!=typeof escapee[ch])break;string+=escapee[ch]}else string+=ch}error(\"Bad string\")},white=function(){for(;ch&&\" \">=ch;)next()},word=function(){switch(ch){case\"t\":return next(\"t\"),next(\"r\"),next(\"u\"),next(\"e\"),!0;case\"f\":return next(\"f\"),next(\"a\"),next(\"l\"),next(\"s\"),next(\"e\"),!1;case\"n\":return next(\"n\"),next(\"u\"),next(\"l\"),next(\"l\"),null}error(\"Unexpected '\"+ch+\"'\")},array=function(){var array=[];if(\"[\"===ch){if(next(\"[\"),white(),\"]\"===ch)return next(\"]\"),array;for(;ch;){if(array.push(value()),white(),\"]\"===ch)return next(\"]\"),array;next(\",\"),white()}}error(\"Bad array\")},object=function(){var key,object={};if(\"{\"===ch){if(next(\"{\"),white(),\"}\"===ch)return next(\"}\"),object;for(;ch;){if(key=string(),white(),next(\":\"),Object.hasOwnProperty.call(object,key)&&error('Duplicate key \"'+key+'\"'),object[key]=value(),white(),\"}\"===ch)return next(\"}\"),object;next(\",\"),white()}}error(\"Bad object\")};return value=function(){switch(white(),ch){case\"{\":return object();case\"[\":return array();case'\"':return string();case\"-\":return number();default:return ch>=\"0\"&&\"9\">=ch?number():word()}},function(source,reviver){var result;return text=source,at=0,ch=\" \",result=value(),white(),ch&&error(\"Syntax error\"),\"function\"==typeof reviver?function walk(holder,key){var k,v,value=holder[key];if(value&&\"object\"==typeof value)for(k in value)Object.hasOwnProperty.call(value,k)&&(v=walk(value,k),void 0!==v?value[k]=v:delete value[k]);return reviver.call(holder,key,value)}({\"\":result},\"\"):result}}),ace.define(\"ace/mode/json_worker\",[\"require\",\"exports\",\"module\",\"ace/lib/oop\",\"ace/worker/mirror\",\"ace/mode/json/json_parse\"],function(acequire,exports){\"use strict\";var oop=acequire(\"../lib/oop\"),Mirror=acequire(\"../worker/mirror\").Mirror,parse=acequire(\"./json/json_parse\"),JsonWorker=exports.JsonWorker=function(sender){Mirror.call(this,sender),this.setTimeout(200)};oop.inherits(JsonWorker,Mirror),function(){this.onUpdate=function(){var value=this.doc.getValue(),errors=[];try{value&&parse(value)}catch(e){var pos=this.doc.indexToPosition(e.at-1);errors.push({row:pos.row,column:pos.column,text:e.message,type:\"error\"})}this.sender.emit(\"annotate\",errors)}}.call(JsonWorker.prototype)}),ace.define(\"ace/lib/es5-shim\",[\"require\",\"exports\",\"module\"],function(){function Empty(){}function doesDefinePropertyWork(object){try{return Object.defineProperty(object,\"sentinel\",{}),\"sentinel\"in object}catch(exception){}}function toInteger(n){return n=+n,n!==n?n=0:0!==n&&n!==1/0&&n!==-(1/0)&&(n=(n>0||-1)*Math.floor(Math.abs(n))),n}Function.prototype.bind||(Function.prototype.bind=function(that){var target=this;if(\"function\"!=typeof target)throw new TypeError(\"Function.prototype.bind called on incompatible \"+target);var args=slice.call(arguments,1),bound=function(){if(this instanceof bound){var result=target.apply(this,args.concat(slice.call(arguments)));return Object(result)===result?result:this}return target.apply(that,args.concat(slice.call(arguments)))};return target.prototype&&(Empty.prototype=target.prototype,bound.prototype=new Empty,Empty.prototype=null),bound});var defineGetter,defineSetter,lookupGetter,lookupSetter,supportsAccessors,call=Function.prototype.call,prototypeOfArray=Array.prototype,prototypeOfObject=Object.prototype,slice=prototypeOfArray.slice,_toString=call.bind(prototypeOfObject.toString),owns=call.bind(prototypeOfObject.hasOwnProperty);if((supportsAccessors=owns(prototypeOfObject,\"__defineGetter__\"))&&(defineGetter=call.bind(prototypeOfObject.__defineGetter__),defineSetter=call.bind(prototypeOfObject.__defineSetter__),lookupGetter=call.bind(prototypeOfObject.__lookupGetter__),lookupSetter=call.bind(prototypeOfObject.__lookupSetter__)),2!=[1,2].splice(0).length)if(function(){function makeArray(l){var a=Array(l+2);return a[0]=a[1]=0,a}var lengthBefore,array=[];return array.splice.apply(array,makeArray(20)),array.splice.apply(array,makeArray(26)),lengthBefore=array.length,array.splice(5,0,\"XXX\"),lengthBefore+1==array.length,lengthBefore+1==array.length?!0:void 0\n}()){var array_splice=Array.prototype.splice;Array.prototype.splice=function(start,deleteCount){return arguments.length?array_splice.apply(this,[void 0===start?0:start,void 0===deleteCount?this.length-start:deleteCount].concat(slice.call(arguments,2))):[]}}else Array.prototype.splice=function(pos,removeCount){var length=this.length;pos>0?pos>length&&(pos=length):void 0==pos?pos=0:0>pos&&(pos=Math.max(length+pos,0)),length>pos+removeCount||(removeCount=length-pos);var removed=this.slice(pos,pos+removeCount),insert=slice.call(arguments,2),add=insert.length;if(pos===length)add&&this.push.apply(this,insert);else{var remove=Math.min(removeCount,length-pos),tailOldPos=pos+remove,tailNewPos=tailOldPos+add-remove,tailCount=length-tailOldPos,lengthAfterRemove=length-remove;if(tailOldPos>tailNewPos)for(var i=0;tailCount>i;++i)this[tailNewPos+i]=this[tailOldPos+i];else if(tailNewPos>tailOldPos)for(i=tailCount;i--;)this[tailNewPos+i]=this[tailOldPos+i];if(add&&pos===lengthAfterRemove)this.length=lengthAfterRemove,this.push.apply(this,insert);else for(this.length=lengthAfterRemove+add,i=0;add>i;++i)this[pos+i]=insert[i]}return removed};Array.isArray||(Array.isArray=function(obj){return\"[object Array]\"==_toString(obj)});var boxedString=Object(\"a\"),splitString=\"a\"!=boxedString[0]||!(0 in boxedString);if(Array.prototype.forEach||(Array.prototype.forEach=function(fun){var object=toObject(this),self=splitString&&\"[object String]\"==_toString(this)?this.split(\"\"):object,thisp=arguments[1],i=-1,length=self.length>>>0;if(\"[object Function]\"!=_toString(fun))throw new TypeError;for(;length>++i;)i in self&&fun.call(thisp,self[i],i,object)}),Array.prototype.map||(Array.prototype.map=function(fun){var object=toObject(this),self=splitString&&\"[object String]\"==_toString(this)?this.split(\"\"):object,length=self.length>>>0,result=Array(length),thisp=arguments[1];if(\"[object Function]\"!=_toString(fun))throw new TypeError(fun+\" is not a function\");for(var i=0;length>i;i++)i in self&&(result[i]=fun.call(thisp,self[i],i,object));return result}),Array.prototype.filter||(Array.prototype.filter=function(fun){var value,object=toObject(this),self=splitString&&\"[object String]\"==_toString(this)?this.split(\"\"):object,length=self.length>>>0,result=[],thisp=arguments[1];if(\"[object Function]\"!=_toString(fun))throw new TypeError(fun+\" is not a function\");for(var i=0;length>i;i++)i in self&&(value=self[i],fun.call(thisp,value,i,object)&&result.push(value));return result}),Array.prototype.every||(Array.prototype.every=function(fun){var object=toObject(this),self=splitString&&\"[object String]\"==_toString(this)?this.split(\"\"):object,length=self.length>>>0,thisp=arguments[1];if(\"[object Function]\"!=_toString(fun))throw new TypeError(fun+\" is not a function\");for(var i=0;length>i;i++)if(i in self&&!fun.call(thisp,self[i],i,object))return!1;return!0}),Array.prototype.some||(Array.prototype.some=function(fun){var object=toObject(this),self=splitString&&\"[object String]\"==_toString(this)?this.split(\"\"):object,length=self.length>>>0,thisp=arguments[1];if(\"[object Function]\"!=_toString(fun))throw new TypeError(fun+\" is not a function\");for(var i=0;length>i;i++)if(i in self&&fun.call(thisp,self[i],i,object))return!0;return!1}),Array.prototype.reduce||(Array.prototype.reduce=function(fun){var object=toObject(this),self=splitString&&\"[object String]\"==_toString(this)?this.split(\"\"):object,length=self.length>>>0;if(\"[object Function]\"!=_toString(fun))throw new TypeError(fun+\" is not a function\");if(!length&&1==arguments.length)throw new TypeError(\"reduce of empty array with no initial value\");var result,i=0;if(arguments.length>=2)result=arguments[1];else for(;;){if(i in self){result=self[i++];break}if(++i>=length)throw new TypeError(\"reduce of empty array with no initial value\")}for(;length>i;i++)i in self&&(result=fun.call(void 0,result,self[i],i,object));return result}),Array.prototype.reduceRight||(Array.prototype.reduceRight=function(fun){var object=toObject(this),self=splitString&&\"[object String]\"==_toString(this)?this.split(\"\"):object,length=self.length>>>0;if(\"[object Function]\"!=_toString(fun))throw new TypeError(fun+\" is not a function\");if(!length&&1==arguments.length)throw new TypeError(\"reduceRight of empty array with no initial value\");var result,i=length-1;if(arguments.length>=2)result=arguments[1];else for(;;){if(i in self){result=self[i--];break}if(0>--i)throw new TypeError(\"reduceRight of empty array with no initial value\")}do i in this&&(result=fun.call(void 0,result,self[i],i,object));while(i--);return result}),Array.prototype.indexOf&&-1==[0,1].indexOf(1,2)||(Array.prototype.indexOf=function(sought){var self=splitString&&\"[object String]\"==_toString(this)?this.split(\"\"):toObject(this),length=self.length>>>0;if(!length)return-1;var i=0;for(arguments.length>1&&(i=toInteger(arguments[1])),i=i>=0?i:Math.max(0,length+i);length>i;i++)if(i in self&&self[i]===sought)return i;return-1}),Array.prototype.lastIndexOf&&-1==[0,1].lastIndexOf(0,-3)||(Array.prototype.lastIndexOf=function(sought){var self=splitString&&\"[object String]\"==_toString(this)?this.split(\"\"):toObject(this),length=self.length>>>0;if(!length)return-1;var i=length-1;for(arguments.length>1&&(i=Math.min(i,toInteger(arguments[1]))),i=i>=0?i:length-Math.abs(i);i>=0;i--)if(i in self&&sought===self[i])return i;return-1}),Object.getPrototypeOf||(Object.getPrototypeOf=function(object){return object.__proto__||(object.constructor?object.constructor.prototype:prototypeOfObject)}),!Object.getOwnPropertyDescriptor){var ERR_NON_OBJECT=\"Object.getOwnPropertyDescriptor called on a non-object: \";Object.getOwnPropertyDescriptor=function(object,property){if(\"object\"!=typeof object&&\"function\"!=typeof object||null===object)throw new TypeError(ERR_NON_OBJECT+object);if(owns(object,property)){var descriptor,getter,setter;if(descriptor={enumerable:!0,configurable:!0},supportsAccessors){var prototype=object.__proto__;object.__proto__=prototypeOfObject;var getter=lookupGetter(object,property),setter=lookupSetter(object,property);if(object.__proto__=prototype,getter||setter)return getter&&(descriptor.get=getter),setter&&(descriptor.set=setter),descriptor}return descriptor.value=object[property],descriptor}}}if(Object.getOwnPropertyNames||(Object.getOwnPropertyNames=function(object){return Object.keys(object)}),!Object.create){var createEmpty;createEmpty=null===Object.prototype.__proto__?function(){return{__proto__:null}}:function(){var empty={};for(var i in empty)empty[i]=null;return empty.constructor=empty.hasOwnProperty=empty.propertyIsEnumerable=empty.isPrototypeOf=empty.toLocaleString=empty.toString=empty.valueOf=empty.__proto__=null,empty},Object.create=function(prototype,properties){var object;if(null===prototype)object=createEmpty();else{if(\"object\"!=typeof prototype)throw new TypeError(\"typeof prototype[\"+typeof prototype+\"] != 'object'\");var Type=function(){};Type.prototype=prototype,object=new Type,object.__proto__=prototype}return void 0!==properties&&Object.defineProperties(object,properties),object}}if(Object.defineProperty){var definePropertyWorksOnObject=doesDefinePropertyWork({}),definePropertyWorksOnDom=\"undefined\"==typeof document||doesDefinePropertyWork(document.createElement(\"div\"));if(!definePropertyWorksOnObject||!definePropertyWorksOnDom)var definePropertyFallback=Object.defineProperty}if(!Object.defineProperty||definePropertyFallback){var ERR_NON_OBJECT_DESCRIPTOR=\"Property description must be an object: \",ERR_NON_OBJECT_TARGET=\"Object.defineProperty called on non-object: \",ERR_ACCESSORS_NOT_SUPPORTED=\"getters & setters can not be defined on this javascript engine\";Object.defineProperty=function(object,property,descriptor){if(\"object\"!=typeof object&&\"function\"!=typeof object||null===object)throw new TypeError(ERR_NON_OBJECT_TARGET+object);if(\"object\"!=typeof descriptor&&\"function\"!=typeof descriptor||null===descriptor)throw new TypeError(ERR_NON_OBJECT_DESCRIPTOR+descriptor);if(definePropertyFallback)try{return definePropertyFallback.call(Object,object,property,descriptor)}catch(exception){}if(owns(descriptor,\"value\"))if(supportsAccessors&&(lookupGetter(object,property)||lookupSetter(object,property))){var prototype=object.__proto__;object.__proto__=prototypeOfObject,delete object[property],object[property]=descriptor.value,object.__proto__=prototype}else object[property]=descriptor.value;else{if(!supportsAccessors)throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED);owns(descriptor,\"get\")&&defineGetter(object,property,descriptor.get),owns(descriptor,\"set\")&&defineSetter(object,property,descriptor.set)}return object}}Object.defineProperties||(Object.defineProperties=function(object,properties){for(var property in properties)owns(properties,property)&&Object.defineProperty(object,property,properties[property]);return object}),Object.seal||(Object.seal=function(object){return object}),Object.freeze||(Object.freeze=function(object){return object});try{Object.freeze(function(){})}catch(exception){Object.freeze=function(freezeObject){return function(object){return\"function\"==typeof object?object:freezeObject(object)}}(Object.freeze)}if(Object.preventExtensions||(Object.preventExtensions=function(object){return object}),Object.isSealed||(Object.isSealed=function(){return!1}),Object.isFrozen||(Object.isFrozen=function(){return!1}),Object.isExtensible||(Object.isExtensible=function(object){if(Object(object)===object)throw new TypeError;for(var name=\"\";owns(object,name);)name+=\"?\";object[name]=!0;var returnValue=owns(object,name);return delete object[name],returnValue}),!Object.keys){var hasDontEnumBug=!0,dontEnums=[\"toString\",\"toLocaleString\",\"valueOf\",\"hasOwnProperty\",\"isPrototypeOf\",\"propertyIsEnumerable\",\"constructor\"],dontEnumsLength=dontEnums.length;for(var key in{toString:null})hasDontEnumBug=!1;Object.keys=function(object){if(\"object\"!=typeof object&&\"function\"!=typeof object||null===object)throw new TypeError(\"Object.keys called on a non-object\");var keys=[];for(var name in object)owns(object,name)&&keys.push(name);if(hasDontEnumBug)for(var i=0,ii=dontEnumsLength;ii>i;i++){var dontEnum=dontEnums[i];owns(object,dontEnum)&&keys.push(dontEnum)}return keys}}Date.now||(Date.now=function(){return(new Date).getTime()});var ws=\"\t\\n\u000b\\f\\r   ᠎             　\\u2028\\u2029﻿\";if(!String.prototype.trim||ws.trim()){ws=\"[\"+ws+\"]\";var trimBeginRegexp=RegExp(\"^\"+ws+ws+\"*\"),trimEndRegexp=RegExp(ws+ws+\"*$\");String.prototype.trim=function(){return(this+\"\").replace(trimBeginRegexp,\"\").replace(trimEndRegexp,\"\")}}var toObject=function(o){if(null==o)throw new TypeError(\"can't convert \"+o+\" to object\");return Object(o)}});";
 },{}],"../node_modules/brace/mode/json.js":[function(require,module,exports) {
@@ -56033,31 +55894,34 @@ var isStructurallyValidLanguageTag = function isStructurallyValidLanguageTag(loc
 var canonicalizeLocaleList = function canonicalizeLocaleList(locales) {
   if (!locales) return [];
   if (!Array.isArray(locales)) locales = [locales];
-  return locales.map(function (tag) {
-    // Requiring tag to be a String or Object means that the Number value
-    // NaN will not be interpreted as the language tag "nan", which stands
-    // for Min Nan Chinese.
-    switch (_typeof(tag)) {
-      case 'string':
-        break;
+  var res = {};
 
-      case 'object':
-        tag = tag.toString();
-        break;
+  for (var i = 0; i < locales.length; ++i) {
+    var tag = locales[i];
+    if (tag && _typeof(tag) === 'object') tag = String(tag);
 
-      default:
-        throw new TypeError('Locales should be strings, ' + JSON.stringify(tag) + " isn't.");
+    if (typeof tag !== 'string') {
+      // Requiring tag to be a String or Object means that the Number value
+      // NaN will not be interpreted as the language tag "nan", which stands
+      // for Min Nan Chinese.
+      var msg = "Locales should be strings, ".concat(JSON.stringify(tag), " isn't.");
+      throw new TypeError(msg);
     }
+
+    if (tag[0] === '*') continue;
 
     if (!isStructurallyValidLanguageTag(tag)) {
-      throw new RangeError('The locale ' + JSON.stringify(tag) + ' is not a structurally valid BCP 47 language tag.');
+      var strTag = JSON.stringify(tag);
+
+      var _msg = "The locale ".concat(strTag, " is not a structurally valid BCP 47 language tag.");
+
+      throw new RangeError(_msg);
     }
 
-    return tag;
-  }).reduce(function (seen, tag) {
-    if (seen.indexOf(tag) < 0) seen.push(tag);
-    return seen;
-  }, []);
+    res[tag] = true;
+  }
+
+  return Object.keys(res);
 };
 
 var defaultLocale = function defaultLocale() {
@@ -56090,22 +55954,12 @@ var getType = function getType(type) {
   throw new RangeError('Not a valid plural type: ' + JSON.stringify(type));
 };
 
-var handleLocaleMatcher = function handleLocaleMatcher(localeMatcher) {
-  if (localeMatcher && localeMatcher !== 'best fit' && typeof console !== 'undefined') {
-    console.warn('intl-polyfill only supports `best fit` localeMatcher');
-  }
-};
-
 var PluralRules =
 /*#__PURE__*/
 function () {
   _createClass(PluralRules, null, [{
     key: "supportedLocalesOf",
     value: function supportedLocalesOf(locales) {
-      var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-          localeMatcher = _ref.localeMatcher;
-
-      handleLocaleMatcher(localeMatcher);
       return canonicalizeLocaleList(locales).filter(findLocale);
     }
   }]);
@@ -56115,12 +55969,12 @@ function () {
 
     _classCallCheck(this, PluralRules);
 
-    handleLocaleMatcher(opt.localeMatcher);
     this._locale = resolveLocale(locales);
     this._type = getType(opt.type);
 
     if ((typeof Intl === "undefined" ? "undefined" : _typeof(Intl)) === 'object' && Intl.NumberFormat) {
-      this._nf = new Intl.NumberFormat(this._locale, opt);
+      // make-plural expects latin digits with . decimal separator
+      this._nf = new Intl.NumberFormat('en', opt);
     } else {
       var minID = opt.minimumIntegerDigits,
           minFD = opt.minimumFractionDigits,
@@ -56191,7 +56045,7 @@ function () {
       if (typeof number !== 'number') number = Number(number);
       if (!isFinite(number)) return 'other';
 
-      var fmt = this._format(number);
+      var fmt = this._format(Math.abs(number));
 
       return _makePlural.default[this._locale](fmt, this._type === 'ordinal');
     }
@@ -57780,9 +57634,9 @@ var global = arguments[3];
 },{}],"../node_modules/fluent-syntax/compat.js":[function(require,module,exports) {
 var define;
 var global = arguments[3];
-/* fluent-syntax@0.12.0 */
+/* fluent-syntax@0.13.0 */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define('fluent-syntax', ['exports'], factory) : factory(global.FluentSyntax = {});
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define('fluent-syntax', ['exports'], factory) : (global = global || self, factory(global.FluentSyntax = {}));
 })(this, function (exports) {
   'use strict';
   /*
@@ -57898,10 +57752,8 @@ var global = arguments[3];
 
       const clone = Object.create(this.constructor.prototype);
 
-      var _arr = Object.keys(this);
-
-      for (var _i = 0; _i < _arr.length; _i++) {
-        const prop = _arr[_i];
+      for (var _i = 0, _Object$keys = Object.keys(this); _i < _Object$keys.length; _i++) {
+        const prop = _Object$keys[_i];
         clone[prop] = visit(this[prop]);
       }
 
@@ -58333,7 +58185,7 @@ var global = arguments[3];
           const _args = _slicedToArray(args, 1),
                 token = _args[0];
 
-          return `Expected token: "${token}"`;
+          return "Expected token: \"".concat(token, "\"");
         }
 
       case "E0004":
@@ -58341,7 +58193,7 @@ var global = arguments[3];
           const _args2 = _slicedToArray(args, 1),
                 range = _args2[0];
 
-          return `Expected a character from range: "${range}"`;
+          return "Expected a character from range: \"".concat(range, "\"");
         }
 
       case "E0005":
@@ -58349,7 +58201,7 @@ var global = arguments[3];
           const _args3 = _slicedToArray(args, 1),
                 id = _args3[0];
 
-          return `Expected message "${id}" to have a value or attributes`;
+          return "Expected message \"".concat(id, "\" to have a value or attributes");
         }
 
       case "E0006":
@@ -58357,7 +58209,7 @@ var global = arguments[3];
           const _args4 = _slicedToArray(args, 1),
                 id = _args4[0];
 
-          return `Expected term "-${id}" to have a value`;
+          return "Expected term \"-".concat(id, "\" to have a value");
         }
 
       case "E0007":
@@ -58416,7 +58268,7 @@ var global = arguments[3];
           const _args5 = _slicedToArray(args, 1),
                 char = _args5[0];
 
-          return `Unknown escape sequence: \\${char}.`;
+          return "Unknown escape sequence: \\".concat(char, ".");
         }
 
       case "E0026":
@@ -58424,7 +58276,7 @@ var global = arguments[3];
           const _args6 = _slicedToArray(args, 1),
                 sequence = _args6[0];
 
-          return `Invalid Unicode escape sequence: ${sequence}.`;
+          return "Invalid Unicode escape sequence: ".concat(sequence, ".");
         }
 
       case "E0027":
@@ -58834,8 +58686,8 @@ var global = arguments[3];
 
       const methodNames = ["getComment", "getMessage", "getTerm", "getAttribute", "getIdentifier", "getVariant", "getNumber", "getPattern", "getTextElement", "getPlaceable", "getExpression", "getInlineExpression", "getCallArgument", "getCallArguments", "getString", "getLiteral"];
 
-      for (var _i = 0; _i < methodNames.length; _i++) {
-        const name = methodNames[_i];
+      for (var _i = 0, _methodNames = methodNames; _i < _methodNames.length; _i++) {
+        const name = _methodNames[_i];
         this[name] = withSpan(this[name]);
       }
     }
@@ -59004,23 +58856,23 @@ var global = arguments[3];
         }
       }
 
-      let Comment$$1;
+      let Comment$1;
 
       switch (level) {
         case 0:
-          Comment$$1 = Comment;
+          Comment$1 = Comment;
           break;
 
         case 1:
-          Comment$$1 = GroupComment;
+          Comment$1 = GroupComment;
           break;
 
         case 2:
-          Comment$$1 = ResourceComment;
+          Comment$1 = ResourceComment;
           break;
       }
 
-      return new Comment$$1(content);
+      return new Comment$1(content);
     }
 
     getMessage(ps) {
@@ -59185,14 +59037,14 @@ var global = arguments[3];
 
       if (ps.currentChar === "-") {
         ps.next();
-        value += `-${this.getDigits(ps)}`;
+        value += "-".concat(this.getDigits(ps));
       } else {
         value += this.getDigits(ps);
       }
 
       if (ps.currentChar === ".") {
         ps.next();
-        value += `.${this.getDigits(ps)}`;
+        value += ".".concat(this.getDigits(ps));
       }
 
       return new NumberLiteral(value);
@@ -59238,7 +59090,7 @@ var global = arguments[3];
         elements.push(this.getIndent(ps, firstIndent, blankStart));
         var commonIndentLength = firstIndent.length;
       } else {
-        var commonIndentLength = Infinity;
+        commonIndentLength = Infinity;
       }
 
       let ch;
@@ -59405,7 +59257,7 @@ var global = arguments[3];
         case "\\":
         case "\"":
           ps.next();
-          return `\\${next}`;
+          return "\\".concat(next);
 
         case "u":
           return this.getUnicodeEscapeSequence(ps, next, 4);
@@ -59426,13 +59278,13 @@ var global = arguments[3];
         const ch = ps.takeHexDigit();
 
         if (!ch) {
-          throw new ParseError("E0026", `\\${u}${sequence}${ps.currentChar}`);
+          throw new ParseError("E0026", "\\".concat(u).concat(sequence).concat(ps.currentChar));
         }
 
         sequence += ch;
       }
 
-      return `\\${u}${sequence}`;
+      return "\\".concat(u).concat(sequence);
     }
 
     getPlaceable(ps) {
@@ -59664,7 +59516,7 @@ var global = arguments[3];
 
     serialize(resource) {
       if (resource.type !== "Resource") {
-        throw new Error(`Unknown resource type: ${resource.type}`);
+        throw new Error("Unknown resource type: ".concat(resource.type));
       }
 
       let state = 0;
@@ -59715,30 +59567,30 @@ var global = arguments[3];
 
         case "Comment":
           if (state & HAS_ENTRIES) {
-            return `\n${serializeComment(entry, "#")}\n`;
+            return "\n".concat(serializeComment(entry, "#"), "\n");
           }
 
-          return `${serializeComment(entry, "#")}\n`;
+          return "".concat(serializeComment(entry, "#"), "\n");
 
         case "GroupComment":
           if (state & HAS_ENTRIES) {
-            return `\n${serializeComment(entry, "##")}\n`;
+            return "\n".concat(serializeComment(entry, "##"), "\n");
           }
 
-          return `${serializeComment(entry, "##")}\n`;
+          return "".concat(serializeComment(entry, "##"), "\n");
 
         case "ResourceComment":
           if (state & HAS_ENTRIES) {
-            return `\n${serializeComment(entry, "###")}\n`;
+            return "\n".concat(serializeComment(entry, "###"), "\n");
           }
 
-          return `${serializeComment(entry, "###")}\n`;
+          return "".concat(serializeComment(entry, "###"), "\n");
 
         case "Junk":
           return serializeJunk(entry);
 
         default:
-          throw new Error(`Unknown entry type: ${entry.type}`);
+          throw new Error("Unknown entry type: ".concat(entry.type));
       }
     }
 
@@ -59746,9 +59598,9 @@ var global = arguments[3];
 
   function serializeComment(comment) {
     let prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "#";
-    const prefixed = comment.content.split("\n").map(line => line.length ? `${prefix} ${line}` : prefix).join("\n"); // Add the trailing newline.
+    const prefixed = comment.content.split("\n").map(line => line.length ? "".concat(prefix, " ").concat(line) : prefix).join("\n"); // Add the trailing newline.
 
-    return `${prefixed}\n`;
+    return "".concat(prefixed, "\n");
   }
 
   function serializeJunk(junk) {
@@ -59762,7 +59614,7 @@ var global = arguments[3];
       parts.push(serializeComment(message.comment));
     }
 
-    parts.push(`${message.id.name} =`);
+    parts.push("".concat(message.id.name, " ="));
 
     if (message.value) {
       parts.push(serializePattern(message.value));
@@ -59803,7 +59655,7 @@ var global = arguments[3];
       parts.push(serializeComment(term.comment));
     }
 
-    parts.push(`-${term.id.name} =`);
+    parts.push("-".concat(term.id.name, " ="));
     parts.push(serializePattern(term.value));
     var _iteratorNormalCompletion3 = true;
     var _didIteratorError3 = false;
@@ -59835,7 +59687,7 @@ var global = arguments[3];
 
   function serializeAttribute(attribute) {
     const value = indent(serializePattern(attribute.value));
-    return `\n    .${attribute.id.name} =${value}`;
+    return "\n    .".concat(attribute.id.name, " =").concat(value);
   }
 
   function serializePattern(pattern) {
@@ -59843,10 +59695,10 @@ var global = arguments[3];
     const startOnNewLine = pattern.elements.some(isSelectExpr) || pattern.elements.some(includesNewLine);
 
     if (startOnNewLine) {
-      return `\n    ${indent(content)}`;
+      return "\n    ".concat(indent(content));
     }
 
-    return ` ${content}`;
+    return " ".concat(content);
   }
 
   function serializeElement(element) {
@@ -59858,7 +59710,7 @@ var global = arguments[3];
         return serializePlaceable(element);
 
       default:
-        throw new Error(`Unknown element type: ${element.type}`);
+        throw new Error("Unknown element type: ".concat(element.type));
     }
   }
 
@@ -59867,35 +59719,35 @@ var global = arguments[3];
 
     switch (expr.type) {
       case "Placeable":
-        return `{${serializePlaceable(expr)}}`;
+        return "{".concat(serializePlaceable(expr), "}");
 
       case "SelectExpression":
         // Special-case select expression to control the whitespace around the
         // opening and the closing brace.
-        return `{ ${serializeExpression(expr)}}`;
+        return "{ ".concat(serializeExpression(expr), "}");
 
       default:
-        return `{ ${serializeExpression(expr)} }`;
+        return "{ ".concat(serializeExpression(expr), " }");
     }
   }
 
   function serializeExpression(expr) {
     switch (expr.type) {
       case "StringLiteral":
-        return `"${expr.value}"`;
+        return "\"".concat(expr.value, "\"");
 
       case "NumberLiteral":
         return expr.value;
 
       case "VariableReference":
-        return `$${expr.id.name}`;
+        return "$".concat(expr.id.name);
 
       case "TermReference":
         {
-          let out = `-${expr.id.name}`;
+          let out = "-".concat(expr.id.name);
 
           if (expr.attribute) {
-            out += `.${expr.attribute.name}`;
+            out += ".".concat(expr.attribute.name);
           }
 
           if (expr.arguments) {
@@ -59910,18 +59762,18 @@ var global = arguments[3];
           let out = expr.id.name;
 
           if (expr.attribute) {
-            out += `.${expr.attribute.name}`;
+            out += ".".concat(expr.attribute.name);
           }
 
           return out;
         }
 
       case "FunctionReference":
-        return `${expr.id.name}${serializeCallArguments(expr.arguments)}`;
+        return "".concat(expr.id.name).concat(serializeCallArguments(expr.arguments));
 
       case "SelectExpression":
         {
-          let out = `${serializeExpression(expr.selector)} ->`;
+          let out = "".concat(serializeExpression(expr.selector), " ->");
           var _iteratorNormalCompletion4 = true;
           var _didIteratorError4 = false;
           var _iteratorError4 = undefined;
@@ -59946,14 +59798,14 @@ var global = arguments[3];
             }
           }
 
-          return `${out}\n`;
+          return "".concat(out, "\n");
         }
 
       case "Placeable":
         return serializePlaceable(expr);
 
       default:
-        throw new Error(`Unknown expression type: ${expr.type}`);
+        throw new Error("Unknown expression type: ".concat(expr.type));
     }
   }
 
@@ -59962,10 +59814,10 @@ var global = arguments[3];
     const value = indent(serializePattern(variant.value));
 
     if (variant.default) {
-      return `\n   *[${key}]${value}`;
+      return "\n   *[".concat(key, "]").concat(value);
     }
 
-    return `\n    [${key}]${value}`;
+    return "\n    [".concat(key, "]").concat(value);
   }
 
   function serializeCallArguments(expr) {
@@ -59973,15 +59825,15 @@ var global = arguments[3];
     const named = expr.named.map(serializeNamedArgument).join(", ");
 
     if (expr.positional.length > 0 && expr.named.length > 0) {
-      return `(${positional}, ${named})`;
+      return "(".concat(positional, ", ").concat(named, ")");
     }
 
-    return `(${positional || named})`;
+    return "(".concat(positional || named, ")");
   }
 
   function serializeNamedArgument(arg) {
     const value = serializeExpression(arg.value);
-    return `${arg.name.name}: ${value}`;
+    return "".concat(arg.name.name, ": ").concat(value);
   }
 
   function serializeVariantKey(key) {
@@ -59993,7 +59845,7 @@ var global = arguments[3];
         return key.value;
 
       default:
-        throw new Error(`Unknown variant key type: ${key.type}`);
+        throw new Error("Unknown variant key type: ".concat(key.type));
     }
   }
   /*
@@ -60012,15 +59864,13 @@ var global = arguments[3];
         return;
       }
 
-      const visit = this[`visit${node.type}`] || this.genericVisit;
+      const visit = this["visit".concat(node.type)] || this.genericVisit;
       visit.call(this, node);
     }
 
     genericVisit(node) {
-      var _arr = Object.keys(node);
-
-      for (var _i = 0; _i < _arr.length; _i++) {
-        const propname = _arr[_i];
+      for (var _i = 0, _Object$keys = Object.keys(node); _i < _Object$keys.length; _i++) {
+        const propname = _Object$keys[_i];
         this.visit(node[propname]);
       }
     }
@@ -60037,15 +59887,13 @@ var global = arguments[3];
         return node;
       }
 
-      const visit = this[`visit${node.type}`] || this.genericVisit;
+      const visit = this["visit".concat(node.type)] || this.genericVisit;
       return visit.call(this, node);
     }
 
     genericVisit(node) {
-      var _arr2 = Object.keys(node);
-
-      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
-        const propname = _arr2[_i2];
+      for (var _i2 = 0, _Object$keys2 = Object.keys(node); _i2 < _Object$keys2.length; _i2++) {
+        const propname = _Object$keys2[_i2];
         const propvalue = node[propname];
 
         if (Array.isArray(propvalue)) {
@@ -60099,47 +59947,47 @@ var global = arguments[3];
     return pos - prevLineBreak - 1;
   }
 
-  exports.parse = parse;
-  exports.serialize = serialize;
-  exports.lineOffset = lineOffset;
-  exports.columnOffset = columnOffset;
+  exports.Annotation = Annotation;
+  exports.Attribute = Attribute;
+  exports.BaseComment = BaseComment;
   exports.BaseNode = BaseNode;
-  exports.Resource = Resource;
+  exports.CallArguments = CallArguments;
+  exports.Comment = Comment;
   exports.Entry = Entry;
+  exports.Expression = Expression;
+  exports.FluentParser = FluentParser;
+  exports.FluentSerializer = FluentSerializer;
+  exports.FunctionReference = FunctionReference;
+  exports.GroupComment = GroupComment;
+  exports.HAS_ENTRIES = HAS_ENTRIES;
+  exports.Identifier = Identifier;
+  exports.Junk = Junk;
+  exports.Literal = Literal;
   exports.Message = Message;
-  exports.Term = Term;
+  exports.MessageReference = MessageReference;
+  exports.NamedArgument = NamedArgument;
+  exports.NumberLiteral = NumberLiteral;
   exports.Pattern = Pattern;
   exports.PatternElement = PatternElement;
-  exports.TextElement = TextElement;
   exports.Placeable = Placeable;
-  exports.Expression = Expression;
-  exports.Literal = Literal;
-  exports.StringLiteral = StringLiteral;
-  exports.NumberLiteral = NumberLiteral;
-  exports.MessageReference = MessageReference;
-  exports.TermReference = TermReference;
-  exports.VariableReference = VariableReference;
-  exports.FunctionReference = FunctionReference;
-  exports.SelectExpression = SelectExpression;
-  exports.CallArguments = CallArguments;
-  exports.Attribute = Attribute;
-  exports.Variant = Variant;
-  exports.NamedArgument = NamedArgument;
-  exports.Identifier = Identifier;
-  exports.BaseComment = BaseComment;
-  exports.Comment = Comment;
-  exports.GroupComment = GroupComment;
+  exports.Resource = Resource;
   exports.ResourceComment = ResourceComment;
-  exports.Junk = Junk;
+  exports.SelectExpression = SelectExpression;
   exports.Span = Span;
-  exports.Annotation = Annotation;
-  exports.FluentParser = FluentParser;
-  exports.HAS_ENTRIES = HAS_ENTRIES;
-  exports.FluentSerializer = FluentSerializer;
+  exports.StringLiteral = StringLiteral;
+  exports.Term = Term;
+  exports.TermReference = TermReference;
+  exports.TextElement = TextElement;
+  exports.Transformer = Transformer;
+  exports.VariableReference = VariableReference;
+  exports.Variant = Variant;
+  exports.Visitor = Visitor;
+  exports.columnOffset = columnOffset;
+  exports.lineOffset = lineOffset;
+  exports.parse = parse;
+  exports.serialize = serialize;
   exports.serializeExpression = serializeExpression;
   exports.serializeVariantKey = serializeVariantKey;
-  exports.Visitor = Visitor;
-  exports.Transformer = Transformer;
   Object.defineProperty(exports, '__esModule', {
     value: true
   });
@@ -60200,8 +60048,8 @@ function parse_translations(translations) {
   return [res, annotations];
 }
 
-function create_bundle(translations) {
-  const bundle = new _compat.FluentBundle('en-US');
+function create_bundle(locale, translations) {
+  const bundle = new _compat.FluentBundle(locale);
   bundle.addMessages(translations);
   return bundle;
 }
@@ -60290,13 +60138,13 @@ function Annotation(props) {
   }, tail)));
 }
 
-function update(translations, externals) {
+function update(locale, translations, externals) {
   const _parse_translations = (0, _fluent.parse_translations)(translations),
         _parse_translations2 = _slicedToArray(_parse_translations, 2),
         res = _parse_translations2[0],
         annotations = _parse_translations2[1];
 
-  const bundle = (0, _fluent.create_bundle)(translations);
+  const bundle = (0, _fluent.create_bundle)(locale, translations);
 
   const _format_messages = (0, _fluent.format_messages)(res, bundle, externals),
         _format_messages2 = _slicedToArray(_format_messages, 2),
@@ -60314,18 +60162,19 @@ function update(translations, externals) {
 class Example extends _react.Component {
   constructor(props) {
     super(props);
-    const translations = props.translations,
+    const locale = props.locale,
+          translations = props.translations,
           externals = props.externals;
     this.state = _objectSpread({
       translations,
       externals
-    }, update(translations, externals));
+    }, update(locale, translations, externals));
   }
 
   handleTranslationsChange(translations) {
     this.setState(_objectSpread({
       translations
-    }, update(translations, this.state.externals)));
+    }, update(this.props.locale, translations, this.state.externals)));
   }
 
   handleExternalsChange(name, value) {
@@ -60335,7 +60184,7 @@ class Example extends _react.Component {
 
     this.setState(_objectSpread({
       externals
-    }, update(this.state.translations, externals)));
+    }, update(this.props.locale, this.state.translations, externals)));
   }
 
   render() {
@@ -60433,15 +60282,21 @@ function RadioInput(props) {
         _onChange2 = props.onChange;
   return _react.default.createElement(_react.Fragment, null, _react.default.createElement("dt", null, "$", name), _react.default.createElement("dd", {
     className: "radio"
-  }, options.map(option => _react.default.createElement(_react.Fragment, {
-    key: `${name}_${option}`
-  }, _react.default.createElement("input", {
-    type: "radio",
-    name: name,
-    value: option,
-    checked: value === option,
-    onChange: evt => _onChange2(evt.target.name, evt.target.value)
-  }), _react.default.createElement("label", null, option)))));
+  }, options.map(option => {
+    const id = `${name}_${option.replace(/[^a-z]/gi, "_")}`;
+    return _react.default.createElement(_react.Fragment, {
+      key: id
+    }, _react.default.createElement("input", {
+      id: id,
+      type: "radio",
+      name: name,
+      value: option,
+      checked: value === option,
+      onChange: evt => _onChange2(evt.target.name, evt.target.value)
+    }), _react.default.createElement("label", {
+      htmlFor: id
+    }, option));
+  })));
 }
 
 let range_counter = 0;
@@ -60470,6 +60325,8 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _reactDom = _interopRequireDefault(require("react-dom"));
 
+var _dedent = _interopRequireDefault(require("@fluent/dedent"));
+
 var _example = _interopRequireDefault(require("./example"));
 
 var _controls = require("./controls");
@@ -60480,20 +60337,22 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 // vim: ts=4 et sts=4 sw=4
 const example0 = {
-  translations: `\
-# Simple things are simple.
-hello-user = Hello, {$userName}!
+  locale: "en-US",
+  translations: _dedent.default`
+        # Simple things are simple.
+        hello-user = Hello, {$userName}!
 
-# Complex things are possible.
-shared-photos =
-    {$userName} {$photoCount ->
-        [one] added a new photo
-       *[other] added {$photoCount} new photos
-    } to {$userGender ->
-        [male] his stream
-        [female] her stream
-       *[other] their stream
-    }.`,
+        # Complex things are possible.
+        shared-photos =
+            {$userName} {$photoCount ->
+                [one] added a new photo
+               *[other] added {$photoCount} new photos
+            } to {$userGender ->
+                [male] his stream
+                [female] her stream
+               *[other] their stream
+            }.
+        `,
   externals: {
     userName: "Anne",
     userGender: "female",
@@ -60518,48 +60377,129 @@ function Example0() {
 _reactDom.default.render(_react.default.createElement(Example0, null), document.getElementById('demo-app'));
 
 const example1 = {
-  translations: `shared-photos =
-    { $user_name } { $photo_count ->
-        [0] hasn't added any photos yet
-        [one] added a new photo
-       *[other] added { $photo_count } new photos
-    }.`,
+  locale: "en-US",
+  translations: _dedent.default`
+        ## Closing tabs
+
+        tabs-close-button = Close
+        tabs-close-tooltip = {$tabCount ->
+            [one] Close {$tabCount} tab
+           *[other] Close {$tabCount} tabs
+        }
+        tabs-close-warning =
+            You are about to close {$tabCount} tabs.
+            Are you sure you want to continue?
+
+        ## Syncing
+
+        -sync-brand-name = Firefox Account
+
+        sync-dialog-title = {-sync-brand-name}
+        sync-headline-title =
+            {-sync-brand-name}: The best way to bring
+            your data always with you
+        sync-signedout-title =
+            Connect with your {-sync-brand-name}
+        `,
   externals: {
-    user_name: "Anne",
-    photo_count: 3
-  }
+    tabCount: 2
+  },
+  height: "30rem"
 };
+
+_reactDom.default.render(_react.default.createElement(_example.default, example1, _react.default.createElement(_controls.RangeInput, {
+  name: "tabCount",
+  min: "2",
+  max: "9",
+  step: "1"
+})), document.getElementById('example1-app'));
+
 const example2 = {
-  translations: `liked-comment =
-    { $user_name } liked your comment on { $user_gender ->
-        [male] his
-        [female] her
-       *[other] their
-    } post.`,
+  locale: "it",
+  translations: _dedent.default`
+        ## Closing tabs
+
+        tabs-close-button = Chiudi
+        tabs-close-tooltip = {$tabCount ->
+            [one] Chiudi {$tabCount} scheda
+           *[other] Chiudi {$tabCount} schede
+        }
+        tabs-close-warning =
+            Verranno chiuse {$tabCount} schede. Proseguire?
+
+        ## Syncing
+
+        -sync-brand-name = {$first ->
+           *[uppercase] Account Firefox
+            [lowercase] account Firefox
+        }
+
+        sync-dialog-title = {-sync-brand-name}
+        sync-headline-title =
+            {-sync-brand-name}: il modo migliore
+            per avere i tuoi dati sempre con te
+        sync-signedout-title =
+            Connetti il tuo {-sync-brand-name(first: "lowercase")}
+        `,
   externals: {
-    user_name: "John",
-    user_gender: "male"
-  }
+    tabCount: 2
+  },
+  height: "30rem"
 };
 
-function Examples() {
-  return _react.default.createElement(_react.Fragment, null, _react.default.createElement(_example.default, example1, _react.default.createElement(_controls.TextInput, {
-    name: "user_name"
-  }), _react.default.createElement(_controls.RangeInput, {
-    name: "photo_count",
-    min: "0",
-    max: "9",
-    step: "1"
-  })), _react.default.createElement(_example.default, example2, _react.default.createElement(_controls.TextInput, {
-    name: "user_name"
-  }), _react.default.createElement(_controls.RadioInput, {
-    name: "user_gender",
-    options: ["male", "female", "unspecified"]
-  })));
-}
+_reactDom.default.render(_react.default.createElement(_example.default, example2, _react.default.createElement(_controls.RangeInput, {
+  name: "tabCount",
+  min: "2",
+  max: "9",
+  step: "1"
+})), document.getElementById('example2-app'));
 
-_reactDom.default.render(_react.default.createElement(Examples, null), document.getElementById('examples-app'));
-},{"react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/index.js","./example":"../src/example.js","./controls":"../src/controls.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+const example3 = {
+  locale: "pl",
+  translations: _dedent.default`
+        ## Closing tabs
+
+        tabs-close-button = Zamknij
+        tabs-close-tooltip = {$tabCount ->
+            [one] Zamknij kartę
+            [few] Zamknij {$tabCount} karty
+           *[many] Zamknij { $tabCount } kart
+        }
+        tabs-close-warning = {$tabCount ->
+            [few] Zostaną zamknięte {$tabCount} karty.
+                  Czy chcesz kontynuować?
+           *[many] Zostanie zamkniętych {$tabCount} kart.
+                   Czy chcesz kontynuować?
+        }
+
+        ## Syncing
+
+        -sync-brand-name = {$case ->
+           *[nominative] Konto Firefox
+            [genitive] Konta Firefox
+            [accusative] Kontem Firefox
+        }
+
+        sync-dialog-title = {-sync-brand-name}
+        sync-headline-title =
+            {-sync-brand-name}: Najlepszy sposób na to,
+            aby mieć swoje dane zawsze przy sobie
+        sync-signedout-title =
+            Zaloguj do {-sync-brand-name(case: "genitive")}
+        `,
+  externals: {
+    tabCount: 2
+  },
+  height: "37rem"
+};
+
+_reactDom.default.render(_react.default.createElement(_example.default, example3, _react.default.createElement(_controls.RangeInput, {
+  name: "tabCount",
+  min: "2",
+  max: "9",
+  step: "1"
+})), document.getElementById('example3-app'));
+},{"react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/index.js","@fluent/dedent":"../node_modules/@fluent/dedent/src/index.js","./example":"../src/example.js","./controls":"../src/controls.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -60587,7 +60527,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56445" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55085" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
