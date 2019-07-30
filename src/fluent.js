@@ -1,7 +1,7 @@
 // vim: ts=4 et sts=4 sw=4
 
 import 'intl-pluralrules';
-import { FluentBundle } from '@fluent/bundle/compat';
+import { FluentBundle, FluentResource } from '@fluent/bundle/compat';
 import { FluentParser, lineOffset, columnOffset, Resource }
     from '@fluent/syntax/compat';
 
@@ -54,7 +54,7 @@ export function parse_translations(translations) {
 
 export function create_bundle(locale, translations) {
     const bundle = new FluentBundle(locale);
-    bundle.addMessages(translations);
+    bundle.addResource(new FluentResource(translations));
     return bundle;
 }
 
@@ -67,7 +67,10 @@ export function format_messages(ast, bundle, externals) {
         }
         const id = entry.id.name;
         const message = bundle.getMessage(id);
-        outputs.set(id, bundle.format(message, externals, errors));
+        if (message.value) {
+            let output = bundle.formatPattern(message.value, externals, errors);
+            outputs.set(id, output);
+        }
     }
     return [outputs, errors];
 }
