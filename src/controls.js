@@ -7,7 +7,7 @@ export function TextInput(props) {
     return (
         <Fragment>
             <dt>${name}</dt>
-            <dd>
+            <dd dir="auto">
                 <input
                     type="text"
                     {...props}

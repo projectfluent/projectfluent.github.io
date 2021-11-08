@@ -305,6 +305,53 @@
             </p>
           </div>
         </article>
+
+        <article>
+            <div id="example4-app" class="example-vertical"></div>
+            <div class="example-description">
+              <h2>The Arabic Translation</h2>
+    
+              <p>
+    
+                The Arabic translation is yet another example of how flexible Fluent can be, using the example of
+                <code>few</code> and <code>many</code>.
+    
+              </p>
+              <p>
+    
+                In this example we added a <code>tabs-count-full</code> variable
+                that stores all the possible plural (textual) variations of the word
+                <em>tab</em>. Arabic has
+                <a href="https://unicode-org.github.io/cldr-staging/charts/37/supplemental/language_plural_rules.html#ar"
+                  target="_blank">6 variations</a> for a numbered element.
+                0, 1, 2, few (<code>3~10, 103~110, 1003</code>), many
+                (<code>11~99, 311~399</code>) and other (<code>100~102, 200~202, 
+                  300~302, …</code>).<br>
+                After we prodive a definition for each variation all we have to do
+                then is include it in our usual messages. This reduces the amount
+                of work needed to be done by the localization community, by
+                defining the 6 possible cases of a word in one place then calling
+                it in any phrase without worrying about its integration status.
+    
+              </p>
+              <p>
+    
+                For this example to work we had to alter the <code>min</code> and
+                <code>max</code> parameters of the slider so it can put into
+                consideration the cases of <code>many</code> like
+                <em>11, 12, 18, …</em>.
+    
+              </p>
+    
+              <p>
+    
+                Also adding <code>dir="auto"</code> reorganized the variables
+                to the correct order in our Arabic example since it's an RTL
+                language.
+    
+              </p>
+            </div>
+          </article>
       </section>
     </div>
     <div>

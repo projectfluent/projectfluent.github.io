@@ -12,7 +12,7 @@ function Message(props) {
     return (
         <Fragment>
             <dt>{id}</dt>
-            <dd>{value}</dd>
+            <dd dir="auto">{value}</dd>
         </Fragment>
     );
 }
