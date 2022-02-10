@@ -79,7 +79,7 @@ const example1 = {
 
 ReactDOM.render(
     <Example {...example1}>
-        <RangeInput name="tabCount" min="2" max="9" step="1" />
+        <RangeInput name="tabCount" min="1" max="9" step="1" />
     </Example>,
     document.getElementById('example1-app')
 );
@@ -120,7 +120,7 @@ const example2 = {
 
 ReactDOM.render(
     <Example {...example2}>
-        <RangeInput name="tabCount" min="2" max="9" step="1" />
+        <RangeInput name="tabCount" min="1" max="9" step="1" />
     </Example>,
     document.getElementById('example2-app')
 );
@@ -167,7 +167,7 @@ const example3 = {
 
 ReactDOM.render(
     <Example {...example3}>
-        <RangeInput name="tabCount" min="2" max="9" step="1" />
+        <RangeInput name="tabCount" min="1" max="9" step="1" />
     </Example>,
     document.getElementById('example3-app')
 );
