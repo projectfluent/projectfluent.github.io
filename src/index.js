@@ -57,9 +57,10 @@ const example1 = {
            *[other] Close {$tabCount} tabs
         }
         tabs-close-warning =
-            You are about to close {$tabCount} tabs.
+            You are about to close {$tabCount ->
+                [one] {$tabCount} tab
+               *[other] {$tabCount} tabs}.
             Are you sure you want to continue?
-
         ## Syncing
 
         -sync-brand-name = Firefox Account
