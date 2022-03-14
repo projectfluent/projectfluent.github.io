@@ -61,6 +61,7 @@ const example1 = {
                 [one] {$tabCount} tab
                *[other] {$tabCount} tabs}.
             Are you sure you want to continue?
+
         ## Syncing
 
         -sync-brand-name = Firefox Account
