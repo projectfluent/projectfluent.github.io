@@ -14,7 +14,7 @@
 }
 
 .example-editor .ace_editor {
-    line-height: 1.2rem !important;
+    line-height: 1.2rem;
 }
 
 .example-editor .ace_editor .ace_cursor {
@@ -49,7 +49,7 @@
 }
 
 .example-editor .ace_editor .ace_string {
-    color: var(--code-string-color); 
+    color: var(--code-string-color);
 }
 
 .example-editor .ace_editor .ace_number {
@@ -81,7 +81,7 @@
     box-shadow: 0 0 3px 0px white;
 }
 
-.example-editor .ace_editor.ace_nobold .ace_line > span {
+.example-editor .ace_editor.ace_nobold .ace_line>span {
     font-weight: normal !important;
 }
 

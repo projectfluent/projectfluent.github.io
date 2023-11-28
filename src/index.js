@@ -1,6 +1,6 @@
 // vim: ts=4 et sts=4 sw=4
 
-import React, {Fragment} from 'react';
+import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import ftl from "@fluent/dedent";
 
@@ -42,8 +42,8 @@ function Example0() {
 }
 
 ReactDOM.render(
-   <Example0 />,
-   document.getElementById('demo-app')
+    <Example0 />,
+    document.getElementById('demo-app')
 );
 
 const example1 = {
@@ -59,7 +59,8 @@ const example1 = {
         tabs-close-warning =
             You are about to close {$tabCount ->
                 [one] {$tabCount} tab
-               *[other] {$tabCount} tabs}.
+               *[other] {$tabCount} tabs
+            }.
             Are you sure you want to continue?
 
         ## Syncing

@@ -40,41 +40,34 @@ body {
   font-weight: 300;
   background-color: var(--main-bg-color);
   color: var(--main-bg-text-color);
-  min-width: 370px;
   line-height: 1.3rem;
   display: grid;
-  grid-template-columns: 
-    [full-start] minmax(0, 1fr) 
-    [main-start] minmax(0, var(--site-width))
-    [main-end] minmax(0, 1fr)
-    [full-end];
+  grid-template-columns:
+    [full-start] minmax(1rem, 1fr) [main-start] minmax(0, var(--site-width)) [main-end] minmax(1rem, 1fr) [full-end];
 }
 
-body > div {
-  display: inherit;
-  grid-column: full;
-  grid-template-columns: inherit;
-}
-
-body > div > * {
+body>:is(nav, header, main, section, footer) {
   grid-column: main;
-  padding-left: 1rem;
-  padding-right: 1rem;
 }
 
+:is(header, main, section) h1 {
+  font-weight: 300;
+  font-size: 2rem;
+  line-height: 1.1;
+}
 
-/* Navigation Header  */
+/* Navigation Header */
 
 #topbar {
   display: flex;
   justify-content: space-between;
 }
 
-#topbar > .logo {
-  line-height: var(--height-top-bar); 
+#topbar>.logo {
+  line-height: var(--height-top-bar);
 }
 
-#topbar > .logo > a {
+#topbar>.logo>a {
   display: inline-block;
   color: var(--logo-color);
   text-decoration: none;
@@ -83,24 +76,27 @@ body > div > * {
   height: var(--height-top-bar);
 }
 
-#topbar > ul {
+#topbar>ul {
   list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.7rem;
+  justify-content: center;
 }
 
-#topbar > ul > li {
+#topbar>ul>li {
   display: inline-block;
-  line-height: var(--height-top-bar); 
-  margin-left: 0.7rem;
+  line-height: var(--height-top-bar);
 }
 
-#topbar > ul > li > a {
+#topbar>ul>li>a {
   display: inline-block;
   color: var(--main-accent-lighter-color);
   text-decoration: none;
   height: var(--height-top-bar);
 }
 
-#topbar > ul > li > a:hover {
+#topbar>ul>li>a:hover {
   color: var(--main-bg-text-active-color);
 }
 
@@ -113,21 +109,20 @@ body > div > * {
   padding-bottom: 3rem;
 }
 
-#intro > h1 {
+#intro>h1 {
   font-size: 4rem;
-  font-weight: 300;
   margin: 3.5rem 0;
 }
 
-#intro > h2 {
+#intro>h2 {
   font-size: 2rem;
-  line-height: 2.2rem;
+  line-height: 1.2;
   font-weight: 300;
   margin: 3rem auto;
   max-width: 80%;
 }
 
-#intro > a.cta {
+#intro>a.cta {
   color: var(--main-accent-darker-color);
   text-decoration: none;
   font-size: 1.3rem;
@@ -136,7 +131,7 @@ body > div > * {
   border: 1px solid var(--main-accent-darker-color);
 }
 
-#intro > a.cta:hover {
+#intro>a.cta:hover {
   background-color: var(--main-accent-darker-color);
   color: white;
 }
@@ -145,31 +140,29 @@ body > div > * {
 
 #above-the-fold {
   display: flex;
-  padding-top: 2rem !important;
-  padding-bottom: 5rem !important;
+  padding-top: 2rem;
+  padding-bottom: 5rem;
 }
 
-#above-the-fold > ul {
+#above-the-fold>ul {
   flex: 1;
 }
 
-#above-the-fold > ul > li {
+#above-the-fold>ul>li {
   margin-top: 1rem;
   margin-bottom: 2rem;
   padding-right: 2rem;
 }
 
-#above-the-fold > ul > li > h1 {
-  font-weight: 300;
+#above-the-fold>ul>li>h1 {
   margin-bottom: 1rem;
-  font-size: 2rem;
 }
 
-#above-the-fold > ul > li > p > a {
+#above-the-fold>ul>li>p>a {
   color: var(--main-accent-color);
 }
 
-#above-the-fold > ul > li > p > a:hover {
+#above-the-fold>ul>li>p>a:hover {
   color: var(--main-accent-darker-color);
 }
 
@@ -187,23 +180,21 @@ body > div > * {
   line-height: 1.5rem;
 }
 
-#explainer > h1 {
-  font-size: 2rem;
-  font-weight: 300;
+#explainer>h1 {
   margin: 0.5rem 0;
 }
 
-#explainer > p {
+#explainer>p {
   padding: 0.5rem 0;
 }
 
-#explainer > p > a {
+#explainer>p>a {
   color: var(--main-accent-text-color);
   text-decoration: none;
   font-weight: 400;
 }
 
-#explainer > p > a:hover {
+#explainer>p>a:hover {
   text-decoration: underline;
 }
 
@@ -224,8 +215,6 @@ body > div > * {
 }
 
 #examples h1 {
-  font-size: 2rem;
-  font-weight: 300;
   margin: 4rem 0 2rem 0;
 }
 
@@ -237,16 +226,16 @@ body > div > * {
 
 #examples .example-vertical {
   flex: 4;
-  border-top: 1px solid var(--main-accent-color);
+  /* border-top: 1px solid var(--main-accent-color); */
 }
 
 .example-vertical .variables {
   border-top: 1px solid #ddd;
-  border-bottom: 1px solid var(--main-accent-color);
+  /* border-bottom: 1px solid var(--main-accent-color); */
   display: grid;
   grid-template-columns: 2fr 5fr;
   grid-template-rows: auto;
-  grid-row-gap: 0.5rem;
+  gap: 0.5rem .3rem;
 }
 
 .example-vertical .results {
@@ -288,27 +277,27 @@ dl.variables {
   padding: 1rem;
 }
 
-dl.variables > dt {
+dl.variables>dt {
   color: var(--code-variable-color);
 }
 
-dl.variables > dd {
+dl.variables>dd {
   display: flex;
 }
 
-dl.variables > dd > input {
+dl.variables>dd>input {
   width: 80%;
 }
 
-dl.variables > dd > input[type=range] {
+dl.variables>dd>input[type=range] {
   height: 1.3rem;
 }
 
-dl.variables > dd > label {
+dl.variables>dd>label {
   padding: 0 0.5rem;
 }
 
-dl.variables > dd.radio {
+dl.variables>dd.radio {
   display: grid;
   grid-template-columns: 1fr 9fr;
   grid-template-rows: auto;
@@ -322,11 +311,11 @@ dl.variables > dd.radio {
   align-items: start;
 }
 
-.output > dt {
+.output>dt {
   color: var(--code-id-color);
 }
 
-.output > dd {
+.output>dd {
   color: var(--code-string-color);
 }
 
@@ -339,7 +328,7 @@ dl.variables > dd.radio {
 }
 
 .annotation__name {
-    color: var(--code-error-color);
+  color: var(--code-error-color);
 }
 
 .annotation__body {
@@ -348,14 +337,14 @@ dl.variables > dd.radio {
 
 .annotation__slice,
 .annotation__label {
-    white-space: pre-wrap;
-    color: #999;
-    margin: 0;
+  white-space: pre-wrap;
+  color: #999;
+  margin: 0;
 }
 
 .annotation__name,
 .annotation__label {
-    color: #d14;
+  color: #d14;
 }
 
 
@@ -369,21 +358,27 @@ dl.variables > dd.radio {
   main {
     display: block;
   }
-
-  #examples {
-    display: none;
-  }
 }
 
 @media (max-width: 30rem) {
   #topbar {
     justify-content: end;
+    padding-top: 1rem;
   }
-  #topbar > .logo {
+
+  #topbar>.logo {
     display: none;
   }
 
-  #topbar > ul > li {
+  #topbar>ul>li {
     margin-left: 0.2rem;
+  }
+
+  #above-the-fold {
+    flex-direction: column;
+  }
+
+  #examples {
+    display: none;
   }
 }
