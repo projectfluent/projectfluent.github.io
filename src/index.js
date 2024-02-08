@@ -56,11 +56,12 @@ const example1 = {
             [one] Close {$tabCount} tab
            *[other] Close {$tabCount} tabs
         }
-        tabs-close-warning =
-            You are about to close {$tabCount ->
-                [one] {$tabCount} tab
-               *[other] {$tabCount} tabs}.
-            Are you sure you want to continue?
+        tabs-close-warning =  {$tabCount ->
+            [one] You are about to close {$tabCount} tab.
+                  Are you sure you want to continue?
+           *[other] You are about to close {$tabCount} tabs.
+                    Are you sure you want to continue?
+        }
 
         ## Syncing
 
@@ -97,8 +98,10 @@ const example2 = {
             [one] Chiudi {$tabCount} scheda
            *[other] Chiudi {$tabCount} schede
         }
-        tabs-close-warning =
-            Verranno chiuse {$tabCount} schede. Proseguire?
+        tabs-close-warning =  {$tabCount ->
+            [one] Verrà chiusa {$tabCount} scheda. Proseguire?
+           *[other] Verranno chiuse {$tabCount} schede. Proseguire?
+        }
 
         ## Syncing
 
