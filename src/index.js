@@ -42,8 +42,8 @@ function Example0() {
 }
 
 ReactDOM.render(
-   <Example0 />,
-   document.getElementById('demo-app')
+    <Example0 />,
+    document.getElementById('demo-app')
 );
 
 const example1 = {
@@ -175,4 +175,44 @@ ReactDOM.render(
         <RangeInput name="tabCount" min="1" max="9" step="1" />
     </Example>,
     document.getElementById('example3-app')
+);
+
+
+
+const example4 = {
+    locale: "ar",
+    translations: ftl`
+    tabs-close-button = أغلق    
+    tabs-count-full = {$tabCount ->
+        [one] تبويب واحد
+        [two] تبويبان
+        [few] {$tabCount} تبوبات
+        [many] {$tabCount} تبويبا
+        *[other] {$tabCount} تبويب
+    }
+    tabs-close-tooltip = {tabs-close-button} {tabs-count-full}
+    tabs-close-warning =
+        أنت على وشك إغلاق  {tabs-count-full}.
+        هل أنت متأكد من المواصالة؟
+    
+    ## Syncing
+    
+    -sync-brand-name = حساب فيرفوكس
+    
+    sync-dialog-title = {-sync-brand-name}
+    sync-headline-title = {-sync-brand-name}: أفضل طريقة لتحمل بياناتك معك أينما كنت.
+    sync-signedout-title =
+        سجل الدخول بإستخدام {-sync-brand-name} الخاص بك.
+    `,
+    externals: {
+        tabCount: 2,
+    },
+    height: "37rem",
+};
+
+ReactDOM.render(
+    <Example {...example4}>
+        <RangeInput name="tabCount" min="1" max="22" step="1" />
+    </Example>,
+    document.getElementById('example4-app')
 );
