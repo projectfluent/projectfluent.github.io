@@ -144,7 +144,7 @@ const example3 = {
         }
         tabs-close-warning = {$tabCount ->
             [one] Zostanie zamknięta {$tabCount} karta.
-                  Czy checz kontynuować?
+                  Czy chcesz kontynuować?
             [few] Zostaną zamknięte {$tabCount} karty.
                   Czy chcesz kontynuować?
            *[many] Zostanie zamkniętych {$tabCount} kart.
